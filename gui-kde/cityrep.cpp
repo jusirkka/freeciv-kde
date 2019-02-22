@@ -136,7 +136,7 @@ city *city_item::get_city()
 /***********************************************************************//**
   Sets nothing, but must be declared
 ***************************************************************************/
-bool city_item::setData(int column, const QVariant &value, int role)
+bool city_item::setData(int /*column*/, const QVariant &/*value*/, int /*role*/)
 {
   return false;
 }
@@ -394,7 +394,7 @@ city_widget::city_widget(city_report *ctr): QTreeView()
 /***********************************************************************//**
   Slot for double clicking row
 ***************************************************************************/
-void city_widget::city_doubleclick(const QModelIndex& index)
+void city_widget::city_doubleclick(const QModelIndex& /*index*/)
 {
   city_view();
 }
@@ -472,7 +472,6 @@ void city_widget::display_list_menu(const QPoint &)
   QMenu *some_menu;
   QMenu *tmp2_menu;
   QMenu *tmp_menu;
-  hud_message_box ask(gui()->central_wdg);
   QVariant qvar, qvar2;
   bool sell_ask;
   bool need_clear = true;
@@ -667,9 +666,7 @@ void city_widget::display_list_menu(const QPoint &)
                         _("Are you sure you want to sell those %s?"),
                         imprname);
             sell_ask = false;
-            ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-            ask.setDefaultButton(QMessageBox::Cancel);
-            ask.set_text_title(buf, _("Sell?"));
+            KV::StandardMessageBox ask(gui()->central_wdg, buf, _("Sell?"));
             sell_ret = ask.exec();
           }
           if (sell_ret == QMessageBox::Ok) {
@@ -1015,7 +1012,7 @@ void city_widget::gen_worklist_labels(QMap<QString, int> &list)
 /***********************************************************************//**
   Creates menu labels and id about available production targets
 ***************************************************************************/
-void city_widget::gen_production_labels(city_widget::menu_labels what,
+void city_widget::gen_production_labels(city_widget::menu_labels /*what*/,
                                         QMap<QString, cid> &list,
                                         bool append_units,
                                         bool append_wonders,

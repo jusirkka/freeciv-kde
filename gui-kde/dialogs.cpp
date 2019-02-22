@@ -1116,26 +1116,19 @@ void races_toggles_set_sensitive(void)
 ***************************************************************************/
 void popup_revolution_dialog(struct government *government)
 {
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
+    if (0 > client.conn.playing->revolution_finishes) {
+        KV::MessageBox ask(gui()->central_wdg,
+                           _("You say you wanna revolution?"),
+                           _("Revolution!"));
 
-  if (0 > client.conn.playing->revolution_finishes) {
-    ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-    ask.setDefaultButton(QMessageBox::Cancel);
-    ask.set_text_title(_("You say you wanna revolution?"), 
-                       _("Revolution!"));
-    ret = ask.exec();
-
-    switch (ret) {
-    case QMessageBox::Cancel:
-      break;
-    case QMessageBox::Ok:
-      revolution_response(government);
-      break;
+        ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+        ask.setDefaultButton(QMessageBox::Cancel);
+        if (ask.exec() == QMessageBox::Ok) {
+            revolution_response(government);
+        }
+    } else {
+        revolution_response(government);
     }
-  } else {
-    revolution_response(government);
-  }
 }
 
 /***********************************************************************//**
@@ -2952,7 +2945,6 @@ void popup_incite_dialog(struct unit *actor, struct city *tcity, int cost,
 {
   char buf[1024];
   char buf2[1024];
-  int ret;
   int diplomat_id = actor->id;
   int diplomat_target_id = tcity->id;
 
@@ -2965,41 +2957,34 @@ void popup_incite_dialog(struct unit *actor, struct city *tcity, int cost,
               client_player()->economic.gold);
 
   if (INCITE_IMPOSSIBLE_COST == cost) {
-    hud_message_box incite_impossible(gui()->central_wdg);
 
-    fc_snprintf(buf2, ARRAY_SIZE(buf2),
-                _("You can't incite a revolt in %s."), city_name_get(tcity));
-    incite_impossible.set_text_title(QString(buf2), "!");
-    incite_impossible.setStandardButtons(QMessageBox::Ok);
-    incite_impossible.exec();
+      fc_snprintf(buf2, ARRAY_SIZE(buf2),
+                  _("You can't incite a revolt in %s."), city_name_get(tcity));
+      KV::MessageBox incite_impossible(gui()->central_wdg, buf2, "!");
+      incite_impossible.setStandardButtons(QMessageBox::Ok);
+      incite_impossible.exec();
   } else if (cost <= client_player()->economic.gold) {
-    hud_message_box ask(gui()->central_wdg);
 
-    fc_snprintf(buf2, ARRAY_SIZE(buf2),
-                PL_("Incite a revolt for %d gold?\n%s",
-                    "Incite a revolt for %d gold?\n%s", cost), cost, buf);
-    ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-    ask.setDefaultButton(QMessageBox::Cancel);
-    ask.set_text_title(QString(buf2), _("Incite a Revolt!"));
-    ret = ask.exec();
-    switch (ret) {
-    case QMessageBox::Cancel:
-      break;
-    case QMessageBox::Ok:
-      request_do_action(paction->id, diplomat_id,
-                        diplomat_target_id, 0, "");
-      break;
-    }
+      fc_snprintf(buf2, ARRAY_SIZE(buf2),
+                  PL_("Incite a revolt for %d gold?\n%s",
+                      "Incite a revolt for %d gold?\n%s", cost), cost, buf);
+      KV::MessageBox ask(gui()->central_wdg, buf2, _("Incite a Revolt!"));
+      ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+      ask.setDefaultButton(QMessageBox::Cancel);
+
+      if (ask.exec() == QMessageBox::Ok) {
+          request_do_action(paction->id, diplomat_id,
+                            diplomat_target_id, 0, "");
+      }
   } else {
-    hud_message_box too_much(gui()->central_wdg);
 
-    fc_snprintf(buf2, ARRAY_SIZE(buf2),
-                PL_("Inciting a revolt costs %d gold.\n%s",
-                    "Inciting a revolt costs %d gold.\n%s", cost), cost,
-                buf);
-    too_much.set_text_title(QString(buf2), "!");
-    too_much.setStandardButtons(QMessageBox::Ok);
-    too_much.exec();
+      fc_snprintf(buf2, ARRAY_SIZE(buf2),
+                  PL_("Inciting a revolt costs %d gold.\n%s",
+                      "Inciting a revolt costs %d gold.\n%s", cost), cost,
+                  buf);
+      KV::MessageBox too_much(gui()->central_wdg, buf2, "!");
+      too_much.setStandardButtons(QMessageBox::Ok);
+      too_much.exec();
   }
 
   diplomat_queue_handle_secondary(diplomat_id);
@@ -3012,7 +2997,6 @@ void popup_incite_dialog(struct unit *actor, struct city *tcity, int cost,
 void popup_bribe_dialog(struct unit *actor, struct unit *tunit, int cost,
                         const struct action *paction)
 {
-  hud_message_box ask(gui()->central_wdg);
   int ret;
   char buf[1024];
   char buf2[1024];
@@ -3031,25 +3015,19 @@ void popup_bribe_dialog(struct unit *actor, struct unit *tunit, int cost,
     fc_snprintf(buf2, ARRAY_SIZE(buf2), PL_("Bribe unit for %d gold?\n%s",
                                             "Bribe unit for %d gold?\n%s",
                                             cost), cost, buf);
-    ask.set_text_title(QString(buf2), QString(_("Bribe Enemy Unit")));
+    KV::MessageBox ask(gui()->central_wdg, buf2, _("Bribe Enemy Unit"));
+
     ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
     ask.setDefaultButton(QMessageBox::Cancel);
-    ret = ask.exec();
-    switch (ret) {
-    case QMessageBox::Cancel:
-      break;
-    case QMessageBox::Ok:
-      request_do_action(paction->id, diplomat_id,
-                        diplomat_target_id, 0, "");
-      break;
-    default:
-      break;
+    if (ask.exec() == QMessageBox::Ok) {
+        request_do_action(paction->id, diplomat_id,
+                          diplomat_target_id, 0, "");
     }
   } else {
     fc_snprintf(buf2, ARRAY_SIZE(buf2),
                 PL_("Bribing the unit costs %d gold.\n%s",
                     "Bribing the unit costs %d gold.\n%s", cost), cost, buf);
-    ask.set_text_title(QString(buf2), _("Traitors Demand Too Much!"));
+    KV::MessageBox ask(gui()->central_wdg, buf2, _("Traitors Demand Too Much!"));
     ask.exec();
   }
 
@@ -3192,7 +3170,7 @@ void popup_pillage_dialog(struct unit *punit, bv_extras extras)
   Disband Message box contructor
 ***************************************************************************/
 disband_box::disband_box(struct unit_list *punits,
-                         QWidget *parent) : hud_message_box(parent)
+                         QWidget *parent) : KV::MessageBox(parent)
 {
   QString str;
   QPushButton *pb;
@@ -3209,7 +3187,7 @@ disband_box::disband_box(struct unit_list *punits,
                   unit_list_size(punits))).arg(unit_list_size(punits));
   pb = addButton(_("Yes"), QMessageBox::AcceptRole);
   addButton(_("No"), QMessageBox::RejectRole);
-  set_text_title(str, _("Disband units"));
+  setTextTitle(str, _("Disband units"));
   setDefaultButton(pb);
   connect(pb, &QAbstractButton::clicked, this, &disband_box::disband_clicked);
 }
@@ -3249,21 +3227,16 @@ void popup_disband_dialog(struct unit_list *punits)
 ***************************************************************************/
 void popup_tileset_suggestion_dialog(void)
 {
-  hud_message_box ask(gui()->central_wdg);
-  QString text;
-  QString title;
-  QPushButton *ok_button;
-
-  title = QString(_("Modpack suggests using %1 tileset."))
-          .arg(game.control.preferred_tileset);
-  text = QString("It might not work with other tilesets.\n"
-                 "You are currently using tileset %1.")
-         .arg(tileset_basename(tileset));
+  auto title = QString(_("Modpack suggests using %1 tileset."))
+      .arg(game.control.preferred_tileset);
+  auto text = QString("It might not work with other tilesets.\n"
+                      "You are currently using tileset %1.")
+      .arg(tileset_basename(tileset));
+  KV::MessageBox ask(gui()->central_wdg, text, title);
   ask.addButton(_("Keep current tileset"), QMessageBox::ActionRole);
-  ok_button = ask.addButton(_("Load tileset"), QMessageBox::ActionRole);
-  ask.set_text_title(text, title);
+  auto ok = ask.addButton(_("Load tileset"), QMessageBox::ActionRole);
   ask.exec();
-  if (ask.clickedButton() == ok_button) {
+  if (ask.clickedButton() == ok) {
     sz_strlcpy(forced_tileset_name, game.control.preferred_tileset);
     if (!tilespec_reread(game.control.preferred_tileset, FALSE, gui()->map_scale)) {
       tileset_error(LOG_ERROR, _("Can't load requested tileset %s."),
@@ -3278,21 +3251,16 @@ void popup_tileset_suggestion_dialog(void)
 ***************************************************************************/
 void popup_soundset_suggestion_dialog(void)
 {
-  hud_message_box ask(gui()->central_wdg);
-  QString text;
-  QString title;
-  QPushButton *ok_button;
-
-  title = QString(_("Modpack suggests using %1 soundset."))
-          .arg(game.control.preferred_soundset);
-  text = QString("It might not work with other tilesets.\n"
-                 "You are currently using soundset %1.")
-         .arg(sound_set_name);
+  auto title = QString(_("Modpack suggests using %1 soundset."))
+      .arg(game.control.preferred_soundset);
+  auto text = QString("It might not work with other tilesets.\n"
+                      "You are currently using soundset %1.")
+      .arg(sound_set_name);
+  KV::MessageBox ask(gui()->central_wdg, text, title);
   ask.addButton(_("Keep current soundset"), QMessageBox::ActionRole);
-  ok_button = ask.addButton(_("Load soundset"), QMessageBox::ActionRole);
-  ask.set_text_title(text, title);
+  auto ok = ask.addButton(_("Load soundset"), QMessageBox::ActionRole);
   ask.exec();
-  if (ask.clickedButton() == ok_button) {
+  if (ask.clickedButton() == ok) {
     audio_restart(game.control.preferred_soundset, music_set_name);
   }
 }
@@ -3303,21 +3271,16 @@ void popup_soundset_suggestion_dialog(void)
 ***************************************************************************/
 void popup_musicset_suggestion_dialog(void)
 {
-  hud_message_box ask(gui()->central_wdg);
-  QString text;
-  QString title;
-  QPushButton *ok_button;
-
-  title = QString(_("Modpack suggests using %1 musicset."))
-          .arg(game.control.preferred_musicset);
-  text = QString("It might not work with other tilesets.\n"
+  auto title = QString(_("Modpack suggests using %1 musicset."))
+      .arg(game.control.preferred_musicset);
+  auto text = QString("It might not work with other tilesets.\n"
                  "You are currently using musicset %1.")
-         .arg(music_set_name);
+      .arg(music_set_name);
+  KV::MessageBox ask(gui()->central_wdg, text, title);
   ask.addButton(_("Keep current musicset"), QMessageBox::ActionRole);
-  ok_button = ask.addButton(_("Load musicset"), QMessageBox::ActionRole);
-  ask.set_text_title(text, title);
+  auto ok = ask.addButton(_("Load musicset"), QMessageBox::ActionRole);
   ask.exec();
-  if (ask.clickedButton() == ok_button) {
+  if (ask.clickedButton() == ok) {
     audio_restart(sound_set_name, game.control.preferred_musicset);
   }
 }
@@ -3326,7 +3289,7 @@ void popup_musicset_suggestion_dialog(void)
   Tileset (modpack) has suggested loading certain theme. Confirm from
   user and load.
 ***************************************************************************/
-bool popup_theme_suggestion_dialog(const char *theme_name)
+bool popup_theme_suggestion_dialog(const char */*theme_name*/)
 {
   /* PORTME */
   return false;
@@ -3643,35 +3606,26 @@ void show_tileset_error(const char *msg)
 ***************************************************************************/
 void popup_upgrade_dialog(struct unit_list *punits)
 {
-  char buf[512];
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
-  QString title;
 
   if (!punits || unit_list_size(punits) == 0) {
     return;
   }
-  if (!get_units_upgrade_info(buf, sizeof(buf), punits)) {
-    title = _("Upgrade Unit!");
-    ask.setStandardButtons(QMessageBox::Ok);
-  } else {
-    title = _("Upgrade Obsolete Units");
-    ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-    ask.setDefaultButton(QMessageBox::Cancel);
-  }
-  ask.set_text_title(QString(buf), title);
-  ret = ask.exec();
 
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-    break;
-  case QMessageBox::Ok:
+  char buf[512];
+  int ret;
+  if (!get_units_upgrade_info(buf, sizeof(buf), punits)) {
+    KV::MessageBox ask(gui()->central_wdg, buf, _("Upgrade Unit!"));
+    ask.setStandardButtons(QMessageBox::Ok);
+    ret = ask.exec();
+  } else {
+    KV::StandardMessageBox ask(gui()->central_wdg, buf, _("Upgrade Obsolete Units"));
+    ret = ask.exec();
+  }
+  if (ret == QMessageBox::Ok) {
     unit_list_iterate(punits, punit) {
       request_unit_upgrade(punit);
     }
     unit_list_iterate_end;
-    break;
   }
 }
 

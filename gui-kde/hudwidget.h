@@ -43,35 +43,6 @@ struct unit_list;
 void show_new_turn_info();
 bool has_player_unit_type(Unit_type_id utype);
 
-/****************************************************************************
-  Custom message box with animated background
-****************************************************************************/
-class hud_message_box: public QMessageBox
-{
-  Q_OBJECT
-  QElapsedTimer m_timer;
-
-public:
-  hud_message_box(QWidget *parent);
-  ~hud_message_box();
-  void set_text_title(QString s1, QString s2);
-
-protected:
-  void paintEvent(QPaintEvent *event);
-  void timerEvent(QTimerEvent *event);
-  void keyPressEvent(QKeyEvent *event);
-private:
-  int m_animate_step;
-  QString text;
-  QString title;
-  QFontMetrics *fm_text;
-  QFontMetrics *fm_title;
-  QFont f_text;
-  QString cs1, cs2;
-  QFont f_title;
-  int top;
-  int mult;
-};
 
 /****************************************************************************
   Class for showing text on screen
@@ -98,35 +69,6 @@ private:
   QFont f_title;
 };
 
-/****************************************************************************
-  Custom input box with animated background
-****************************************************************************/
-class hud_input_box: public QDialog
-{
-  Q_OBJECT
-  QElapsedTimer m_timer;
-
-public:
-  hud_input_box(QWidget *parent);
-  ~hud_input_box();
-  void set_text_title_definput(QString s1, QString s2, QString def_input);
-  QLineEdit input_edit;
-
-protected:
-  void paintEvent(QPaintEvent *event);
-  void timerEvent(QTimerEvent *event);
-private:
-  int m_animate_step;
-  QString text;
-  QString title;
-  QFontMetrics *fm_text;
-  QFontMetrics *fm_title;
-  QFont f_text;
-  QString cs1, cs2;
-  QFont f_title;
-  int top;
-  int mult;
-};
 
 /****************************************************************************
   Custom label to center on current unit

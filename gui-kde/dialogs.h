@@ -31,6 +31,7 @@ extern "C" {
 #include "fonts.h"
 #include "hudwidget.h"
 #include "mapview.h"
+#include "messagebox.h"
 
 class QComboBox;
 class QGridLayout;
@@ -42,6 +43,7 @@ class QTableView;
 class QTableWidget;
 class QTextEdit;
 class QWidget;
+
 
 typedef void (*pfcn_void)(QVariant, QVariant);
 void update_nationset_combo();
@@ -70,7 +72,7 @@ public:
 /***************************************************************************
   Nonmodal message box for disbanding units
 ***************************************************************************/
-class disband_box : public hud_message_box
+class disband_box : public KV::MessageBox
 {
   Q_OBJECT
   struct unit_list *cpunits;

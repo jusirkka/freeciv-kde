@@ -476,7 +476,7 @@ bool trade_generator::discard_any(trade_city* tc, int freeroutes)
 /**********************************************************************//**
   Helper function ato randomize list
 **************************************************************************/
-bool tradecity_rand(const trade_city *t1, const trade_city *t2)
+bool tradecity_rand(const trade_city */*t1*/, const trade_city */*t2*/)
 {
   return (qrand() % 2);
 }
@@ -2268,6 +2268,7 @@ void mr_menu::menus_sensitive()
         if (units_can_do_action(punits, ACTION_DISBAND_UNIT, true)) {
           i.value()->setEnabled(true);
         }
+        break;
 
       case CONNECT_RAIL:
         proad = road_by_compat_special(ROCO_RAILROAD);
@@ -3434,7 +3435,6 @@ void mr_menu::save_image()
   int current_width, current_height;
   int full_size_x, full_size_y;
   QString path, storage_path;
-  hud_message_box saved(gui()->central_wdg);
   bool map_saved;
   QString img_name;
 
@@ -3465,14 +3465,19 @@ void mr_menu::save_image()
   }
   map_saved = mapview.store->map_pixmap.save(img_name, "png");
   map_canvas_resized(current_width, current_height);
-  saved.setStandardButtons(QMessageBox::Ok);
-  saved.setDefaultButton(QMessageBox::Cancel);
   if (map_saved) {
-    saved.set_text_title("Image saved as:\n" + img_name, _("Success"));
+    KV::MessageBox saved(gui()->central_wdg,
+                         "Image saved as:\n" + img_name,
+                         _("Success"));
+    saved.setStandardButtons(QMessageBox::Ok);
+    saved.exec();
   } else {
-    saved.set_text_title(_("Failed to save image of the map"), _("Error"));
+    KV::MessageBox failed(gui()->central_wdg,
+                          _("Failed to save image of the map"),
+                          _("Error"));
+    failed.setStandardButtons(QMessageBox::Ok);
+    failed.exec();
   }
-  saved.exec();
 }
 
 /**********************************************************************//**
@@ -3512,24 +3517,15 @@ void mr_menu::save_game_as()
 **************************************************************************/
 void mr_menu::back_to_menu()
 {
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
 
   if (is_server_running()) {
-    ask.set_text_title(_("Leaving a local game will end it!"), "Leave game");
-    ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-    ask.setDefaultButton(QMessageBox::Cancel);
-    ret = ask.exec();
-
-    switch (ret) {
-    case QMessageBox::Cancel:
-      break;
-    case QMessageBox::Ok:
-      if (client.conn.used) {
+    KV::StandardMessageBox ask(gui()->central_wdg,
+                               _("Leaving a local game will end it!"),
+                               "Leave game");
+    if (ask.exec() == QMessageBox::Ok && client.conn.used) {
         disconnect_from_server();
-      }
-      break;
     }
+
   } else {
     disconnect_from_server();
   }

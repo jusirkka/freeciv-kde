@@ -137,7 +137,7 @@ void tax_rates_dialog::slot_apply_button_pressed()
   Inheriting from qfc_dialog will cause crash in Qt5.2
 **************************************************************************/
 multipler_rates_dialog::multipler_rates_dialog(QWidget *parent,
-                                               Qt::WindowFlags f)
+                                               Qt::WindowFlags /*f*/)
   : QDialog(parent)
 {
   QGroupBox *group_box;
@@ -190,7 +190,7 @@ multipler_rates_dialog::multipler_rates_dialog(QWidget *parent,
 /**********************************************************************//**
   Slider value changed
 **************************************************************************/
-void multipler_rates_dialog::slot_set_value(int i)
+void multipler_rates_dialog::slot_set_value(int /*i*/)
 {
   QSlider *qo;
   qo = (QSlider *) QObject::sender();
@@ -277,7 +277,7 @@ void popup_rates_dialog(void)
 /**********************************************************************//**
   Update multipliers (policies) dialog.
 **************************************************************************/
-void real_multipliers_dialog_update(void *unused)
+void real_multipliers_dialog_update(void */*unused*/)
 {
   /* PORTME */
 }
@@ -338,7 +338,7 @@ QSize fc_double_edge::sizeHint() const
 /**********************************************************************//**
   Double edge paint event
 **************************************************************************/
-void fc_double_edge::paintEvent(QPaintEvent *event)
+void fc_double_edge::paintEvent(QPaintEvent */*event*/)
 {
   QPainter p;
   int i, j, pos;

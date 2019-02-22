@@ -589,7 +589,7 @@ void fc_sidebar::resize_me(int hght, bool force)
 /***********************************************************************//**
   Callback to show map
 ***************************************************************************/
-void side_show_map(bool nothing)
+void side_show_map(bool /*nothing*/)
 {
   gui()->game_tab_widget->setCurrentIndex(0);
 }
@@ -597,7 +597,7 @@ void side_show_map(bool nothing)
 /***********************************************************************//**
   Callback for finishing turn
 ***************************************************************************/
-void side_finish_turn(bool nothing)
+void side_finish_turn(bool /*nothing*/)
 {
   key_end_turn();
 }
@@ -605,7 +605,7 @@ void side_finish_turn(bool nothing)
 /***********************************************************************//**
   Callback to popup rates dialog
 ***************************************************************************/
-void side_rates_wdg(bool nothing)
+void side_rates_wdg(bool /*nothing*/)
 {
   if (client_is_observer() == false) {
     popup_rates_dialog();
@@ -753,7 +753,7 @@ void side_right_click_science(void)
 /***********************************************************************//**
   Left click for science, allowing to close/open
 ***************************************************************************/
-void side_left_click_science(bool nothing)
+void side_left_click_science(bool /*nothing*/)
 {
   science_report *sci_rep;
   int i;

@@ -251,7 +251,7 @@ void map_view::timer_event()
 /**********************************************************************//**
   Updates fonts
 **************************************************************************/
-void map_view::update_font(const QString &name, const QFont &font)
+void map_view::update_font(const QString &name, const QFont&)
 {
   if (name == fonts::city_names ||
       name == fonts::city_productions) {
@@ -262,7 +262,7 @@ void map_view::update_font(const QString &name, const QFont &font)
 /**********************************************************************//**
   Focus lost event
 **************************************************************************/
-void map_view::focusOutEvent(QFocusEvent *event)
+void map_view::focusOutEvent(QFocusEvent *)
 {
   update_cursor(CURSOR_DEFAULT);
 }
@@ -270,7 +270,7 @@ void map_view::focusOutEvent(QFocusEvent *event)
 /**********************************************************************//**
   Leave event
 **************************************************************************/
-void map_view::leaveEvent(QEvent *event)
+void map_view::leaveEvent(QEvent *)
 {
   update_cursor(CURSOR_DEFAULT);
 }
@@ -838,7 +838,7 @@ void minimap_view::update_image()
 /**********************************************************************//**
   Redraws visible map using stored pixmap
 **************************************************************************/
-void minimap_view::paint(QPainter * painter, QPaintEvent * event)
+void minimap_view::paint(QPainter * painter, QPaintEvent *)
 {
   int x, y, ix, iy;
 

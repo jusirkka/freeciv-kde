@@ -210,10 +210,7 @@ void unittype_item::upgrade_units()
 {
   char buf[1024];
   char buf2[2048];
-  hud_message_box ask(gui()->central_wdg);
   int price;
-  int ret;
-  QString s2;
   struct unit_type *upgrade;
 
   upgrade = can_upgrade_unittype(client_player(), utype);
@@ -229,25 +226,16 @@ void unittype_item::upgrade_units()
                   "for %d gold each?\n%s", price),
               utype_name_translation(utype),
               utype_name_translation(upgrade), price, buf);
-  s2 = QString(buf2);
-  ask.set_text_title(s2, _("Upgrade Obsolete Units"));
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ret = ask.exec();
-
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-  case QMessageBox::Ok:
+  KV::StandardMessageBox ask(gui()->central_wdg, buf2, _("Upgrade Obsolete Units"));
+  if (ask.exec() == QMessageBox::Ok) {
     dsend_packet_unit_type_upgrade(&client.conn, utype_number(utype));
-    return;
   }
 }
 
 /************************************************************************//**
   Mouse entered widget
 ****************************************************************************/
-void unittype_item::enterEvent(QEvent *event)
+void unittype_item::enterEvent(QEvent */*event*/)
 {
   entered = true;
   update();
@@ -256,7 +244,7 @@ void unittype_item::enterEvent(QEvent *event)
 /************************************************************************//**
   Paint event for unittype item ( draws background from theme )
 ****************************************************************************/
-void unittype_item::paintEvent(QPaintEvent *event)
+void unittype_item::paintEvent(QPaintEvent */*event*/)
 {
   QRect rfull;
   QPainter p;
@@ -273,7 +261,7 @@ void unittype_item::paintEvent(QPaintEvent *event)
 /************************************************************************//**
   Mouse left widget
 ****************************************************************************/
-void unittype_item::leaveEvent(QEvent *event)
+void unittype_item::leaveEvent(QEvent */*event*/)
 {
   entered = false;
   update();
@@ -414,7 +402,7 @@ void units_reports::init_layout()
 /************************************************************************//**
   Paint event
 ****************************************************************************/
-void units_reports::paintEvent(QPaintEvent *event)
+void units_reports::paintEvent(QPaintEvent */*event*/)
 {
   cw->put_to_corner();
 }
@@ -1436,15 +1424,12 @@ void eco_report::selection_changed(const QItemSelection & sl,
 }
 
 /************************************************************************//**
-  Disband pointed units (in economy report)
+  Disband selected units (in economy report)
 ****************************************************************************/
 void eco_report::disband_units()
 {
   struct universal selected;
   char buf[1024];
-  QString s;
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
   struct unit_type *putype;
 
   selected = cid_decode(uid);
@@ -1454,36 +1439,22 @@ void eco_report::disband_units()
                 "every %s (%d total)?"),
               utype_name_translation(putype), counter);
 
-  s = QString(buf);
-  ask.set_text_title(s, _("Disband Units"));
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ret = ask.exec();
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-  case QMessageBox::Ok:
+  KV::StandardMessageBox ask(gui()->central_wdg, buf, _("Disband Units"));
+  if (ask.exec() == QMessageBox::Ok) {
     disband_all_units(putype, false, buf, sizeof(buf));
-    break;
-  default:
-    return;
+    KV::MessageBox result(gui()->central_wdg, buf, _("Disband Results"));
+    result.setStandardButtons(QMessageBox::Ok);
+    result.exec();
   }
-  s = QString(buf);
-  ask.set_text_title(s, _("Disband Results"));
-  ask.setStandardButtons(QMessageBox::Ok);
-  ask.exec();
 }
 
 /************************************************************************//**
-  Sell all pointed builings
+  Sell all selected buildings
 ****************************************************************************/
 void eco_report::sell_buildings()
 {
   struct universal selected;
   char buf[1024];
-  QString s;
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
   struct impr_type *pimprove;
 
   selected = cid_decode(uid);
@@ -1494,24 +1465,13 @@ void eco_report::sell_buildings()
                 "every %s (%d total)?"),
               improvement_name_translation(pimprove), counter);
 
-  s = QString(buf);
-  ask.set_text_title(s, _("Sell Improvements"));
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ret = ask.exec();
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-  case QMessageBox::Ok:
+  KV::StandardMessageBox ask(gui()->central_wdg, buf, _("Sell Improvements"));
+  if (ask.exec() == QMessageBox::Ok) {
     sell_all_improvements(pimprove, false, buf, sizeof(buf));
-    break;
-  default:
-    return;
+    KV::MessageBox result(gui()->central_wdg, buf, _("Sell-Off: Results"));
+    result.setStandardButtons(QMessageBox::Ok);
+    result.exec();
   }
-  s = QString(buf);
-  ask.set_text_title(s, _("Sell-Off: Results"));
-  ask.setStandardButtons(QMessageBox::Ok);
-  ask.exec();
 }
 
 /************************************************************************//**
@@ -1521,9 +1481,6 @@ void eco_report::sell_redundant()
 {
   struct universal selected;
   char buf[1024];
-  QString s;
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
   struct impr_type *pimprove;
 
   selected = cid_decode(uid);
@@ -1534,24 +1491,13 @@ void eco_report::sell_redundant()
                 "every redundant %s (%d total)?"),
               improvement_name_translation(pimprove), counter);
 
-  s = QString(buf);
-  ask.set_text_title(s, _("Sell Improvements"));
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ret = ask.exec();
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-  case QMessageBox::Ok:
+  KV::MessageBox ask(gui()->central_wdg, buf, _("Sell Improvements"));
+  if (ask.exec() == QMessageBox::Ok) {
     sell_all_improvements(pimprove, true, buf, sizeof(buf));
-    break;
-  default:
-    return;
+    KV::MessageBox result(gui()->central_wdg, buf, _("Sell-Off: Results"));
+    result.setStandardButtons(QMessageBox::Ok);
+    result.exec();
   }
-  s = QString(buf);
-  ask.set_text_title(s, _("Sell-Off: Results"));
-  ask.setStandardButtons(QMessageBox::Ok);
-  ask.exec();
 }
 
 /************************************************************************//**

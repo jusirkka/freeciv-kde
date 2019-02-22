@@ -29,14 +29,14 @@
 #pragma GCC diagnostic pop
 
 
-using namespace FC::KDE;
+using namespace KV;
 
 /*******************************************************************//**
   Setup the gui callback table.
 ***********************************************************************/
 void setup_gui_funcs()
 {
-  struct gui_funcs *funcs = get_gui_funcs();
+  auto funcs = get_gui_funcs();
 
   funcs->ui_init = qtg_ui_init;
   funcs->ui_main = qtg_ui_main;

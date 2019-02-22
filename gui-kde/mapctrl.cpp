@@ -42,6 +42,7 @@
 #include "fc_client.h"
 #include "qtg_cxxside.h"
 #include "shortcuts.h"
+#include "inputbox.h"
 
 #pragma GCC diagnostic pop
 
@@ -57,16 +58,16 @@ extern "C" int city_buy_production(struct city *pcity);
 **************************************************************************/
 void popup_newcity_dialog(struct unit *punit, const char *suggestname)
 {
-  hud_input_box ask(gui()->central_wdg);
-  int index = tile_index(unit_tile(punit));
-  ask.set_text_title_definput(_("What should we call our new city?"),
-                              _("Build New City"), QString(suggestname));
-  if (ask.exec() == QDialog::Accepted) {
-    finish_city(index_to_tile(&(wld.map), index),
-                ask.input_edit.text().toLocal8Bit().data());
-  } else {
-    cancel_city(index_to_tile(&(wld.map), index));
-  }
+    int index = tile_index(unit_tile(punit));
+    KV::InputBox ask(gui()->central_wdg,
+                     _("What should we call our new city?"),
+                     _("Build New City"), suggestname);
+    if (ask.exec() == QDialog::Accepted) {
+        finish_city(index_to_tile(&(wld.map), index),
+                    ask.input().toLocal8Bit().data());
+    } else {
+        cancel_city(index_to_tile(&(wld.map), index));
+    }
 
   return;
 }
@@ -474,7 +475,7 @@ void map_view::shortcut_released(Qt::MouseButton bt)
 /**********************************************************************//**
   Mouse buttons handler for map_view
 **************************************************************************/
-void map_view::mousePressEvent(QMouseEvent *event)
+void map_view::mousePressEvent(QMouseEvent */*event*/)
 {
   shortcut_pressed(0);
 }

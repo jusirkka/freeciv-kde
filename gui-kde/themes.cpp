@@ -30,11 +30,11 @@
 
 
 
-using namespace FC::KDE;
+using namespace KV;
 
 Themes::Themes()
     : m_Current()
-    , m_Default(gui_options.gui_qt_default_theme_name)
+    , m_Default("System")
     , m_Template("%1/themes/gui-kde")
 {
 }

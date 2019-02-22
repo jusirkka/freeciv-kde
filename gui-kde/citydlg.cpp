@@ -68,6 +68,7 @@
 #include "colors.h"
 #include "fc_client.h"
 #include "hudwidget.h"
+#include "inputbox.h"
 
 #pragma GCC diagnostic pop
 
@@ -107,7 +108,7 @@ progress_bar::~progress_bar()
 /************************************************************************//**
   Custom progressbar resize event
 ****************************************************************************/
-void progress_bar::resizeEvent(QResizeEvent *event)
+void progress_bar::resizeEvent(QResizeEvent *)
 {
   create_region();
 }
@@ -177,7 +178,7 @@ void progress_bar::set_pixmap(int n)
 /************************************************************************//**
   Timer event used to animate progress
 ****************************************************************************/
-void progress_bar::timerEvent(QTimerEvent *event)
+void progress_bar::timerEvent(QTimerEvent *)
 {
   if ((value() != minimum() && value() < maximum())
       || (0 == minimum() && 0 == maximum())) {
@@ -594,11 +595,9 @@ void impr_item::wheelEvent(QWheelEvent *event)
 ****************************************************************************/
 void impr_item::mouseDoubleClickEvent(QMouseEvent *event)
 {
-  hud_message_box ask(city_dlg);
   QString s;
   char buf[256];
   int price;
-  int ret;
 
   if (!can_client_issue_orders()) {
     return;
@@ -616,18 +615,10 @@ void impr_item::mouseDoubleClickEvent(QMouseEvent *event)
                     "Sell %s for %d gold?", price),
                 city_improvement_name_translation(pcity, impr), price);
 
-    s = QString(buf);
-    ask.set_text_title(s, (_("Sell improvement?")));
+    KV::MessageBox ask(city_dlg, buf, _("Sell improvement?"));
     ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-    ret = ask.exec();
-
-    switch (ret) {
-    case QMessageBox::Cancel:
-      return;
-
-    case QMessageBox::Ok:
-      city_sell_improvement(pcity, improvement_number(impr));
-      break;
+    if (ask.exec() == QMessageBox::Ok) {
+        city_sell_improvement(pcity, improvement_number(impr));
     }
   }
 }
@@ -2249,16 +2240,16 @@ bool city_dialog::eventFilter(QObject *obj, QEvent *event)
 ****************************************************************************/
 void city_dialog::city_rename()
 {
-  hud_input_box ask(gui()->central_wdg);
-
   if (!can_client_issue_orders()) {
     return;
   }
 
-  ask.set_text_title_definput(_("What should we rename the city to?"),
-                              _("Rename City"), city_name_get(pcity));
+  KV::InputBox ask(gui()->central_wdg,
+                   _("What should we rename the city to?"),
+                   _("Rename City"), city_name_get(pcity));
+
   if (ask.exec() == QDialog::Accepted) {
-    ::city_rename(pcity, ask.input_edit.text().toLocal8Bit().data());
+    ::city_rename(pcity, ask.input().toLocal8Bit().data());
   }
 }
 
@@ -2295,13 +2286,13 @@ void city_dialog::save_cma()
 {
   struct cm_parameter param;
   QString text;
-  hud_input_box ask(gui()->central_wdg);
+  KV::InputBox ask(gui()->central_wdg,
+                   _("What should we name the preset?"),
+                   _("Name new preset"),
+                   _("new preset"));
 
-  ask.set_text_title_definput(_("What should we name the preset?"),
-                              _("Name new preset"),
-                              _("new preset"));
   if (ask.exec() == QDialog::Accepted) {
-    text = ask.input_edit.text().toLocal8Bit().data();
+    text = ask.input().toLocal8Bit().data();
     if (!text.isEmpty()) {
       param.allow_disorder = false;
       param.allow_specialists = true;
@@ -2522,36 +2513,23 @@ void city_dialog::update_cma_tab()
 ****************************************************************************/
 void city_dialog::cma_remove()
 {
-  int i;
-  hud_message_box ask(city_dlg);
-  int ret;
-
-  i = cma_table->currentRow();
+  int i = cma_table->currentRow();
 
   if (i == -1 || cmafec_preset_num() == 0) {
     return;
   }
 
-  ask.set_text_title(_("Remove this preset?"), cmafec_preset_get_descr(i));
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ret = ask.exec();
-
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-
-  case QMessageBox::Ok:
+  KV::MessageBox ask(city_dlg, _("Remove this preset?"), cmafec_preset_get_descr(i));
+  if (ask.exec() == QMessageBox::Ok) {
     cmafec_preset_remove(i);
     update_cma_tab();
-    break;
   }
 }
 
 /************************************************************************//**
   CMA option 'celebrate' qcheckbox state has been changed
 ****************************************************************************/
-void city_dialog::cma_celebrate_changed(int val)
+void city_dialog::cma_celebrate_changed(int /*val*/)
 {
   if (cma_is_city_under_agent(pcity, NULL)) {
     cma_changed();
@@ -3256,10 +3234,8 @@ void city_dialog::update_building()
 void city_dialog::buy()
 {
   char buf[1024], buf2[1024];
-  int ret;
   const char *name = city_production_name_translation(pcity);
   int value = pcity->client.buy_cost;
-  hud_message_box ask(city_dlg);
 
   if (!can_client_issue_orders()) {
     return;
@@ -3272,19 +3248,9 @@ void city_dialog::buy()
   fc_snprintf(buf, ARRAY_SIZE(buf), PL_("Buy %s for %d gold?",
                                         "Buy %s for %d gold?", value),
               name, value);
-  ask.set_text_title(QString(buf), QString(buf2));
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ret = ask.exec();
-
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-    break;
-
-  case QMessageBox::Ok:
+  KV::StandardMessageBox ask(city_dlg, buf, buf2);
+  if (ask.exec() ==  QMessageBox::Ok) {
     city_buy_production(pcity);
-    break;
   }
 }
 
@@ -3540,13 +3506,13 @@ void city_dialog::save_worklist()
   struct worklist queue;
   struct global_worklist *gw;
   QString text;
-  hud_input_box ask(gui()->central_wdg);
+  KV::InputBox ask(gui()->central_wdg,
+                   _("What should we name new worklist?"),
+                   _("Save current worklist"),
+                   _("New worklist"));
 
-  ask.set_text_title_definput(_("What should we name new worklist?"),
-                              _("Save current worklist"),
-                              _("New worklist"));
   if (ask.exec() == QDialog::Accepted) {
-    text = ask.input_edit.text().toLocal8Bit().data();
+    text = ask.input().toLocal8Bit().data();
     if (!text.isEmpty()) {
       gw = global_worklist_new(text.toLocal8Bit().data());
       city_get_queue(pcity, &queue);

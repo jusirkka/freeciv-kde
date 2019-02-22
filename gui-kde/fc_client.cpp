@@ -971,7 +971,7 @@ QIcon fc_icons::get_icon(const QString &id)
   str = QString("themes") + QDir::separator() + "gui-qt" + QDir::separator();
   /* Try custom icon from theme */
   icon.addFile(fileinfoname(get_data_dirs(),
-                            QString(str.toLocal8Bit().data() + FC::KDE::Themes::Current()
+                            QString(str.toLocal8Bit().data() + KV::Themes::Current()
                                     + DIR_SEPARATOR
                                     + id + ".png").toLocal8Bit().data()));
   str = str + "icons" + DIR_SEPARATOR;
@@ -999,7 +999,7 @@ QPixmap* fc_icons::get_pixmap(const QString &id)
   }
   str = QString("themes") + DIR_SEPARATOR + "gui-qt" + DIR_SEPARATOR;
   status = pm->load(fileinfoname(get_data_dirs(),
-                                 QString(str + FC::KDE::Themes::Current()
+                                 QString(str + KV::Themes::Current()
                                  + DIR_SEPARATOR
                                  + id + ".png").toLocal8Bit().data()));
 
@@ -1245,7 +1245,7 @@ void pregame_options::max_players_change(int i)
 /************************************************************************//**
   Slot for changing level of AI
 ****************************************************************************/
-void pregame_options::ailevel_change(int i)
+void pregame_options::ailevel_change(int)
 {
   QVariant v = ailevel->currentData();
 
@@ -1264,7 +1264,7 @@ void pregame_options::ailevel_change(int i)
 /************************************************************************//**
   Slot for changing ruleset
 ****************************************************************************/
-void pregame_options::ruleset_change(int i)
+void pregame_options::ruleset_change(int)
 {
   if (!cruleset->currentText().isEmpty()) {
     set_ruleset(cruleset->currentText().toLocal8Bit().data());

@@ -65,7 +65,7 @@ void handle_authentication_req(enum authentication_type type,
   This regenerates the player information from a loaded game on the
   server.
 **************************************************************************/
-void handle_game_load(bool load_successful, const char *filename)
+void handle_game_load(bool load_successful, const char */*filename*/)
 {
   if (load_successful) {
     set_client_page(PAGE_START);

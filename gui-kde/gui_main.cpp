@@ -47,6 +47,7 @@
 #include "hudwidget.h"
 #include "qtg_cxxside.h"
 #include "themes.h"
+#include "messagebox.h"
 
 #pragma GCC diagnostic pop
 
@@ -71,7 +72,7 @@ static void apply_notify_font(struct option *poption);
 static void apply_sidebar(struct option *poption);
 static void apply_titlebar(struct option *poption);
 
-using namespace FC::KDE;
+using namespace KV;
 
 /**********************************************************************//**
   Return fc_client instance
@@ -493,26 +494,16 @@ void reset_unit_table(void)
 **************************************************************************/
 void popup_quit_dialog()
 {
-  hud_message_box ask(gui()->central_wdg);
-  int ret;
-
-  ask.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  ask.setDefaultButton(QMessageBox::Cancel);
-  ask.set_text_title(_("Are you sure you want to quit?"),  _("Quit?"));
-  ret = ask.exec();
-
-  switch (ret) {
-  case QMessageBox::Cancel:
-    return;
-    break;
-  case QMessageBox::Ok:
+  KV::StandardMessageBox ask(gui()->central_wdg,
+                             _("Are you sure you want to quit?"),
+                             _("Quit?"));
+  if (ask.exec() == QMessageBox::Ok) {
     start_quitting();
     if (client.conn.used) {
       disconnect_from_server();
     }
     gui()->write_settings();
     qapp->quit();
-    break;
   }
 }
 

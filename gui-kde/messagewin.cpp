@@ -118,7 +118,7 @@ void info_tab::mousePressEvent(QMouseEvent *event)
 /***********************************************************************//**
   Restores cursor when resizing is done
 ***************************************************************************/
-void info_tab::mouseReleaseEvent(QMouseEvent* event)
+void info_tab::mouseReleaseEvent(QMouseEvent* /*event*/)
 {
   QPoint p;
   if (gui()->interface_locked) {
@@ -227,7 +227,7 @@ messagewdg::messagewdg(QWidget *parent): QWidget(parent)
   Slot executed when selection on meg_table has changed
 ***************************************************************************/
 void messagewdg::item_selected(const QItemSelection &sl,
-                               const QItemSelection &ds)
+                               const QItemSelection &/*ds*/)
 {
   const struct message *pmsg;
   int i, j;
@@ -269,7 +269,7 @@ void messagewdg::item_selected(const QItemSelection &sl,
 /***********************************************************************//**
   Mouse entered messagewdg
 ***************************************************************************/
-void messagewdg::enterEvent(QEvent *event)
+void messagewdg::enterEvent(QEvent */*event*/)
 {
   setCursor(Qt::ArrowCursor);
 }
@@ -277,7 +277,7 @@ void messagewdg::enterEvent(QEvent *event)
 /***********************************************************************//**
   Mouse left messagewdg
 ***************************************************************************/
-void messagewdg::leaveEvent(QEvent *event)
+void messagewdg::leaveEvent(QEvent */*event*/)
 {
   setCursor(Qt::ArrowCursor);
 }
@@ -285,7 +285,7 @@ void messagewdg::leaveEvent(QEvent *event)
 /***********************************************************************//**
   Paints semi-transparent background
 ***************************************************************************/
-void messagewdg::paint(QPainter *painter, QPaintEvent *event)
+void messagewdg::paint(QPainter *painter, QPaintEvent */*event*/)
 {
   painter->setBrush(QColor(0, 0, 0, 35));
   painter->drawRect(0, 0, width(), height());
@@ -353,7 +353,7 @@ void messagewdg::msg_update()
 /***********************************************************************//**
   Resize event for messagewdg
 ***************************************************************************/
-void messagewdg::resizeEvent(QResizeEvent* event)
+void messagewdg::resizeEvent(QResizeEvent* /*event*/)
 {
   msg_update();
 }
@@ -362,7 +362,7 @@ void messagewdg::resizeEvent(QResizeEvent* event)
   Display the message dialog.  Optionally raise it.
   Typically triggered by F10.
 ***************************************************************************/
-void meswin_dialog_popup(bool raise)
+void meswin_dialog_popup(bool /*raise*/)
 {
   /* PORTME */
 }
@@ -379,7 +379,7 @@ bool meswin_dialog_is_open(void)
 /***********************************************************************//**
   Do the work of updating (populating) the message dialog.
 ***************************************************************************/
-void real_meswin_dialog_update(void *unused)
+void real_meswin_dialog_update(void */*unused*/)
 {
   int  i, num;
   const struct message *pmsg;

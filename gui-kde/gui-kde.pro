@@ -35,7 +35,9 @@ SOURCES += gui_main.cpp \
     luaconsole.cpp \
     themes.cpp \
     graphics.cpp \
-    diplodlg.cpp
+    diplodlg.cpp \
+    messagebox.cpp \
+    inputbox.cpp
 
 HEADERS += gui_main.h \
     dialogs.h \
@@ -71,7 +73,9 @@ HEADERS += gui_main.h \
     themes.h \
     graphics.h \
     diplodlg.h \
-    themes.h
+    themes.h \
+    messagebox.h \
+    inputbox.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -89,3 +93,6 @@ DEFINES += HAVE_CONFIG_H \
 LIBS += -lz -licuuc -lbz2 -llzma -lSDL2_mixer -lSDL2 \
     -lMagickWand-7.Q16 -lcurl \
     -L. -lfreeciv
+
+FORMS += \
+    inputbox.ui

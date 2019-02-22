@@ -3,7 +3,7 @@
 
 #include <QString>
 
-namespace FC {namespace KDE {
+namespace KV {
 
 class Themes {
 public:
@@ -33,6 +33,6 @@ private:
 };
 
 
-}}
+}
 
 #endif // THEMES_H

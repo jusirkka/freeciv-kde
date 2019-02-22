@@ -795,7 +795,7 @@ void diplo_dlg::make_active(int party)
 /************************************************************************//**
   Initializes some data for diplomacy dialog
 ****************************************************************************/
-bool diplo_dlg::init(bool raise)
+bool diplo_dlg::init(bool /*raise*/)
 {
   if (!can_client_issue_orders()) {
     return false;
@@ -1001,7 +1001,7 @@ void handle_diplomacy_create_clause(int counterpart, int giver,
   Update the diplomacy dialog when the meeting is canceled (the dialog
   should be closed).
 ****************************************************************************/
-void handle_diplomacy_cancel_meeting(int counterpart, int initiated_from)
+void handle_diplomacy_cancel_meeting(int counterpart, int /*initiated_from*/)
 {
   int i;
   diplo_dlg *dd;
