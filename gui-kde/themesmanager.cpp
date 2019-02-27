@@ -21,9 +21,6 @@
 #include "themes_common.h"
 
 
-// gui-qt
-#include "fc_client.h"
-
 
 #pragma GCC diagnostic pop
 

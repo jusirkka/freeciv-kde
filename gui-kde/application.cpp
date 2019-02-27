@@ -151,6 +151,7 @@ void Application::addIdleCallback(void callback(void *), void *data) {
 
 void Application::processTasks() {
   while (!m_tasks.isEmpty()) {
+    qCDebug(FC) << "Processing idle task";
     auto cb = m_tasks.takeFirst();
     cb.callback(cb.data);
   }

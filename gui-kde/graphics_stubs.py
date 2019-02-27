@@ -89,14 +89,24 @@ class Parser(object):
     def print_stubs(self):
         print('extern "C" {')
         print('#include "{}_g.h"'.format(self.key))
-        print('}\n')
+        print('}')
+        print('#include "logging.h"\n')
                   
         for func_name, data in self.funcs.items():
             params = ', '.join(data['parameters'])
+            r_type = data['return_type']
             if params == 'void':
-                print('{} {}() {{\n}}\n'.format(data['return_type'], func_name))
+                print('{} {}() {{'.format(r_type, func_name))
             else:
-                print('{} {}({}) {{\n}}\n'.format(data['return_type'], func_name, params))
+                print('{} {}({}) {{'.format(r_type, func_name, params))
+            print('  qCDebug(FC) << "{}";'.format(func_name))
+            if r_type == 'bool':
+                print('  return false;')
+            elif r_type == 'int':
+                print('  return 0;')
+            elif r_type != 'void':
+                print('  return X;')
+            print('}\n')
 
 
 
