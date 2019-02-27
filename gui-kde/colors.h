@@ -19,7 +19,7 @@ extern "C" {
 }
 
 // Qt
-#include "QColor"
+#include <QColor>
 
 struct color {
   QColor qcolor;

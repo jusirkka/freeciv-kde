@@ -1,11 +1,11 @@
-#ifndef THEMES_H
-#define THEMES_H
+#ifndef THEMESMANAGER_H
+#define THEMESMANAGER_H
 
 #include <QString>
 
 namespace KV {
 
-class Themes {
+class ThemesManager {
 public:
     static void LoadTheme(const char *themes_path, const char *theme_name);
     static void ClearTheme();
@@ -15,10 +15,10 @@ public:
     static const QString& Default();
 
 private:
-    static Themes* instance();
-    Themes();
-    Themes(const Themes&);
-    Themes& operator=(const Themes&);
+    static ThemesManager* instance();
+    ThemesManager();
+    ThemesManager(const ThemesManager&);
+    ThemesManager& operator=(const ThemesManager&);
 
     void loadTheme(const QString& theme_name, const QString& theme_path);
     QStringList getPaths() const;
@@ -35,4 +35,4 @@ private:
 
 }
 
-#endif // THEMES_H
+#endif // THEMESMANAGER_H

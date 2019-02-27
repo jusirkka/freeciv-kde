@@ -2,80 +2,51 @@ TEMPLATE = app
 TARGET = freeciv-kde
 QT += core gui widgets
 
-SOURCES += gui_main.cpp \
-    dialogs.cpp \
-    fc_client.cpp \
-    mapview.cpp \
-    fonts.cpp \
-    citydlg.cpp \
-    hudwidget.cpp \
-    canvas.cpp \
-    helpdlg.cpp \
-    plrdlg.cpp \
-    spaceshipdlg.cpp \
-    repodlgs.cpp \
-    cityrep.cpp \
-    chatline.cpp \
-    menu.cpp \
-    pages.cpp \
-    shortcuts.cpp \
-    voteinfo_bar.cpp \
-    optiondlg.cpp \
-    sidebar.cpp \
-    messagewin.cpp \
-    messagedlg.cpp \
-    gotodlg.cpp \
-    mapctrl.cpp \
-    ratesdlg.cpp \
-    sprite.cpp \
-    inteldlg.cpp \
-    connectdlg.cpp \
-    colors.cpp \
-    qtg_cxxside.cpp \
-    luaconsole.cpp \
-    themes.cpp \
-    graphics.cpp \
-    diplodlg.cpp \
+SOURCES += \
+    themesmanager.cpp \
     messagebox.cpp \
-    inputbox.cpp
+    inputbox.cpp \
+    main.cpp \
+    application.cpp \
+    mainwindow.cpp \
+    spritefactory.cpp \
+packhand.cpp \
+gotodlg.cpp \
+mapctrl.cpp \
+cityrep.cpp \
+voteinfo_bar.cpp \
+chatline.cpp \
+luaconsole.cpp \
+spaceshipdlg.cpp \
+optiondlg.cpp \
+sprite.cpp \
+messagewin.cpp \
+wldlg.cpp \
+repodlgs.cpp \
+graphics.cpp \
+ratesdlg.cpp \
+colors.cpp \
+mapview.cpp \
+plrdlg.cpp \
+helpdlg.cpp \
+inteldlg.cpp \
+menu.cpp \
+finddlg.cpp \
+dialogs.cpp \
+messagedlg.cpp \
+diplodlg.cpp \
+pages.cpp
 
-HEADERS += gui_main.h \
-    dialogs.h \
-    fc_client.h \
-    mapview.h \
-    fonts.h \
-    citydlg.h \
-    hudwidget.h \
-    canvas.h \
-    helpdlg.h \
-    plrdlg.h \
-    spaceshipdlg.h \
-    repodlgs.h \
-    cityrep.h \
-    chatline.h \
-    menu.h \
-    pages.h \
-    shortcuts.h \
-    voteinfo_bar.h \
-    optiondlg.h \
-    sidebar.h \
-    messagewin.h \
-    messagedlg.h \
-    gotodlg.h \
-    mapctrl.h \
-    ratesdlg.h \
-    sprite.h \
-    inteldlg.h \
-    connectdlg.h \
-    colors.h \
-    qtg_cxxside.h \
-    luaconsole.h \
-    themes.h \
-    graphics.h \
-    diplodlg.h \
-    themes.h \
+HEADERS += \
+    themesmanager.h \
     messagebox.h \
-    inputbox.h
+    inputbox.h \
+    application.h \
+    logging.h \
+    mainwindow.h \
+    sprite.h \
+    colors.h \
+    spritefactory.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -95,4 +66,5 @@ LIBS += -lz -licuuc -lbz2 -llzma -lSDL2_mixer -lSDL2 \
     -L. -lfreeciv
 
 FORMS += \
-    inputbox.ui
+    inputbox.ui \
+    mainwindow.ui
