@@ -11,6 +11,7 @@ extern "C" {
 class QTimer;
 class QWidget;
 class QFont;
+struct text_tag_list;
 
 namespace KV {
 
@@ -34,7 +35,6 @@ public:
   static void Main(int argc, char *argv[]);
 
   static void Exit();
-  static QWidget* View();
 
   /**
    * @brief Make a bell noise (beep). This provides low-level sound alerts even
@@ -44,7 +44,7 @@ public:
 
   static void VersionMessage(const char* version);
   static void ChatMessage(const char *astring,
-                          const struct text_tag_list* tags,
+                          const text_tag_list* tags,
                           int conn_id);
   static void SetRulesets(int num_rulesets, char **rulesets);
 
@@ -59,7 +59,7 @@ public:
 signals:
 
   void versionMessage(QString);
-  void chatMessage(QString, const struct text_tag_list*);
+  void chatMessage(QString, const text_tag_list*);
   void rulesetMessage(QStringList);
   void addServerSource(int);
   void removeServerSource();

@@ -6,34 +6,81 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "messagebox.h"
+#include "state.h"
+#include "logging.h"
 
 using namespace KV;
 
 MainWindow::MainWindow()
   : QMainWindow()
   , m_UI(new Ui::MainWindow)
+  , m_currentState(nullptr)
 {
   m_UI->setupUi(this);
+
+  auto intro = new State::Intro(this);
+  connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);
+  m_states.addState(intro);
+
+  auto nw = new State::Network(this);
+  connect(nw, &QState::activeChanged, this, &MainWindow::setCurrentState);
+  m_states.addState(nw);
+
+  auto start = new State::Start(this);
+  connect(start, &QState::activeChanged, this, &MainWindow::setCurrentState);
+  m_states.addState(start);
+
+  auto game = new State::Game(this);
+  connect(game, &QState::activeChanged, this, &MainWindow::setCurrentState);
+  m_states.addState(game);
+
+
+  intro->addTransition(m_UI->actionConnectToGame, &QAction::triggered, nw);
+  nw->addTransition(nw, &State::Network::accepted, start);
+  nw->addTransition(nw, &State::Network::rejected, intro);
+  game->addTransition(m_UI->actionConnectToGame, &QAction::triggered, nw);
+  intro->addTransition(intro, &State::Intro::playing, game);
+
+  m_states.setInitialState(intro);
+  m_states.start();
+
+}
+
+void MainWindow::setCurrentState(bool active) {
+  auto s = qobject_cast<State::Base*>(sender());
+  // qCDebug(FC) << "MainWindow::setCurrentState" << s->id() << active;
+  if (!active) {
+    if (s == m_currentState) {
+      // qCDebug(FC) << "no active state";
+      m_currentState = nullptr;
+    }
+  } else {
+    qCDebug(FC) << "active state = " << s->id();
+    m_currentState = s;
+  }
 }
 
 MainWindow::~MainWindow() {
   delete m_UI;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent */*event*/) {
 }
 
 void MainWindow::on_actionSaveGameAs_triggered() {}
 void MainWindow::on_actionNewGame_triggered() {}
 void MainWindow::on_actionLoadScenario_triggered() {}
 void MainWindow::on_actionLoadGame_triggered() {}
-void MainWindow::on_actionConnectToGame_triggered() {}
 
 void MainWindow::on_actionQuit_triggered() {
-  KV::StandardMessageBox ask(centralWidget(),
-                             _("Are you sure you want to quit?"),
-                             _("Quit?"));
-  if (ask.exec() == QMessageBox::Ok) {
+  bool ok = true;
+  if (!m_currentState || m_currentState->id() != PAGE_MAIN) {
+    KV::StandardMessageBox ask(centralWidget(),
+                               _("Are you sure you want to quit?"),
+                               _("Quit?"));
+    ok = ask.exec() == QMessageBox::Ok;
+  }
+  if (ok) {
     start_quitting();
     if (client.conn.used) {
       disconnect_from_server();
@@ -41,7 +88,6 @@ void MainWindow::on_actionQuit_triggered() {
     writeSettings();
     qApp->quit();
   }
-
 }
 
 void MainWindow::writeSettings() {}

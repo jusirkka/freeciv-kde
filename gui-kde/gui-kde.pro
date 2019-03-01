@@ -35,7 +35,10 @@ finddlg.cpp \
 dialogs.cpp \
 messagedlg.cpp \
 diplodlg.cpp \
-pages.cpp
+pages.cpp \
+    state.cpp \
+    network.cpp \
+    mapwidget.cpp
 
 HEADERS += \
     themesmanager.h \
@@ -46,7 +49,10 @@ HEADERS += \
     mainwindow.h \
     sprite.h \
     colors.h \
-    spritefactory.h
+    spritefactory.h \
+    state.h \
+    network.h \
+    mapwidget.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -67,4 +73,5 @@ LIBS += -lz -licuuc -lbz2 -llzma -lSDL2_mixer -lSDL2 \
 
 FORMS += \
     inputbox.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    network.ui

@@ -47,10 +47,10 @@ static void setup_gui_funcs() {
     return false;
   };
   funcs->tileset_type_set = [] (enum ts_type) {
-    qCDebug(FC) << "tileset_type_set";
+    qCDebug(FC) << "TODO: tileset_type_set";
   };
   funcs->free_intro_radar_sprites = [] () {
-    qCDebug(FC) << "free_intro_radar_sprites";
+    qCDebug(FC) << "TODO: free_intro_radar_sprites";
   };
   funcs->load_gfxfile = KV::SpriteFactory::Load;
   funcs->create_sprite = KV::SpriteFactory::Create;
@@ -76,7 +76,7 @@ static void setup_gui_funcs() {
     delete store;
   };
   funcs->canvas_set_zoom = [] (struct canvas*, float) {
-    qCDebug(FC) << "canvas_set_zoom";
+    qCDebug(FC) << "TODO: canvas_set_zoom";
   };
   funcs->has_zoom_support = [] () {
     return false;
@@ -249,16 +249,16 @@ static void setup_gui_funcs() {
 
   funcs->set_rulesets = KV::Application::SetRulesets;
   funcs->options_extra_init = [] () {
-    qCDebug(FC) << "options_extra_init";
+    qCDebug(FC) << "TODO: options_extra_init";
   };
   funcs->server_connect = [] () {
-    qCDebug(FC) << "server_connect";
+    qCDebug(FC) << "TODO: server_connect";
   };
   funcs->add_net_input = KV::Application::AddServerSource;
   funcs->remove_net_input = KV::Application::RemoveServerSource;
   funcs->real_conn_list_dialog_update = KV::Application::UpdateUsers;
   funcs->close_connection_dialog = [] () {
-    qCDebug(FC) << "close_connection_dialog";
+    qCDebug(FC) << "TODO: close_connection_dialog";
   };
   funcs->add_idle_callback = KV::Application::AddIdleCallback;
 
@@ -269,10 +269,10 @@ static void setup_gui_funcs() {
   };
 
   funcs->set_unit_icon = [] (int idx, struct unit* punit) {
-    qCDebug(FC) << "set_unit_icon" << idx << punit->id;
+    qCDebug(FC) << "TODO: set_unit_icon" << idx << punit->id;
   };
   funcs->set_unit_icons_more_arrow = [] (bool onoff) {
-    qCDebug(FC) << "set_unit_icons_more_arrow" << onoff;
+    qCDebug(FC) << "TODO: set_unit_icons_more_arrow" << onoff;
   };
   funcs->real_focus_units_changed = [] () {
     qCDebug(FC) << "TODO: real_focus_units_changed";
@@ -284,23 +284,23 @@ static void setup_gui_funcs() {
   };
 
   funcs->editgui_refresh = [] () {
-    qCDebug(FC) << "editgui_refresh";
+    qCDebug(FC) << "TODO: editgui_refresh";
   };
   funcs->editgui_notify_object_created = [] (int tag, int id) {
-    qCDebug(FC) << "editgui_notify_object_created" << tag << id;
+    qCDebug(FC) << "TODO: editgui_notify_object_created" << tag << id;
   };
   funcs->editgui_notify_object_changed = [] (
       int objtype, int object_id, bool removal) {
-    qCDebug(FC) << "editgui_notify_object_changed" << objtype << object_id << removal;
+    qCDebug(FC) << "TODO: editgui_notify_object_changed" << objtype << object_id << removal;
   };
   funcs->editgui_popup_properties = [] (const struct tile_list* /*tiles*/, int objtype) {
-    qCDebug(FC) << "editgui_popup_properties" << objtype;
+    qCDebug(FC) << "TODO: editgui_popup_properties" << objtype;
   };
   funcs->editgui_tileset_changed = [] () {
-    qCDebug(FC) << "editgui_tileset_changed";
+    qCDebug(FC) << "TODO: editgui_tileset_changed";
   };
   funcs->editgui_popdown_all = [] () {
-    qCDebug(FC) << "editgui_popdown_all";
+    qCDebug(FC) << "TODO: editgui_popdown_all";
   };
 
   funcs->popup_combat_info = [] (
@@ -331,7 +331,7 @@ static void setup_gui_funcs() {
     qCDebug(FC) << "TODO: popdown_all_city_dialogs";
   };
   funcs->handmade_scenario_warning = [] () {
-    qCDebug(FC) << "handmade_scenario_warning";
+    qCDebug(FC) << "TODO: handmade_scenario_warning";
     return false;
   };
   funcs->refresh_unit_city_dialogs = [] (struct unit *punit) {

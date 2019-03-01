@@ -2,10 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStateMachine>
 
 namespace Ui {class MainWindow;}
 
 namespace KV {
+
+namespace State {class Base;}
 
 class MainWindow: public QMainWindow
 {
@@ -28,7 +31,6 @@ private slots:
   void on_actionNewGame_triggered();
   void on_actionLoadScenario_triggered();
   void on_actionLoadGame_triggered();
-  void on_actionConnectToGame_triggered();
   void on_actionQuit_triggered();
   void on_actionFullscreen_toggled(bool on);
   void on_actionMinimap_toggled(bool on);
@@ -95,6 +97,8 @@ private slots:
   void on_actionShowMenubar_toggled(bool on);
   void on_actionShowToolbar_toggled(bool on);
 
+  void setCurrentState(bool active);
+
 private:
 
   void writeSettings();
@@ -103,6 +107,8 @@ private:
 private:
 
   Ui::MainWindow* m_UI;
+  QStateMachine m_states;
+  State::Base* m_currentState;
 
 };
 

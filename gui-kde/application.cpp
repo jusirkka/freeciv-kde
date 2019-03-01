@@ -90,22 +90,20 @@ void Application::Beep()
   QApplication::alert(instance()->m_mainWindow->centralWidget());
 }
 
-QWidget* Application::View() {
-  return instance()->m_mainWindow->centralWidget();
-}
-
 void Application::VersionMessage(const char *version) {
+  qCDebug(FC) << "TODO: Application::VersionMessage";
   instance()->versionMessage(QString(version));
 }
 
 void Application::ChatMessage(const char *astring,
-                              const struct text_tag_list *tags, int)
+                              const text_tag_list *tags, int)
 {
-  // instance()->chatMessage(QString(astring), tags);
+  qCDebug(FC) << "TODO: Application::ChatMessage";
+  instance()->chatMessage(QString(astring), tags);
 }
 
 QFont Application::Font(enum client_font /*font*/) {
-  qCDebug(FC) << "TODO: Font";
+  qCDebug(FC) << "TODO: Application::Font";
   return QFontDatabase::systemFont(QFontDatabase::GeneralFont);
 }
 
@@ -114,18 +112,22 @@ void Application::SetRulesets(int num_rulesets, char **rulesets) {
   for (int i = 0; i < num_rulesets; i++) {
     rules << rulesets[i];
   }
+  qCDebug(FC) << "TODO: Application::SetRulesets";
   instance()->rulesetMessage(rules);
 }
 
 void Application::AddServerSource(int sock) {
+  qCDebug(FC) << "TODO: Application::AddServerSource";
   instance()->addServerSource(sock);
 }
 
 void Application::RemoveServerSource() {
+  qCDebug(FC) << "TODO: Application::RemoveServerSource";
   instance()->removeServerSource();
 }
 
 void Application::UpdateUsers(void *) {
+  qCDebug(FC) << "TODO: Application::UpdateUsers";
   instance()->updateUsers();
 }
 
@@ -135,7 +137,7 @@ void Application::AddIdleCallback(void callback(void *), void *data) {
 }
 
 void Application::StateChange(client_pages page) {
-  qCDebug(FC) << "TODO: StateChange";
+  qCDebug(FC) << "TODO: StateChange" << page;
 }
 
 Application* Application::instance() {
