@@ -1,8 +1,10 @@
 #include "state.h"
 #include "mainwindow.h"
 #include "logging.h"
-#include "network.h"
+#include "networkdialog.h"
+#include "startdialog.h"
 #include "mapwidget.h"
+#include "messagebox.h"
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QPainter>
@@ -11,6 +13,8 @@
 #include "tilespec.h"
 #include "version.h"
 #include "fc_config.h"
+#include "clinet.h"
+#include "client_main.h"
 
 
 using namespace KV::State;
@@ -98,20 +102,37 @@ void Intro::onEntry(QEvent* event) {
 
 Network::Network(MainWindow *parent)
   : Base(parent, PAGE_NETWORK)
-  , m_networkDialog(new KV::Network(parent))
+  , m_networkDialog(new KV::NetworkDialog(parent))
 {
-   connect(m_networkDialog, &QDialog::accepted, this, &Network::accepted);
+   connect(m_networkDialog, &QDialog::accepted, this, &Network::connectToServer);
    connect(m_networkDialog, &QDialog::rejected, this, &Network::rejected);
 }
 
+void Network::connectToServer() {
+  char errbuf [512];
+
+  sz_strlcpy(user_name, m_networkDialog->user().toLocal8Bit().data());
+  sz_strlcpy(server_host, m_networkDialog->server().toLocal8Bit().data());
+  server_port = m_networkDialog->port();
+
+  if (connect_to_server(user_name, server_host, server_port,
+                        errbuf, sizeof(errbuf)) != -1) {
+    emit accepted();
+  } else {
+    KV::MessageBox fail(m_parent->centralWidget(), errbuf, "Connection failed");
+    fail.setStandardButtons(QMessageBox::Ok);
+    fail.exec();
+    emit rejected();
+  }
+}
 
 Network::~Network() {
   delete m_networkDialog;
 }
 
 void Network::onEntry(QEvent* event) {
-  m_networkDialog->show();
   m_networkDialog->init();
+  m_networkDialog->show();
   QState::onEntry(event);
 }
 
@@ -147,17 +168,26 @@ void Game::onEntry(QEvent* event) {
 
 Start::Start(MainWindow *parent)
   : Base(parent, PAGE_START)
-{}
-
-
-Start::~Start() {}
-
-void Start::onEntry(QEvent* event) {
-  QState::onEntry(event);
+  , m_startDialog(new KV::StartDialog(parent))
+{
+  connect(m_startDialog, &QDialog::accepted, this, &Start::accepted);
+  connect(m_startDialog, &QDialog::rejected, this, &Start::disconnectFromServer);
 }
 
 
+Start::~Start() {
+  delete m_startDialog;
+}
 
+void Start::onEntry(QEvent* event) {
+  m_startDialog->show();
+  QState::onEntry(event);
+}
+
+void Start::disconnectFromServer() {
+  disconnect_from_server();
+  emit rejected();
+}
 
 
 

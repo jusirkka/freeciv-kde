@@ -4,6 +4,6 @@ extern "C" {
 #include "logging.h"
 
 void popup_find_dialog() {
-  qCDebug(FC) << "popup_find_dialog";
+  qCDebug(FC) << "TODO: popup_find_dialog";
 }
 

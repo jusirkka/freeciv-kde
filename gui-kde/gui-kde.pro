@@ -37,8 +37,9 @@ messagedlg.cpp \
 diplodlg.cpp \
 pages.cpp \
     state.cpp \
-    network.cpp \
-    mapwidget.cpp
+    mapwidget.cpp \
+    startdialog.cpp \
+    networkdialog.cpp
 
 HEADERS += \
     themesmanager.h \
@@ -51,8 +52,9 @@ HEADERS += \
     colors.h \
     spritefactory.h \
     state.h \
-    network.h \
-    mapwidget.h
+    mapwidget.h \
+    startdialog.h \
+    networkdialog.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -74,4 +76,5 @@ LIBS += -lz -licuuc -lbz2 -llzma -lSDL2_mixer -lSDL2 \
 FORMS += \
     inputbox.ui \
     mainwindow.ui \
-    network.ui
+    startdialog.ui \
+    networkdialog.ui

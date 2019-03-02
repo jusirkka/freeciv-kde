@@ -4,22 +4,22 @@ extern "C" {
 #include "logging.h"
 
 void option_dialog_popup(const char *name, const struct option_set *poptset) {
-  qCDebug(FC) << "option_dialog_popup";
+  qCDebug(FC) << "TODO: option_dialog_popup";
 }
 
 void option_dialog_popdown(const struct option_set *poptset) {
-  qCDebug(FC) << "option_dialog_popdown";
+  qCDebug(FC) << "TODO: option_dialog_popdown";
 }
 
 void option_gui_update(struct option *poption) {
-  qCDebug(FC) << "option_gui_update";
+  qCDebug(FC) << "TODO: option_gui_update";
 }
 
 void option_gui_add(struct option *poption) {
-  qCDebug(FC) << "option_gui_add";
+  qCDebug(FC) << "TODO: option_gui_add";
 }
 
 void option_gui_remove(struct option *poption) {
-  qCDebug(FC) << "option_gui_remove";
+  qCDebug(FC) << "TODO: option_gui_remove";
 }
 

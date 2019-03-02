@@ -99,7 +99,7 @@ class Parser(object):
                 print('{} {}() {{'.format(r_type, func_name))
             else:
                 print('{} {}({}) {{'.format(r_type, func_name, params))
-            print('  qCDebug(FC) << "{}";'.format(func_name))
+            print('  qCDebug(FC) << "TODO: {}";'.format(func_name))
             if r_type == 'bool':
                 print('  return false;')
             elif r_type == 'int':

@@ -11,6 +11,9 @@ extern "C" {
 class QTimer;
 class QWidget;
 class QFont;
+class QIcon;
+class QSocketNotifier;
+
 struct text_tag_list;
 
 namespace KV {
@@ -21,6 +24,8 @@ class MainWindow;
 class Application: public QObject {
 
   Q_OBJECT
+
+  friend class StartDialog;
 
 public:
 
@@ -49,6 +54,7 @@ public:
   static void SetRulesets(int num_rulesets, char **rulesets);
 
   static QFont Font(enum client_font font);
+  static QIcon Icon(const QString& name);
 
   static void AddServerSource(int sock);
   static void RemoveServerSource();
@@ -61,8 +67,6 @@ signals:
   void versionMessage(QString);
   void chatMessage(QString, const text_tag_list*);
   void rulesetMessage(QStringList);
-  void addServerSource(int);
-  void removeServerSource();
   void updateUsers();
 
 private:
@@ -73,11 +77,14 @@ private:
   Application& operator=(const Application&);
 
   void addIdleCallback(void (callback)(void *), void *data);
+  void addServerSource(int);
+  void removeServerSource();
 
 private slots:
 
   void timerRestart();
   void processTasks();
+  void serverInput(int sock);
 
 
 private:
@@ -98,6 +105,7 @@ private:
   MainWindow* m_mainWindow;
   QTimer* m_timer;
   QVector<Callback> m_tasks;
+  QSocketNotifier* m_notifier;
 
 
 };

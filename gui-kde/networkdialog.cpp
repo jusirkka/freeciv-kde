@@ -1,5 +1,5 @@
-#include "network.h"
-#include "ui_network.h"
+#include "networkdialog.h"
+#include "ui_networkdialog.h"
 #include "logging.h"
 #include <QApplication>
 #include <QItemSelection>
@@ -12,9 +12,9 @@
 
 using namespace KV;
 
-Network::Network(QWidget *parent)
+NetworkDialog::NetworkDialog(QWidget *parent)
     : QDialog(parent)
-    , m_UI(new Ui::Network)
+    , m_UI(new Ui::NetworkDialog)
     , m_localScan(nullptr)
     , m_globalScan(nullptr)
     , m_localScanDone(true)
@@ -26,7 +26,8 @@ Network::Network(QWidget *parent)
 
   setWindowTitle(QApplication::applicationName());
 
-  connect(m_UI->detailsButton, &QPushButton::toggled, this, &Network::setDetailsButtonText);
+  connect(m_UI->detailsButton, &QPushButton::toggled,
+          this, &NetworkDialog::setDetailsButtonText);
 
   QStringList serverLabels{_("Server Name"),_("Port"), _("Version"), _("Status"), Q_("?count:Players"), _("Comment")};
   m_UI->localTable->setHorizontalHeaderLabels(serverLabels);
@@ -46,11 +47,11 @@ Network::Network(QWidget *parent)
   }
 
   connect(m_UI->internetTable->selectionModel(), &QItemSelectionModel::selectionChanged,
-          this, &Network::serverChanged);
+          this, &NetworkDialog::serverChanged);
   connect(m_UI->localTable->selectionModel(), &QItemSelectionModel::selectionChanged,
-          this, &Network::serverChanged);
+          this, &NetworkDialog::serverChanged);
 
-  connect(m_scanTimer, &QTimer::timeout, this, &Network::checkServerScans);
+  connect(m_scanTimer, &QTimer::timeout, this, &NetworkDialog::checkServerScans);
 
 
   resize(640, 480);
@@ -58,7 +59,7 @@ Network::Network(QWidget *parent)
   initWidget();
 }
 
-void Network::initWidget() {
+void NetworkDialog::initWidget() {
   m_UI->detailsButton->setChecked(false);
   m_UI->playerBox->setVisible(m_UI->detailsButton->isChecked());
   m_UI->detailsButton->setText("Details >>");
@@ -72,7 +73,7 @@ void Network::initWidget() {
 
 }
 
-void Network::init() {
+void NetworkDialog::init() {
   initWidget();
   m_localScanDone = false;
   m_globalScanDone = false;
@@ -87,7 +88,7 @@ void Network::init() {
   });
 }
 
-void Network::final() {
+void NetworkDialog::final() {
   m_scanTimer->stop();
   server_scan_finish(m_localScan);
   m_localScan = nullptr;
@@ -97,7 +98,7 @@ void Network::final() {
   m_globalScanDone = true;
 }
 
-void Network::checkServerScans() {
+void NetworkDialog::checkServerScans() {
 
   if (!m_localScanDone) checkServerScan(m_localScan);
   if (!m_globalScanDone) checkServerScan(m_globalScan);
@@ -107,7 +108,7 @@ void Network::checkServerScans() {
   }
 }
 
-void Network::checkServerScan(server_scan *scan) {
+void NetworkDialog::checkServerScan(server_scan *scan) {
   auto stat = server_scan_poll(scan);
 
   if (stat >= SCAN_STATUS_PARTIAL) {
@@ -132,7 +133,7 @@ void Network::checkServerScan(server_scan *scan) {
   }
 }
 
-void Network::updateServerList(server_scan *scan, const server_list *servers) {
+void NetworkDialog::updateServerList(server_scan *scan, const server_list *servers) {
 
   QTableWidget* table = scan == m_localScan ? m_UI->localTable : m_UI->internetTable;
   table->clearContents();
@@ -161,11 +162,11 @@ void Network::updateServerList(server_scan *scan, const server_list *servers) {
 
 
 
-Network::~Network() {
+NetworkDialog::~NetworkDialog() {
   delete m_UI;
 }
 
-void Network::setDetailsButtonText(bool checked) {
+void NetworkDialog::setDetailsButtonText(bool checked) {
   if (checked) {
     m_UI->detailsButton->setText("Details <<");
   } else {
@@ -174,7 +175,7 @@ void Network::setDetailsButtonText(bool checked) {
 }
 
 
-void Network::serverChanged(const QItemSelection &selected, const QItemSelection&) {
+void NetworkDialog::serverChanged(const QItemSelection &selected, const QItemSelection&) {
   QModelIndexList indices = selected.indexes();
   if (indices.isEmpty()) return;
   m_UI->serverEdit->setText(indices[0].data().toString());
@@ -219,8 +220,17 @@ void Network::serverChanged(const QItemSelection &selected, const QItemSelection
 }
 
 
+QString NetworkDialog::user() const {
+  return m_UI->userEdit->text();
+}
 
+QString NetworkDialog::server() const {
+  return m_UI->serverEdit->text();
+}
 
+int NetworkDialog::port() const {
+  return m_UI->portSpin->value();
+}
 
 
 

@@ -4,10 +4,10 @@ extern "C" {
 #include "logging.h"
 
 void log_output_window() {
-  qCDebug(FC) << "log_output_window";
+  qCDebug(FC) << "TODO: log_output_window";
 }
 
 void clear_output_window() {
-  qCDebug(FC) << "clear_output_window";
+  qCDebug(FC) << "TODO: clear_output_window";
 }
 

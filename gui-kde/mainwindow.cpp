@@ -17,6 +17,7 @@ MainWindow::MainWindow()
   , m_currentState(nullptr)
 {
   m_UI->setupUi(this);
+  setWindowTitle(qAppName());
 
   auto intro = new State::Intro(this);
   connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);
@@ -36,10 +37,12 @@ MainWindow::MainWindow()
 
 
   intro->addTransition(m_UI->actionConnectToGame, &QAction::triggered, nw);
+  intro->addTransition(intro, &State::Intro::playing, game);
   nw->addTransition(nw, &State::Network::accepted, start);
   nw->addTransition(nw, &State::Network::rejected, intro);
+  start->addTransition(start, &State::Start::accepted, game);
+  start->addTransition(start, &State::Start::rejected, intro);
   game->addTransition(m_UI->actionConnectToGame, &QAction::triggered, nw);
-  intro->addTransition(intro, &State::Intro::playing, game);
 
   m_states.setInitialState(intro);
   m_states.start();
@@ -55,7 +58,7 @@ void MainWindow::setCurrentState(bool active) {
       m_currentState = nullptr;
     }
   } else {
-    qCDebug(FC) << "active state = " << s->id();
+    qCDebug(FC) << "active state = " << client_pages_name(s->id());
     m_currentState = s;
   }
 }

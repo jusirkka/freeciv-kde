@@ -4,10 +4,10 @@ extern "C" {
 #include "logging.h"
 
 void load_intro_gfx() {
-  qCDebug(FC) << "load_intro_gfx";
+  qCDebug(FC) << "TODO: load_intro_gfx";
 }
 
 void load_cursors() {
-  qCDebug(FC) << "load_cursors";
+  qCDebug(FC) << "TODO: load_cursors";
 }
 

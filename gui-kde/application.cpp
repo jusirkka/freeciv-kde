@@ -4,11 +4,13 @@
 
 #include "fc_config.h"
 #include "sprite.h"
+#include "shared.h"
 
 
 // client
 #include "client_main.h"
 #include "tilespec.h"
+#include "clinet.h"
 
 
 #pragma GCC diagnostic pop
@@ -18,10 +20,14 @@
 #include <QTextBlock>
 #include <QTextCursor>
 #include <QTimer>
+#include <QSocketNotifier>
+#include <QIcon>
+
 #include "application.h"
 #include "logging.h"
 #include "themesmanager.h"
 #include "mainwindow.h"
+#include "themesmanager.h"
 
 
 Q_LOGGING_CATEGORY(FC, "Freeciv")
@@ -71,11 +77,12 @@ void Application::Main(int argc, char *argv[]) {
 
   set_client_state(C_S_DISCONNECTED);
 
-  instance()->m_mainWindow->show();
-
+  // mainwindow ctor refers to application instance:
+  // create it first
+  auto mw = new MainWindow;
+  instance()->m_mainWindow = mw;
+  mw->show();
   app.exec();
-
-
 }
 
 void Application::Exit() {
@@ -98,13 +105,30 @@ void Application::VersionMessage(const char *version) {
 void Application::ChatMessage(const char *astring,
                               const text_tag_list *tags, int)
 {
-  qCDebug(FC) << "TODO: Application::ChatMessage";
+  qCDebug(FC) << "TODO: Application::ChatMessage" << astring;
   instance()->chatMessage(QString(astring), tags);
 }
 
 QFont Application::Font(enum client_font /*font*/) {
   qCDebug(FC) << "TODO: Application::Font";
   return QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+}
+
+QIcon Application::Icon(const QString& name) {
+  QIcon icon;
+
+  /* Try custom icon from theme */
+  auto path = "themes/gui-qt/" + ThemesManager::Current() + "/" +
+      name + ".png";
+  icon.addFile(fileinfoname(get_data_dirs(), path.toLocal8Bit().data()));
+
+  /* Try icon from icons dir */
+  if (icon.isNull()) {
+    path = "themes/gui-qt/icons/" + name + ".png";
+    icon.addFile(fileinfoname(get_data_dirs(), path.toLocal8Bit().data()));
+  }
+
+  return QIcon(icon);
 }
 
 void Application::SetRulesets(int num_rulesets, char **rulesets) {
@@ -117,17 +141,17 @@ void Application::SetRulesets(int num_rulesets, char **rulesets) {
 }
 
 void Application::AddServerSource(int sock) {
-  qCDebug(FC) << "TODO: Application::AddServerSource";
+  qCDebug(FC) << "Application::AddServerSource";
   instance()->addServerSource(sock);
 }
 
 void Application::RemoveServerSource() {
-  qCDebug(FC) << "TODO: Application::RemoveServerSource";
+  qCDebug(FC) << "Application::RemoveServerSource";
   instance()->removeServerSource();
 }
 
 void Application::UpdateUsers(void *) {
-  qCDebug(FC) << "TODO: Application::UpdateUsers";
+  qCDebug(FC) << "Application::UpdateUsers";
   instance()->updateUsers();
 }
 
@@ -137,7 +161,7 @@ void Application::AddIdleCallback(void callback(void *), void *data) {
 }
 
 void Application::StateChange(client_pages page) {
-  qCDebug(FC) << "TODO: StateChange" << page;
+  qCDebug(FC) << "TODO: Application::StateChange" << client_pages_name(page);
 }
 
 Application* Application::instance() {
@@ -160,8 +184,9 @@ void Application::processTasks() {
 }
 
 Application::Application()
-  : m_mainWindow(new MainWindow)
+  : m_mainWindow(nullptr)
   , m_timer(new QTimer)
+  , m_notifier(nullptr)
 {
   m_timer->setSingleShot(true);
   connect(m_timer, &QTimer::timeout, this, &Application::timerRestart);
@@ -172,8 +197,22 @@ void Application::timerRestart() {
   m_timer->start(real_timer_callback() * 1000);
 }
 
+void Application::addServerSource(int sock) {
+  if (m_notifier) removeServerSource();
+  m_notifier = new QSocketNotifier(sock, QSocketNotifier::Read, this);
+  connect(m_notifier, &QSocketNotifier::activated, this, &Application::serverInput);
+}
+
+void Application::removeServerSource() {
+  m_notifier->deleteLater();
+  m_notifier = nullptr;
+}
+
+void Application::serverInput(int sock) {
+  input_from_server(sock);
+}
+
 Application::~Application() {
-  delete m_mainWindow;
   m_timer->stop();
   delete m_timer;
 }

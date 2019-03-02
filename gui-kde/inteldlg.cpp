@@ -4,14 +4,14 @@ extern "C" {
 #include "logging.h"
 
 void close_intel_dialog(struct player *p) {
-  qCDebug(FC) << "close_intel_dialog";
+  qCDebug(FC) << "TODO: close_intel_dialog";
 }
 
 void popup_intel_dialog(struct player *p) {
-  qCDebug(FC) << "popup_intel_dialog";
+  qCDebug(FC) << "TODO: popup_intel_dialog";
 }
 
 void update_intel_dialog(struct player *p) {
-  qCDebug(FC) << "update_intel_dialog";
+  qCDebug(FC) << "TODO: update_intel_dialog";
 }
 

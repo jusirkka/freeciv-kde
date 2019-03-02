@@ -4,7 +4,7 @@
 #include <QDialog>
 
 namespace Ui {
-class Network;
+class NetworkDialog;
 }
 
 class QItemSelection;
@@ -15,18 +15,22 @@ struct server_list;
 
 namespace KV {
 
-class Network: public QDialog
+class NetworkDialog: public QDialog
 {
     Q_OBJECT
 
 public:
 
-  Network(QWidget *parent);
+  NetworkDialog(QWidget *parent);
 
-  ~Network() override;
+  ~NetworkDialog() override;
 
   void init();
   void final();
+
+  QString server() const;
+  QString user() const;
+  int port() const;
 
 private slots:
 
@@ -42,7 +46,7 @@ private:
 
 private:
 
-    Ui::Network* m_UI;
+    Ui::NetworkDialog* m_UI;
     server_scan* m_localScan;
     server_scan* m_globalScan;
     bool m_localScanDone;

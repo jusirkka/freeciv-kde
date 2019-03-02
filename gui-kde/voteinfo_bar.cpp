@@ -4,6 +4,6 @@ extern "C" {
 #include "logging.h"
 
 void voteinfo_gui_update() {
-  qCDebug(FC) << "voteinfo_gui_update";
+  qCDebug(FC) << "TODO: voteinfo_gui_update";
 }
 

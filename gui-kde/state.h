@@ -13,7 +13,8 @@ namespace KV {
 
 class MainWindow;
 class MapWidget;
-class Network;
+class NetworkDialog;
+class StartDialog;
 
 namespace State {
 
@@ -62,8 +63,12 @@ signals:
   void accepted();
   void rejected();
 
+private slots:
+
+  void connectToServer();
+
 private:
-  KV::Network* m_networkDialog;
+  KV::NetworkDialog* m_networkDialog;
 };
 
 class Game: public Base {
@@ -88,6 +93,17 @@ public:
   ~Start() override;
 protected:
   void onEntry(QEvent *event) override;
+
+private slots:
+
+  void disconnectFromServer();
+
+signals:
+  void accepted();
+  void rejected();
+
+private:
+  StartDialog* m_startDialog;
 };
 
 }}

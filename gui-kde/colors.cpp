@@ -4,7 +4,7 @@ extern "C" {
 #include "logging.h"
 
 int color_brightness_score(struct color *color) {
-  qCDebug(FC) << "color_brightness_score";
+  qCDebug(FC) << "TODO: color_brightness_score";
   return 0;
 }
 
