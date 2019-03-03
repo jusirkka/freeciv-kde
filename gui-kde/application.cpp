@@ -3,15 +3,17 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "fc_config.h"
-#include "sprite.h"
 #include "shared.h"
+#include "featured_text.h"
+#include "audio.h"
+#include "game.h"
 
-
-// client
 #include "client_main.h"
 #include "tilespec.h"
 #include "clinet.h"
 
+#include "colors.h"
+#include "sprite.h"
 
 #pragma GCC diagnostic pop
 
@@ -102,11 +104,124 @@ void Application::VersionMessage(const char *version) {
   instance()->versionMessage(QString(version));
 }
 
-void Application::ChatMessage(const char *astring,
-                              const text_tag_list *tags, int)
-{
-  qCDebug(FC) << "TODO: Application::ChatMessage" << astring;
-  instance()->chatMessage(QString(astring), tags);
+
+static QString applyTags(const char *s, const text_tag_list *tags) {
+  if (!tags) {
+    return QString(s);
+  }
+
+  QMultiMap <int, QString> mm;
+  QByteArray bytes = s;
+
+  int start;
+  int stop;
+  text_tag_list_iterate(tags, ptag) {
+    if ((text_tag_stop_offset(ptag) == FT_OFFSET_UNSET)) {
+      stop = bytes.count();
+    } else {
+      stop = text_tag_stop_offset(ptag);
+    }
+
+    if ((text_tag_start_offset(ptag) == FT_OFFSET_UNSET)) {
+      start = 0;
+    } else {
+      start = text_tag_start_offset(ptag);
+    }
+
+    switch (text_tag_type(ptag)) {
+    case TTT_BOLD:
+      mm.insert(stop, "</b>");
+      mm.insert(start, "<b>");
+      break;
+    case TTT_ITALIC:
+      mm.insert(stop, "</i>");
+      mm.insert(start, "<i>");
+      break;
+    case TTT_STRIKE:
+      mm.insert(stop, "</s>");
+      mm.insert(start, "<s>");
+      break;
+    case TTT_UNDERLINE:
+      mm.insert(stop, "</u>");
+      mm.insert(start, "<u>");
+      break;
+    case TTT_COLOR: {
+      auto fg = text_tag_color_foreground(ptag);
+      auto bg = text_tag_color_background(ptag);
+      if (fg) {
+        mm.insert(stop, "</span>");
+        mm.insert(start, QString("<span style=color:%1>").arg(fg));
+      }
+      if (bg) {
+        mm.insert(stop, "</span>");
+        mm.insert(start, QString("<span style=background-color:%1;>").arg(bg));
+      }
+      break;
+    }
+    case TTT_LINK: {
+      color* pcolor = nullptr;
+
+      switch (text_tag_link_type(ptag)) {
+      case TLT_CITY:
+        pcolor = get_color(tileset, COLOR_MAPVIEW_CITY_LINK);
+        break;
+      case TLT_TILE:
+        pcolor = get_color(tileset, COLOR_MAPVIEW_TILE_LINK);
+        break;
+      case TLT_UNIT:
+        pcolor = get_color(tileset, COLOR_MAPVIEW_UNIT_LINK);
+        break;
+      }
+
+      if (!pcolor) {
+        break; /* Not a valid link type case. */
+      }
+      mm.insert(stop, "</a></font>");
+      mm.insert(start, QString("<font color=\"%1\"><a href=%2,%3>")
+                .arg(pcolor->qcolor.name(QColor::HexRgb))
+                .arg(QString::number(text_tag_link_type(ptag)))
+                .arg(QString::number(text_tag_link_id(ptag))));
+    }
+    }
+  } text_tag_list_iterate_end;
+
+
+  QMapIterator<int, QString> i(mm);
+  int p = 0;
+  QByteArray res;
+  while (i.hasNext()) {
+    i.next();
+    res += bytes.left(i.key() - p);
+    res += i.value();
+    bytes = bytes.right(bytes.size() - i.key() + p);
+    p = i.key();
+  }
+
+  // qCDebug(FC) << res;
+  return QString(res);
+}
+
+void Application::ChatMessage(const char *s, const text_tag_list *tags, int) {
+  qCDebug(FC) << "Application::ChatMessage";
+
+  QString wakeup(gui_options.gui_qt_wakeup_text);
+  /* Format wakeup string if needed */
+  if (wakeup.contains("%1")) {
+    wakeup = wakeup.arg(client.conn.username);
+  }
+
+  QString str(s);
+  if (str.contains(client.conn.username)) {
+    qApp->alert(instance()->m_mainWindow);
+  }
+
+  /* Play sound if we encountered wakeup string */
+  if (str.contains(wakeup) && client_state() < C_S_RUNNING && !wakeup.isEmpty()) {
+    qApp->alert(instance()->m_mainWindow);
+    audio_play_sound("e_player_wake", nullptr);
+  }
+
+  instance()->chatMessage(applyTags(s, tags));
 }
 
 QFont Application::Font(enum client_font /*font*/) {
@@ -187,6 +302,7 @@ Application::Application()
   : m_mainWindow(nullptr)
   , m_timer(new QTimer)
   , m_notifier(nullptr)
+  , m_completionList()
 {
   m_timer->setSingleShot(true);
   connect(m_timer, &QTimer::timeout, this, &Application::timerRestart);
@@ -210,6 +326,30 @@ void Application::removeServerSource() {
 
 void Application::serverInput(int sock) {
   input_from_server(sock);
+}
+
+void Application::updateUsers() {
+  QString s;
+  QSet<QString> fresh;
+  conn_list_iterate(game.est_connections, pconn) {
+    if (pconn->playing) {
+      fresh << pconn->playing->name;
+      fresh << pconn->playing->username;
+    } else {
+      fresh << pconn->username;
+    }
+  } conn_list_iterate_end;
+
+  players_iterate (pplayer){
+    fresh << pplayer->name;
+  } players_iterate_end;
+
+  if (fresh != QSet<QString>::fromList(m_completionList)) {
+    m_completionList = fresh.values();
+    emit completionListChanged(m_completionList);
+  }
+
+  emit playersChanged();
 }
 
 Application::~Application() {

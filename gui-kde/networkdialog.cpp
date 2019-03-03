@@ -77,7 +77,6 @@ void NetworkDialog::init() {
   initWidget();
   m_localScanDone = false;
   m_globalScanDone = false;
-  m_scanTimer->start(1000);
   m_localScan = server_scan_begin(SERVER_SCAN_LOCAL,
                                   [] (struct server_scan *, const char *message) {
     qCWarning(FC) << message;
@@ -86,6 +85,8 @@ void NetworkDialog::init() {
                                   [] (struct server_scan *, const char *message) {
     qCWarning(FC) << message;
   });
+  checkServerScans();
+  m_scanTimer->start(500);
 }
 
 void NetworkDialog::final() {

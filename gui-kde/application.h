@@ -26,6 +26,8 @@ class Application: public QObject {
   Q_OBJECT
 
   friend class StartDialog;
+  friend class ChatWindow;
+  friend class ChatLineEdit;
 
 public:
 
@@ -65,9 +67,10 @@ public:
 signals:
 
   void versionMessage(QString);
-  void chatMessage(QString, const text_tag_list*);
-  void rulesetMessage(QStringList);
-  void updateUsers();
+  void chatMessage(const QString&);
+  void rulesetMessage(const QStringList&);
+  void playersChanged();
+  void completionListChanged(const QStringList&);
 
 private:
 
@@ -79,6 +82,7 @@ private:
   void addIdleCallback(void (callback)(void *), void *data);
   void addServerSource(int);
   void removeServerSource();
+  void updateUsers();
 
 private slots:
 
@@ -106,6 +110,7 @@ private:
   QTimer* m_timer;
   QVector<Callback> m_tasks;
   QSocketNotifier* m_notifier;
+  QStringList m_completionList;
 
 
 };

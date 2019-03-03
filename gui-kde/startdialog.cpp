@@ -29,7 +29,7 @@ StartDialog::StartDialog(QWidget *parent)
   connect(m_UI->playerTree, &QTreeWidget::customContextMenuRequested,
           this, &StartDialog::popupTreeMenu);
 
-  connect(Application::instance(), &Application::updateUsers,
+  connect(Application::instance(), &Application::playersChanged,
           this, &StartDialog::populateTree);
 
 

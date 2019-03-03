@@ -96,7 +96,7 @@
          </property>
         </column>
        </widget>
-       <widget class="QTextEdit" name="outputText">
+       <widget class="KV::ChatWindow" name="outputText">
         <property name="minimumSize">
          <size>
           <width>30</width>
@@ -107,7 +107,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="chatLine">
+      <widget class="KV::ChatLineEdit" name="chatLine">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -333,6 +333,18 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KV::ChatWindow</class>
+   <extends>QTextEdit</extends>
+   <header>chatwindow.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KV::ChatLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>chatlineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
