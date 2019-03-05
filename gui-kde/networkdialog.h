@@ -46,7 +46,7 @@ private:
 
 private:
 
-    Ui::NetworkDialog* m_UI;
+    Ui::NetworkDialog* m_ui;
     server_scan* m_localScan;
     server_scan* m_globalScan;
     bool m_localScanDone;

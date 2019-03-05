@@ -62,7 +62,8 @@ public:
   static void RemoveServerSource();
   static void UpdateUsers(void*);
   static void AddIdleCallback(void (callback)(void *), void *data);
-  static void StateChange(enum client_pages page);
+  static void StateChange(client_pages page);
+  static client_pages CurrentState();
 
 signals:
 

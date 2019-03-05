@@ -14,7 +14,7 @@ using namespace KV;
 
 NetworkDialog::NetworkDialog(QWidget *parent)
     : QDialog(parent)
-    , m_UI(new Ui::NetworkDialog)
+    , m_ui(new Ui::NetworkDialog)
     , m_localScan(nullptr)
     , m_globalScan(nullptr)
     , m_localScanDone(true)
@@ -22,33 +22,33 @@ NetworkDialog::NetworkDialog(QWidget *parent)
     , m_holdingMutex(false)
     , m_scanTimer(new QTimer(this))
 {
-  m_UI->setupUi(this);
+  m_ui->setupUi(this);
 
   setWindowTitle(QApplication::applicationName());
 
-  connect(m_UI->detailsButton, &QPushButton::toggled,
+  connect(m_ui->detailsButton, &QPushButton::toggled,
           this, &NetworkDialog::setDetailsButtonText);
 
   QStringList serverLabels{_("Server Name"),_("Port"), _("Version"), _("Status"), Q_("?count:Players"), _("Comment")};
-  m_UI->localTable->setHorizontalHeaderLabels(serverLabels);
-  m_UI->internetTable->setHorizontalHeaderLabels(serverLabels);
+  m_ui->localTable->setHorizontalHeaderLabels(serverLabels);
+  m_ui->internetTable->setHorizontalHeaderLabels(serverLabels);
 
   QStringList playerLabels{_("Name"), _("Type"), _("Host"), _("Nation")};
-  m_UI->playerTable->setHorizontalHeaderLabels(playerLabels);
+  m_ui->playerTable->setHorizontalHeaderLabels(playerLabels);
 
   const QList<QHeaderView*> headers{
-    m_UI->localTable->horizontalHeader(),
-    m_UI->internetTable->horizontalHeader(),
-    m_UI->playerTable->horizontalHeader()
+    m_ui->localTable->horizontalHeader(),
+    m_ui->internetTable->horizontalHeader(),
+    m_ui->playerTable->horizontalHeader()
   };
   for (auto header: headers) {
     header->setSectionResizeMode(0, QHeaderView::Stretch);
     header->setStretchLastSection(true);
   }
 
-  connect(m_UI->internetTable->selectionModel(), &QItemSelectionModel::selectionChanged,
+  connect(m_ui->internetTable->selectionModel(), &QItemSelectionModel::selectionChanged,
           this, &NetworkDialog::serverChanged);
-  connect(m_UI->localTable->selectionModel(), &QItemSelectionModel::selectionChanged,
+  connect(m_ui->localTable->selectionModel(), &QItemSelectionModel::selectionChanged,
           this, &NetworkDialog::serverChanged);
 
   connect(m_scanTimer, &QTimer::timeout, this, &NetworkDialog::checkServerScans);
@@ -60,16 +60,16 @@ NetworkDialog::NetworkDialog(QWidget *parent)
 }
 
 void NetworkDialog::initWidget() {
-  m_UI->detailsButton->setChecked(false);
-  m_UI->playerBox->setVisible(m_UI->detailsButton->isChecked());
-  m_UI->detailsButton->setText("Details >>");
+  m_ui->detailsButton->setChecked(false);
+  m_ui->playerBox->setVisible(m_ui->detailsButton->isChecked());
+  m_ui->detailsButton->setText("Details >>");
   setResult(QDialog::Rejected);
-  m_UI->passEdit->setEchoMode(QLineEdit::Password);
-  m_UI->passEdit->setDisabled(true);
+  m_ui->passEdit->setEchoMode(QLineEdit::Password);
+  m_ui->passEdit->setDisabled(true);
 
-  m_UI->serverEdit->setText("localhost");
-  m_UI->portSpin->setValue(5556);
-  m_UI->userEdit->setText(user_name);
+  m_ui->serverEdit->setText("localhost");
+  m_ui->portSpin->setValue(5556);
+  m_ui->userEdit->setText(user_name);
 
 }
 
@@ -136,12 +136,12 @@ void NetworkDialog::checkServerScan(server_scan *scan) {
 
 void NetworkDialog::updateServerList(server_scan *scan, const server_list *servers) {
 
-  QTableWidget* table = scan == m_localScan ? m_UI->localTable : m_UI->internetTable;
+  QTableWidget* table = scan == m_localScan ? m_ui->localTable : m_ui->internetTable;
   table->clearContents();
   table->setRowCount(0);
 
-  QString host = m_UI->serverEdit->text();
-  int port = m_UI->portSpin->value();
+  QString host = m_ui->serverEdit->text();
+  int port = m_ui->portSpin->value();
 
   int row = 0;
   server_list_iterate(servers, server) {
@@ -164,14 +164,14 @@ void NetworkDialog::updateServerList(server_scan *scan, const server_list *serve
 
 
 NetworkDialog::~NetworkDialog() {
-  delete m_UI;
+  delete m_ui;
 }
 
 void NetworkDialog::setDetailsButtonText(bool checked) {
   if (checked) {
-    m_UI->detailsButton->setText("Details <<");
+    m_ui->detailsButton->setText("Details <<");
   } else {
-    m_UI->detailsButton->setText("Details >>");
+    m_ui->detailsButton->setText("Details >>");
   }
 }
 
@@ -179,18 +179,18 @@ void NetworkDialog::setDetailsButtonText(bool checked) {
 void NetworkDialog::serverChanged(const QItemSelection &selected, const QItemSelection&) {
   QModelIndexList indices = selected.indexes();
   if (indices.isEmpty()) return;
-  m_UI->serverEdit->setText(indices[0].data().toString());
-  m_UI->portSpin->setValue(indices[1].data().toString().toInt());
+  m_ui->serverEdit->setText(indices[0].data().toString());
+  m_ui->portSpin->setValue(indices[1].data().toString().toInt());
 
   auto tw = qobject_cast<QItemSelectionModel *>(sender());
 
   struct server_scan* scan;
-  if (tw == m_UI->internetTable->selectionModel()) {
+  if (tw == m_ui->internetTable->selectionModel()) {
     scan = m_globalScan;
-    m_UI->localTable->clearSelection();
+    m_ui->localTable->clearSelection();
   } else {
     scan = m_localScan;
-    m_UI->internetTable->clearSelection();
+    m_ui->internetTable->clearSelection();
   }
 
   auto serverList = server_scan_get_list(scan);
@@ -208,29 +208,29 @@ void NetworkDialog::serverChanged(const QItemSelection &selected, const QItemSel
     return;
   }
 
-  m_UI->playerTable->clearContents();
-  m_UI->playerTable->setRowCount(0);
+  m_ui->playerTable->clearContents();
+  m_ui->playerTable->setRowCount(0);
 
   for (int k = 0; k < server->nplayers; k++) {
-    m_UI->playerTable->insertRow(k);
-    m_UI->playerTable->setItem(k, 0, new QTableWidgetItem(server->players[k].name));
-    m_UI->playerTable->setItem(k, 1, new QTableWidgetItem(server->players[k].type));
-    m_UI->playerTable->setItem(k, 2, new QTableWidgetItem(server->players[k].host));
-    m_UI->playerTable->setItem(k, 3, new QTableWidgetItem(server->players[k].nation));
+    m_ui->playerTable->insertRow(k);
+    m_ui->playerTable->setItem(k, 0, new QTableWidgetItem(server->players[k].name));
+    m_ui->playerTable->setItem(k, 1, new QTableWidgetItem(server->players[k].type));
+    m_ui->playerTable->setItem(k, 2, new QTableWidgetItem(server->players[k].host));
+    m_ui->playerTable->setItem(k, 3, new QTableWidgetItem(server->players[k].nation));
   }
 }
 
 
 QString NetworkDialog::user() const {
-  return m_UI->userEdit->text();
+  return m_ui->userEdit->text();
 }
 
 QString NetworkDialog::server() const {
-  return m_UI->serverEdit->text();
+  return m_ui->serverEdit->text();
 }
 
 int NetworkDialog::port() const {
-  return m_UI->portSpin->value();
+  return m_ui->portSpin->value();
 }
 
 

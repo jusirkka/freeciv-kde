@@ -4,21 +4,33 @@
 #include <QMainWindow>
 #include <QStateMachine>
 
+extern "C" {
+#include "pages_g.h"
+}
+
 namespace Ui {class MainWindow;}
 
 namespace KV {
 
-namespace State {class Base;}
+namespace State {
+class Base;
+class Network;
+}
 
 class MainWindow: public QMainWindow
 {
 
   Q_OBJECT
 
+  friend class State::Network;
+
 public:
 
   MainWindow();
   ~MainWindow() override;
+
+  client_pages state() const;
+
 
 protected:
 
@@ -28,7 +40,6 @@ protected:
 private slots:
 
   void on_actionSaveGameAs_triggered();
-  void on_actionNewGame_triggered();
   void on_actionLoadScenario_triggered();
   void on_actionLoadGame_triggered();
   void on_actionQuit_triggered();
@@ -106,7 +117,7 @@ private:
 
 private:
 
-  Ui::MainWindow* m_UI;
+  Ui::MainWindow* m_ui;
   QStateMachine m_states;
   State::Base* m_currentState;
 

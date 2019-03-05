@@ -41,7 +41,8 @@ SOURCES += \
     spaceshipdlg_g.cpp \
     sprite_g.cpp \
     voteinfo_bar_g.cpp \
-    wldlg_g.cpp
+    wldlg_g.cpp \
+    nationdialog.cpp
 
 
 HEADERS += \
@@ -59,7 +60,8 @@ HEADERS += \
     startdialog.h \
     networkdialog.h \
     chatwindow.h \
-    chatlineedit.h
+    chatlineedit.h \
+    nationdialog.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -82,4 +84,5 @@ FORMS += \
     inputbox.ui \
     mainwindow.ui \
     startdialog.ui \
-    networkdialog.ui
+    networkdialog.ui \
+    nationdialog.ui

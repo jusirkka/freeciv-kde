@@ -97,6 +97,7 @@ protected:
 private slots:
 
   void disconnectFromServer();
+  void playerReady();
 
 signals:
   void accepted();

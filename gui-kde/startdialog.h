@@ -9,7 +9,12 @@ namespace Ui {
 class StartDialog;
 }
 
+struct player;
+
 namespace KV {
+
+class NationDialog;
+
 class StartDialog : public QDialog
 {
   Q_OBJECT
@@ -22,13 +27,22 @@ private slots:
 
   void popupTreeMenu(const QPoint& p);
   void populateTree();
+  void rulesetChange(const QString& rules);
+  void setRulesets(const QStringList& sets);
+  void maxPlayersChanged(int numPlayers);
+  void aiLevelChanged(int idx);
+  void pickNation(const player* p);
+  void observe();
 
 private:
 
   void updateButtons();
 
 private:
-  Ui::StartDialog* m_UI;
+
+  Ui::StartDialog* m_ui;
+  NationDialog* m_nationDialog;
+
 };
 }
 

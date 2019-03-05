@@ -34,9 +34,11 @@ static void setup_gui_funcs() {
   funcs->get_gui_type = [] () {return GUI_QT;};
 
   funcs->insert_client_build_info = [] (char *, size_t) {
-    qCDebug(FC) << "insert_client_build_info";
+    qCDebug(FC) << "TODO: insert_client_build_info";
   };
-  funcs->adjust_default_options = [] () {};
+  funcs->adjust_default_options = [] () {
+    qCDebug(FC) << "TODO: adjust_default_options";
+  };
 
   funcs->version_message = KV::Application::VersionMessage;
   funcs->real_output_window_append = KV::Application::ChatMessage;
@@ -68,11 +70,13 @@ static void setup_gui_funcs() {
   };
 
   funcs->canvas_create = [] (int width, int height) {
+    qCDebug(FC) << "canvas_create";
     struct canvas *store = new canvas;
     store->map_pixmap = QPixmap(width, height);
     return store;
   };
   funcs->canvas_free = [] (struct canvas *store) {
+    qCDebug(FC) << "canvas_free";
     delete store;
   };
   funcs->canvas_set_zoom = [] (struct canvas*, float) {
@@ -85,6 +89,7 @@ static void setup_gui_funcs() {
       struct canvas *dest, struct canvas *src,
       int src_x, int src_y, int dest_x, int dest_y, int width,
       int height) {
+    qCDebug(FC) << "canvas_copy";
 
     QRectF source_rect(src_x, src_y, width, height);
     QRectF dest_rect(dest_x, dest_y, width, height);
@@ -99,12 +104,13 @@ static void setup_gui_funcs() {
     p.end();
   };
 
-  funcs->canvas_put_sprite = [] (
+  funcs->canvas_put_sprite = [] (      
       struct canvas *pcanvas,
       int canvas_x, int canvas_y,
       struct sprite *sprite,
       int offset_x, int offset_y, int width, int height) {
 
+    qCDebug(FC) << "canvas_put_sprite";
     QPainter p;
     p.begin(&pcanvas->map_pixmap);
     p.drawPixmap(canvas_x, canvas_y, sprite->pm, offset_x, offset_y, width, height);
@@ -115,6 +121,7 @@ static void setup_gui_funcs() {
       int canvas_x, int canvas_y,
       struct sprite *sprite) {
 
+    qCDebug(FC) << "canvas_put_sprite_full";
     int width, height;
     get_sprite_dimensions(sprite, &width, &height);
     canvas_put_sprite(pcanvas, canvas_x, canvas_y, sprite,
@@ -126,6 +133,7 @@ static void setup_gui_funcs() {
       struct sprite *psprite,
       bool /*fog*/, int /*fog_x*/, int /*fog_y*/) {
 
+    qCDebug(FC) << "canvas_put_sprite_fogged";
     QPainter p;
     p.begin(&pcanvas->map_pixmap);
     p.setCompositionMode(QPainter::CompositionMode_Difference);
@@ -139,6 +147,7 @@ static void setup_gui_funcs() {
       int canvas_x, int canvas_y,
       int width, int height) {
 
+    qCDebug(FC) << "canvas_put_rectangle";
     QBrush brush(pcolor->qcolor);
     QPen pen(pcolor->qcolor);
     QPainter p;
@@ -161,6 +170,7 @@ static void setup_gui_funcs() {
       struct sprite *psprite, struct color *pcolor,
       int canvas_x, int canvas_y) {
 
+    qCDebug(FC) << "canvas_fill_sprite_area";
     int width, height;
     get_sprite_dimensions(psprite, &width, &height);
     canvas_put_rectangle(pcanvas, pcolor, canvas_x, canvas_y, width, height);
@@ -170,6 +180,7 @@ static void setup_gui_funcs() {
       enum line_type ltype, int start_x, int start_y,
       int dx, int dy) {
 
+    qCDebug(FC) << "canvas_put_line";
     QPen pen;
     pen.setColor(pcolor->qcolor);
     pen.setWidth(1);
@@ -191,6 +202,7 @@ static void setup_gui_funcs() {
       enum line_type ltype, int start_x, int start_y,
       int dx, int dy) {
 
+    qCDebug(FC) << "canvas_put_curved_line";
     QPen pen;
     pen.setColor(pcolor->qcolor);
     QPainter p;
@@ -216,6 +228,7 @@ static void setup_gui_funcs() {
       int *width, int *height,
       enum client_font font, const char *text) {
 
+    qCDebug(FC) << "get_text_size";
     auto afont = KV::Application::Font(font);
     auto fm = new QFontMetrics(afont);
     if (width) {
@@ -231,6 +244,7 @@ static void setup_gui_funcs() {
       enum client_font font, struct color *pcolor,
       const char *text) {
 
+    qCDebug(FC) << "canvas_put_text";
     QColor color(pcolor->qcolor);
 
     auto afont = KV::Application::Font(font);
@@ -263,10 +277,7 @@ static void setup_gui_funcs() {
   funcs->add_idle_callback = KV::Application::AddIdleCallback;
 
   funcs->real_set_client_page = KV::Application::StateChange;
-  funcs->get_current_client_page = [] () {
-    qCDebug(FC) << "TODO: get_current_client_page";
-    return PAGE_START;
-  };
+  funcs->get_current_client_page = KV::Application::CurrentState;
 
   funcs->set_unit_icon = [] (int idx, struct unit* punit) {
     qCDebug(FC) << "TODO: set_unit_icon" << idx << punit->id;

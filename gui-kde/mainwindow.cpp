@@ -13,10 +13,10 @@ using namespace KV;
 
 MainWindow::MainWindow()
   : QMainWindow()
-  , m_UI(new Ui::MainWindow)
+  , m_ui(new Ui::MainWindow)
   , m_currentState(nullptr)
 {
-  m_UI->setupUi(this);
+  m_ui->setupUi(this);
   setWindowTitle(qAppName());
 
   auto intro = new State::Intro(this);
@@ -36,13 +36,15 @@ MainWindow::MainWindow()
   m_states.addState(game);
 
 
-  intro->addTransition(m_UI->actionConnectToGame, &QAction::triggered, nw);
+  intro->addTransition(m_ui->actionConnectToGame, &QAction::triggered, nw);
+  intro->addTransition(m_ui->actionNewGame, &QAction::triggered, nw);
   intro->addTransition(intro, &State::Intro::playing, game);
   nw->addTransition(nw, &State::Network::accepted, start);
   nw->addTransition(nw, &State::Network::rejected, intro);
   start->addTransition(start, &State::Start::accepted, game);
   start->addTransition(start, &State::Start::rejected, intro);
-  game->addTransition(m_UI->actionConnectToGame, &QAction::triggered, nw);
+  game->addTransition(m_ui->actionConnectToGame, &QAction::triggered, nw);
+  game->addTransition(m_ui->actionNewGame, &QAction::triggered, nw);
 
   m_states.setInitialState(intro);
   m_states.start();
@@ -63,15 +65,16 @@ void MainWindow::setCurrentState(bool active) {
   }
 }
 
+client_pages MainWindow::state() const {return m_currentState->id();}
+
 MainWindow::~MainWindow() {
-  delete m_UI;
+  delete m_ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent */*event*/) {
 }
 
 void MainWindow::on_actionSaveGameAs_triggered() {}
-void MainWindow::on_actionNewGame_triggered() {}
 void MainWindow::on_actionLoadScenario_triggered() {}
 void MainWindow::on_actionLoadGame_triggered() {}
 

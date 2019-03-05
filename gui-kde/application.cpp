@@ -30,6 +30,7 @@
 #include "themesmanager.h"
 #include "mainwindow.h"
 #include "themesmanager.h"
+#include "state.h"
 
 
 Q_LOGGING_CATEGORY(FC, "Freeciv")
@@ -251,7 +252,7 @@ void Application::SetRulesets(int num_rulesets, char **rulesets) {
   for (int i = 0; i < num_rulesets; i++) {
     rules << rulesets[i];
   }
-  qCDebug(FC) << "TODO: Application::SetRulesets";
+  qCDebug(FC) << "Application::SetRulesets" << rules;
   instance()->rulesetMessage(rules);
 }
 
@@ -277,6 +278,11 @@ void Application::AddIdleCallback(void callback(void *), void *data) {
 
 void Application::StateChange(client_pages page) {
   qCDebug(FC) << "TODO: Application::StateChange" << client_pages_name(page);
+}
+
+client_pages Application::CurrentState() {
+  qCDebug(FC) << "Application::CurrentState";
+  return instance()->m_mainWindow->state();
 }
 
 Application* Application::instance() {

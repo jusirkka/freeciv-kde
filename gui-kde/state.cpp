@@ -1,4 +1,5 @@
 #include "state.h"
+#include "ui_mainwindow.h"
 #include "mainwindow.h"
 #include "logging.h"
 #include "networkdialog.h"
@@ -9,17 +10,18 @@
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QApplication>
+#include <QStateMachine>
 
 #include "tilespec.h"
 #include "version.h"
 #include "fc_config.h"
 #include "clinet.h"
 #include "client_main.h"
+#include "connectdlg_common.h"
+#include "mapview_common.h"
 
 
 using namespace KV::State;
-
-#define IN_PROGRESS 1
 
 /**
  * Intro
@@ -69,16 +71,6 @@ QWidget* Intro::createIntroWidget() {
 
   auto intro_layout = new QVBoxLayout;
   intro_layout->addWidget(intro_label, 0, Qt::AlignHCenter);
-
-#if IN_PROGRESS
-  QLabel *beta_label = new QLabel("warning: development in progress");
-  QPalette warn_color;
-  warn_color.setColor(QPalette::WindowText, Qt::red);
-  beta_label->setPalette(warn_color);
-  beta_label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Maximum);
-  beta_label->setAlignment(Qt::AlignCenter);
-  intro_layout->addWidget(beta_label, 0, Qt::AlignHCenter);
-#endif
 
   auto w = new QWidget;
   w->setLayout(intro_layout);
@@ -131,8 +123,18 @@ Network::~Network() {
 }
 
 void Network::onEntry(QEvent* event) {
-  m_networkDialog->init();
-  m_networkDialog->show();
+  if (event->type() == QEvent::StateMachineSignal) {
+    auto signalEvent = static_cast<QStateMachine::SignalEvent*>(event);
+    if (signalEvent->sender() == m_parent->m_ui->actionConnectToGame) {
+      m_networkDialog->init();
+      m_networkDialog->show();
+    } else if (signalEvent->sender() == m_parent->m_ui->actionNewGame) {
+      if (!is_server_running()) {
+        client_start_server();
+      }
+      emit accepted();
+    }
+  }
   QState::onEntry(event);
 }
 
@@ -148,7 +150,9 @@ void Network::onExit(QEvent* event) {
 
 Game::Game(MainWindow *parent)
   : Base(parent, PAGE_GAME)
-{}
+{
+  init_mapcanvas_and_overview();
+}
 
 KV::MapWidget* Game::createMapWidget() {
   return new MapWidget;
@@ -170,7 +174,7 @@ Start::Start(MainWindow *parent)
   : Base(parent, PAGE_START)
   , m_startDialog(new KV::StartDialog(parent))
 {
-  connect(m_startDialog, &QDialog::accepted, this, &Start::accepted);
+  connect(m_startDialog, &QDialog::accepted, this, &Start::playerReady);
   connect(m_startDialog, &QDialog::rejected, this, &Start::disconnectFromServer);
 }
 
@@ -189,7 +193,17 @@ void Start::disconnectFromServer() {
   emit rejected();
 }
 
+void Start::playerReady() {
+  if (can_client_control()) {
+    dsend_packet_player_ready(&client.conn,
+                              player_number(client_player()),
+                              !client_player()->is_ready);
+  } else {
+    dsend_packet_player_ready(&client.conn, 0, TRUE);
+  }
 
+  emit accepted();
+}
 
 
 

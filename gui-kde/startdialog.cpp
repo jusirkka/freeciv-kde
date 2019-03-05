@@ -1,38 +1,82 @@
 #include "startdialog.h"
 #include "ui_startdialog.h"
 #include "application.h"
+#include "nationdialog.h"
 #include <QPainter>
+#include <QMenu>
+#include <QAction>
+#include "sprite.h"
+#include "colors.h"
 
 #include "game.h"
 #include "tilespec.h"
-#include "sprite.h"
-#include "colors.h"
+#include "chat.h"
+
+
+#include "connectdlg_common.h"
+#include "client_main.h"
+#include "climisc.h"
+#include "chatline_common.h"
 
 using namespace KV;
 
 StartDialog::StartDialog(QWidget *parent)
   : QDialog(parent)
-  , m_UI(new Ui::StartDialog)
+  , m_ui(new Ui::StartDialog)
+  , m_nationDialog(new NationDialog(this))
 {
-  m_UI->setupUi(this);
+  m_ui->setupUi(this);
+
+  // Player tree
   QStringList headers{
     _("Name"), _("Ready"), Q_("?player:Leader"),_("Flag"),
     _("Border"), _("Nation"), _("Team"), _("Host")
   };
 
-  m_UI->playerTree->setColumnCount(headers.count());
-  m_UI->playerTree->setHeaderLabels(headers);
-  m_UI->playerTree->setContextMenuPolicy(Qt::CustomContextMenu);
-  m_UI->playerTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  m_ui->playerTree->setColumnCount(headers.count());
+  m_ui->playerTree->setHeaderLabels(headers);
+  m_ui->playerTree->setContextMenuPolicy(Qt::CustomContextMenu);
+  m_ui->playerTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 
-  connect(m_UI->playerTree, &QTreeWidget::customContextMenuRequested,
+  connect(m_ui->playerTree, &QTreeWidget::customContextMenuRequested,
           this, &StartDialog::popupTreeMenu);
 
   connect(Application::instance(), &Application::playersChanged,
           this, &StartDialog::populateTree);
 
+  // Rules combo
+  connect(m_ui->rulesCombo, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
+          this, &StartDialog::rulesetChange);
+  connect(Application::instance(), &Application::rulesetMessage,
+          this, &StartDialog::setRulesets);
 
+  // Players spin
+  m_ui->playersSpin->setRange(1, MAX_NUM_PLAYERS);
+  connect(m_ui->playersSpin, QOverload<int>::of(&QSpinBox::valueChanged),
+          this, &StartDialog::maxPlayersChanged);
+
+  // AI combo
+  for (int i = 0; i < AI_LEVEL_COUNT; i++) {
+    auto level = static_cast<ai_level>(i);
+    if (is_settable_ai_level(level)) {
+      QString name = ai_level_translated_name(level);
+      m_ui->aiCombo->addItem(name, i);
+    }
+  }
+  m_ui->aiCombo->setCurrentIndex(-1);
+  connect(m_ui->aiCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+          this, &StartDialog::aiLevelChanged);
+
+  // Nation button
+  connect(m_ui->nationButton, &QPushButton::clicked,
+          this, [=] () {this->pickNation(client_player());});
+
+  // Observe button
+  connect(m_ui->observeButton, &QPushButton::clicked,
+          this, &StartDialog::observe);
+
+  updateButtons();
   setWindowTitle(qAppName());
 }
 
@@ -40,7 +84,7 @@ void StartDialog::populateTree() {
 
   if (conn_list_size(game.est_connections) == 0) return;
 
-  m_UI->playerTree->clear();
+  m_ui->playerTree->clear();
 
   auto playerRoot = new QTreeWidgetItem();
   playerRoot->setText(0, Q_("?header:Players"));
@@ -54,7 +98,7 @@ void StartDialog::populateTree() {
     playerItem->setData(0, Qt::UserRole, QVariant::fromValue(1));
     playerItem->setData(1, Qt::UserRole, QVariant::fromValue((void *) pplayer));
 
-    // Column 0 = name
+    // Column 0 = Name
     if (is_ai(pplayer)) {
       auto ainame = QString(pplayer->username) + " <" +
           ai_level_translated_name(pplayer->ai_common.skill_level) + ">";
@@ -75,7 +119,7 @@ void StartDialog::populateTree() {
     }
     // Column 4 = Border color
     if (player_has_color(tileset, pplayer)) {
-      QPixmap pm(m_UI->playerTree->header()->sectionSizeHint(4), 16);
+      QPixmap pm(m_ui->playerTree->header()->sectionSizeHint(4), 16);
       pm.fill(Qt::transparent);
       QPainter p;
       p.begin(&pm);
@@ -90,7 +134,7 @@ void StartDialog::populateTree() {
     } else {
       playerItem->setText(5, _("Random"));
     }
-    // Column 6 = team
+    // Column 6 = Team
     playerItem->setText(6, pplayer->team ? team_name_translation(pplayer->team) : "");
     // Column 7 = Host
     QString host;
@@ -120,7 +164,7 @@ void StartDialog::populateTree() {
 
   } players_iterate_end;
 
-  m_UI->playerTree->insertTopLevelItem(0, playerRoot);
+  m_ui->playerTree->insertTopLevelItem(0, playerRoot);
 
   // Global observers
   auto observerRoot = new QTreeWidgetItem();
@@ -137,7 +181,7 @@ void StartDialog::populateTree() {
     observerRoot->addChild(observerItem);
   } conn_list_iterate_end;
 
-  m_UI->playerTree->insertTopLevelItem(1, observerRoot);
+  m_ui->playerTree->insertTopLevelItem(1, observerRoot);
 
   // Detached
   auto detachedRoot = new QTreeWidgetItem();
@@ -152,27 +196,271 @@ void StartDialog::populateTree() {
     detachedRoot->addChild(detachedItem);
   } conn_list_iterate_end;
 
-  m_UI->playerTree->insertTopLevelItem(2, detachedRoot);
+  m_ui->playerTree->insertTopLevelItem(2, detachedRoot);
 
-  m_UI->playerTree->expandAll();
+  m_ui->playerTree->expandAll();
   updateButtons();
 }
 
+static QString serverCommand(const QString& s) {
+  return QString("%1%2").arg(SERVER_COMMAND_PREFIX).arg(s);
+}
 
 void StartDialog::popupTreeMenu(const QPoint &p) {
+  QTreeWidgetItem *item = m_ui->playerTree->itemAt(p);
+  if (!item) return;
+  if (item->data(0, Qt::UserRole).toInt() == 0) return; // label
+
+  // consistency check
+  auto selected = static_cast<player*>(item->data(1, Qt::UserRole).value<void*>());
+  bool ok = false;
+  players_iterate(pplayer) {
+    if (selected && selected == pplayer) {
+      ok = true;
+      break;
+    }
+  } players_iterate_end;
+  if (!ok) return;
+
+  QString me = QString(client.conn.username).replace("\"", "");
+
+
+  auto menu = new QMenu(this);
+
+
+  auto name = QString("\"%1\"").arg(selected->name);
+  if (me != selected->username) {
+    auto a = new QAction(_("Observe"));
+    connect(a, &QAction::triggered, this, [=]() {
+      send_chat(serverCommand(QString("observe %1").arg(name)).toUtf8());
+    });
+    menu->addAction(a);
+
+    if (can_client_control()) {
+      a = new QAction(_("Remove player"));
+      connect(a, &QAction::triggered, this, [=]() {
+        send_chat(serverCommand(QString("remove %1").arg(name)).toUtf8());
+      });
+      menu->addAction(a);
+    }
+
+    a = new QAction(_("Take this player"));
+    connect(a, &QAction::triggered, this, [=]() {
+      send_chat(serverCommand(QString("take %1").arg(name)).toUtf8());
+    });
+    menu->addAction(a);
+  }
+
+  if (can_conn_edit_players_nation(&client.conn, selected)) {
+    auto a = new QAction(_("Pick nation"));
+    connect(a, &QAction::triggered, this, [=]() {
+      m_nationDialog->init(selected);
+      m_nationDialog->show();
+    });
+    menu->addAction(a);
+  }
+
+  if (is_ai(selected) && can_client_control()) {
+    // Set AI difficulty submenu
+    auto submenu = new QMenu;
+    submenu->setTitle(_("Set difficulty"));
+    menu->addMenu(submenu);
+
+    for (int i = 0; i < AI_LEVEL_COUNT; i++) {
+      auto level = static_cast<ai_level>(i);
+      if (is_settable_ai_level(level)) {
+        auto a = new QAction(ai_level_translated_name(level));
+        connect(a, &QAction::triggered, this, [=] () {
+          send_chat(serverCommand(QString("%1 %2")
+                                  .arg(ai_level_cmd(level))
+                                  .arg(name)).toUtf8());
+        });
+        submenu->addAction(a);
+      }
+    }
+  }
+
+  // Put to Team X submenu
+  if (game.info.is_new_game) {
+    auto submenu = new QMenu;
+    submenu->setTitle(_("Put on team"));
+    menu->addMenu(submenu);
+    int count = selected->team ? player_list_size(team_members(selected->team)) : 0;
+    bool need_empty_team = count != 1;
+    team_slots_iterate(tslot) {
+      if (!team_slot_is_used(tslot)) {
+        if (!need_empty_team) {
+          continue;
+        }
+        need_empty_team = false;
+      }
+      auto a = new QAction(team_slot_name_translation(tslot));
+      connect(a, &QAction::triggered, this, [=] () {
+        send_chat(serverCommand(QString("team %1 \"%2\"")
+                                .arg(name)
+                                .arg(team_slot_rule_name(tslot)))
+                  .toUtf8());
+      });
+      submenu->addAction(a);
+    } team_slots_iterate_end;
+  }
+
+  if (can_client_control()) {
+    auto a = new QAction(_("Aitoggle player"));
+    connect(a, &QAction::triggered, this, [=] () {
+      send_chat(serverCommand(QString("aitoggle %1").arg(name)).toUtf8());
+    });
+    menu->addAction(a);
+  }
+
+  menu->popup(m_ui->playerTree->mapToGlobal(p));
 }
 
 
 void StartDialog::updateButtons() {
+
+  // Player spin
+  int i = 0;
+  players_iterate(pplayer) {
+    i++;
+  } players_iterate_end;
+
+  m_ui->playersSpin->blockSignals(true);
+  m_ui->playersSpin->setValue(i);
+  m_ui->playersSpin->blockSignals(false);
+
+  // Observe button
+  if (client_is_observer() || client_is_global_observer()) {
+    m_ui->observeButton->setText(_("Don't Observe"));
+  } else {
+    m_ui->observeButton->setText(_("Observe"));
+  }
+
+  bool sensitive;
+  QString text;
+
+  // Ok button
+  if (can_client_control()) {
+    sensitive = true;
+    if (client_player()->is_ready) {
+      text = _("Not ready");
+    } else {
+      int num_unready = 0;
+
+      players_iterate(pplayer) {
+        if (is_human(pplayer) && !pplayer->is_ready) {
+          num_unready++;
+        }
+      } players_iterate_end;
+
+      if (num_unready > 1) {
+        text = _("Ready");
+      } else {
+        /* We are the last unready player so clicking here will
+         * immediately start the game. */
+        text = ("Start");
+      }
+    }
+  } else {
+    text = _("Start");
+    if (can_client_access_hack() && client.conn.observer == TRUE) {
+      sensitive = true;
+      players_iterate(plr) {
+        if (is_human(plr)) {
+          /* There's human controlled player(s) in game, so it's their
+           * job to start the game. */
+          sensitive = false;
+          break;
+        }
+      } players_iterate_end;
+    } else {
+      sensitive = false;
+    }
+  }
+  m_ui->startButton->setEnabled(sensitive);
+  m_ui->startButton->setText(text);
+
+  /* Nation button */
+  sensitive = game.info.is_new_game && can_client_control();
+  m_ui->nationButton->setEnabled(sensitive);
+
+  // AI combo
+  ai_level level = server_ai_level();
+  if (ai_level_is_valid(level)) {
+    m_ui->aiCombo->setCurrentIndex(m_ui->aiCombo->findData(level));
+  } else {
+    m_ui->aiCombo->setCurrentIndex(-1);
+  }
 }
 
 StartDialog::~StartDialog()
 {
-  delete m_UI;
+  delete m_ui;
 }
 
 
 
+void StartDialog::rulesetChange(const QString& rules) {
+  set_ruleset(rules.toUtf8());
+}
+
+void StartDialog::setRulesets(const QStringList &sets) {
+  m_ui->rulesCombo->blockSignals(true);
+  QString c(m_ui->rulesCombo->currentText());
+  m_ui->rulesCombo->clear();
+  bool ok = false;
+  for (auto s: sets) {
+    m_ui->rulesCombo->addItem(s);
+    if (s == c) {
+      m_ui->rulesCombo->setCurrentText(s);
+      ok = true;
+    }
+  }
+  if (!ok) {
+    m_ui->rulesCombo->setCurrentText("default");
+  }
+  m_ui->rulesCombo->blockSignals(false);
+}
+
+void StartDialog::maxPlayersChanged(int numPlayers) {
+  option_int_set(optset_option_by_name(server_optset, "aifill"), numPlayers);
+}
+
+void StartDialog::pickNation(const player* p) {
+  m_nationDialog->init(p);
+  m_nationDialog->show();
+}
+
+
+
+
+void StartDialog::aiLevelChanged(int) {
+
+  QVariant v = m_ui->aiCombo->currentData();
+  if (v.isValid()) {
+    ai_level k = static_cast<ai_level>(v.toInt());
+    /* Suppress changes provoked by server rather than local user */
+    if (server_ai_level() != k) {
+      send_chat(serverCommand(ai_level_cmd(k)).toUtf8());
+    }
+  }
+
+}
+
+
+void StartDialog::observe() {
+  if (client_is_observer() || client_is_global_observer()) {
+    if (game.info.is_new_game) {
+      send_chat(serverCommand("take -").toUtf8());
+    } else {
+      send_chat(serverCommand("detach").toUtf8());
+    }
+    m_ui->observeButton->setText(_("Don't Observe"));
+  } else {
+    send_chat(serverCommand("observe").toUtf8());
+    m_ui->observeButton->setText(_("Observe"));
+  }
+}
 
 
 
