@@ -5,6 +5,8 @@
 #include <QLineEdit>
 
 
+struct tile;
+
 namespace KV {
 
 class ChatLineEdit : public QLineEdit
@@ -18,6 +20,8 @@ class ChatLineEdit : public QLineEdit
 public:
 
   explicit ChatLineEdit(QWidget* parent = nullptr);
+
+  void makeLink(tile* ptile);
 
   bool event(QEvent* event) override;
 

@@ -8,6 +8,8 @@ extern "C" {
 #include "canvas_g.h"
 #include "pages_g.h"
 }
+#include "tilespec.h"
+
 class QTimer;
 class QWidget;
 class QFont;
@@ -28,6 +30,12 @@ class Application: public QObject {
   friend class StartDialog;
   friend class ChatWindow;
   friend class ChatLineEdit;
+  friend class MapView;
+  friend class MainWindow;
+  friend class UnitInfo;
+  friend class GameInfo;
+  friend class EndTurnRect;
+  friend class GovMenu;
 
 public:
 
@@ -54,6 +62,11 @@ public:
                           const text_tag_list* tags,
                           int conn_id);
   static void SetRulesets(int num_rulesets, char **rulesets);
+  static void FlushDirty();
+  static void DirtyAll();
+  static void DirtyRect(const QRect& r);
+  static void UpdateCursor(cursor_type ct);
+
 
   static QFont Font(enum client_font font);
   static QIcon Icon(const QString& name);
@@ -64,6 +77,13 @@ public:
   static void AddIdleCallback(void (callback)(void *), void *data);
   static void StateChange(client_pages page);
   static client_pages CurrentState();
+  static void UpdateUnitInfo(unit_list* punits);
+  static void UpdateGameInfo();
+  static void UpdateTurnTimeout();
+  static void ToggleTurnDone(bool on);
+  static void UpdateTurnDone(bool on);
+  static void CreateLineAtMousePos();
+  static void UnitSelectDialog(tile *ptile);
 
 signals:
 
@@ -72,6 +92,18 @@ signals:
   void rulesetMessage(const QStringList&);
   void playersChanged();
   void completionListChanged(const QStringList&);
+  void flushDirty();
+  void dirtyAll();
+  void dirtyRect(const QRect& r);
+  void updateCursor(cursor_type ct);
+  void stateChange(client_pages page);
+  void updateUnitInfo(void* punits);
+  void updateGameInfo();
+  void updateTurnTimeout();
+  void toggleTurnDone(bool on);
+  void updateTurnDone(bool on);
+  void createLineAtMousePos();
+  void unitSelectDialog(tile *ptile);
 
 private:
 

@@ -70,13 +70,13 @@ static void setup_gui_funcs() {
   };
 
   funcs->canvas_create = [] (int width, int height) {
-    qCDebug(FC) << "canvas_create";
+    // qCDebug(FC) << "canvas_create";
     struct canvas *store = new canvas;
     store->map_pixmap = QPixmap(width, height);
     return store;
   };
   funcs->canvas_free = [] (struct canvas *store) {
-    qCDebug(FC) << "canvas_free";
+    // qCDebug(FC) << "canvas_free";
     delete store;
   };
   funcs->canvas_set_zoom = [] (struct canvas*, float) {
@@ -89,7 +89,7 @@ static void setup_gui_funcs() {
       struct canvas *dest, struct canvas *src,
       int src_x, int src_y, int dest_x, int dest_y, int width,
       int height) {
-    qCDebug(FC) << "canvas_copy";
+    // qCDebug(FC) << "canvas_copy";
 
     QRectF source_rect(src_x, src_y, width, height);
     QRectF dest_rect(dest_x, dest_y, width, height);
@@ -110,7 +110,7 @@ static void setup_gui_funcs() {
       struct sprite *sprite,
       int offset_x, int offset_y, int width, int height) {
 
-    qCDebug(FC) << "canvas_put_sprite";
+    // qCDebug(FC) << "canvas_put_sprite";
     QPainter p;
     p.begin(&pcanvas->map_pixmap);
     p.drawPixmap(canvas_x, canvas_y, sprite->pm, offset_x, offset_y, width, height);
@@ -121,7 +121,7 @@ static void setup_gui_funcs() {
       int canvas_x, int canvas_y,
       struct sprite *sprite) {
 
-    qCDebug(FC) << "canvas_put_sprite_full";
+    // qCDebug(FC) << "canvas_put_sprite_full";
     int width, height;
     get_sprite_dimensions(sprite, &width, &height);
     canvas_put_sprite(pcanvas, canvas_x, canvas_y, sprite,
@@ -133,7 +133,7 @@ static void setup_gui_funcs() {
       struct sprite *psprite,
       bool /*fog*/, int /*fog_x*/, int /*fog_y*/) {
 
-    qCDebug(FC) << "canvas_put_sprite_fogged";
+    // qCDebug(FC) << "canvas_put_sprite_fogged";
     QPainter p;
     p.begin(&pcanvas->map_pixmap);
     p.setCompositionMode(QPainter::CompositionMode_Difference);
@@ -147,7 +147,7 @@ static void setup_gui_funcs() {
       int canvas_x, int canvas_y,
       int width, int height) {
 
-    qCDebug(FC) << "canvas_put_rectangle";
+    // qCDebug(FC) << "canvas_put_rectangle";
     QBrush brush(pcolor->qcolor);
     QPen pen(pcolor->qcolor);
     QPainter p;
@@ -170,7 +170,7 @@ static void setup_gui_funcs() {
       struct sprite *psprite, struct color *pcolor,
       int canvas_x, int canvas_y) {
 
-    qCDebug(FC) << "canvas_fill_sprite_area";
+    // qCDebug(FC) << "canvas_fill_sprite_area";
     int width, height;
     get_sprite_dimensions(psprite, &width, &height);
     canvas_put_rectangle(pcanvas, pcolor, canvas_x, canvas_y, width, height);
@@ -180,7 +180,7 @@ static void setup_gui_funcs() {
       enum line_type ltype, int start_x, int start_y,
       int dx, int dy) {
 
-    qCDebug(FC) << "canvas_put_line";
+    // qCDebug(FC) << "canvas_put_line";
     QPen pen;
     pen.setColor(pcolor->qcolor);
     pen.setWidth(1);
@@ -202,7 +202,7 @@ static void setup_gui_funcs() {
       enum line_type ltype, int start_x, int start_y,
       int dx, int dy) {
 
-    qCDebug(FC) << "canvas_put_curved_line";
+    // qCDebug(FC) << "canvas_put_curved_line";
     QPen pen;
     pen.setColor(pcolor->qcolor);
     QPainter p;
@@ -228,7 +228,7 @@ static void setup_gui_funcs() {
       int *width, int *height,
       enum client_font font, const char *text) {
 
-    qCDebug(FC) << "get_text_size";
+    // qCDebug(FC) << "get_text_size";
     auto afont = KV::Application::Font(font);
     auto fm = new QFontMetrics(afont);
     if (width) {
@@ -244,7 +244,7 @@ static void setup_gui_funcs() {
       enum client_font font, struct color *pcolor,
       const char *text) {
 
-    qCDebug(FC) << "canvas_put_text";
+    // qCDebug(FC) << "canvas_put_text";
     QColor color(pcolor->qcolor);
 
     auto afont = KV::Application::Font(font);
@@ -295,23 +295,23 @@ static void setup_gui_funcs() {
   };
 
   funcs->editgui_refresh = [] () {
-    qCDebug(FC) << "TODO: editgui_refresh";
+    // qCDebug(FC) << "TODO: editgui_refresh";
   };
   funcs->editgui_notify_object_created = [] (int tag, int id) {
-    qCDebug(FC) << "TODO: editgui_notify_object_created" << tag << id;
+    // qCDebug(FC) << "TODO: editgui_notify_object_created" << tag << id;
   };
   funcs->editgui_notify_object_changed = [] (
       int objtype, int object_id, bool removal) {
-    qCDebug(FC) << "TODO: editgui_notify_object_changed" << objtype << object_id << removal;
+    // qCDebug(FC) << "TODO: editgui_notify_object_changed" << objtype << object_id << removal;
   };
   funcs->editgui_popup_properties = [] (const struct tile_list* /*tiles*/, int objtype) {
-    qCDebug(FC) << "TODO: editgui_popup_properties" << objtype;
+    // qCDebug(FC) << "TODO: editgui_popup_properties" << objtype;
   };
   funcs->editgui_tileset_changed = [] () {
-    qCDebug(FC) << "TODO: editgui_tileset_changed";
+    // qCDebug(FC) << "TODO: editgui_tileset_changed";
   };
   funcs->editgui_popdown_all = [] () {
-    qCDebug(FC) << "TODO: editgui_popdown_all";
+    // qCDebug(FC) << "TODO: editgui_popdown_all";
   };
 
   funcs->popup_combat_info = [] (
@@ -327,7 +327,8 @@ static void setup_gui_funcs() {
                 << make_def_veteran;
   };
   funcs->update_timeout_label = [] () {
-    qCDebug(FC) << "TODO: update_timeout_label";
+    // qCDebug(FC) << "update_timeout_label";
+    KV::Application::UpdateTurnTimeout();
   };
   funcs->real_city_dialog_popup = [] (struct city* /*pcity*/) {
     qCDebug(FC) << "TODO: real_city_dialog_popup";

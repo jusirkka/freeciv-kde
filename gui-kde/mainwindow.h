@@ -17,6 +17,8 @@ class Base;
 class Network;
 }
 
+class ChatLineEdit;
+
 class MainWindow: public QMainWindow
 {
 
@@ -30,6 +32,8 @@ public:
   ~MainWindow() override;
 
   client_pages state() const;
+  void enableGameMenus(bool ok);
+  ChatLineEdit* chatLine() {return m_chatLine;}
 
 
 protected:
@@ -109,6 +113,12 @@ private slots:
   void on_actionShowToolbar_toggled(bool on);
 
   void setCurrentState(bool active);
+  void stateChange(client_pages page);
+  void restartStateMachine();
+
+signals:
+
+  void resetStateMachine();
 
 private:
 
@@ -120,6 +130,8 @@ private:
   Ui::MainWindow* m_ui;
   QStateMachine m_states;
   State::Base* m_currentState;
+  QVector<State::Base*> m_stateList;
+  ChatLineEdit* m_chatLine;
 
 };
 

@@ -22,7 +22,7 @@ void MessageBox::keyPressEvent(QKeyEvent *event)
         destroy();
         event->accept();
     }
-    QWidget::keyPressEvent(event);
+    QMessageBox::keyPressEvent(event);
 }
 
 void MessageBox::setTextTitle(const QString &text, const QString &title) {

@@ -2,6 +2,7 @@ extern "C" {
 #include "dialogs_g.h"
 }
 #include "logging.h"
+#include "application.h"
 
 void popup_notify_goto_dialog(const char *headline, const char *lines, const struct text_tag_list *tags, struct tile *ptile) {
   qCDebug(FC) << "TODO: popup_notify_goto_dialog";
@@ -23,8 +24,9 @@ void popdown_races_dialog() {
   qCDebug(FC) << "TODO: popdown_races_dialog";
 }
 
-void unit_select_dialog_popup(struct tile *ptile) {
-  qCDebug(FC) << "TODO: unit_select_dialog_popup";
+void unit_select_dialog_popup(tile *ptile) {
+  // qCDebug(FC) << "unit_select_dialog_popup";
+  KV::Application::UnitSelectDialog(ptile);
 }
 
 void unit_select_dialog_update_real(void *unused) {
@@ -49,7 +51,7 @@ void popup_action_selection(struct unit *actor_unit, struct city *target_city, s
 
 int action_selection_actor_unit() {
   qCDebug(FC) << "TODO: action_selection_actor_unit";
-  return 0;
+  return IDENTITY_NUMBER_ZERO;
 }
 
 int action_selection_target_city() {

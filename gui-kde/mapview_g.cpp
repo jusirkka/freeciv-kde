@@ -3,21 +3,26 @@ extern "C" {
 }
 #include "logging.h"
 #include "canvas.h"
+#include "application.h"
 
 void update_info_label() {
-  qCDebug(FC) << "TODO: update_info_label";
+  // qCDebug(FC) << "update_info_label";
+  KV::Application::UpdateGameInfo();
 }
 
 void update_unit_info_label(struct unit_list *punitlist) {
-  qCDebug(FC) << "TODO: update_unit_info_label";
+  // qCDebug(FC) << "update_unit_info_label";
+  KV::Application::UpdateUnitInfo(punitlist);
 }
 
-void update_mouse_cursor(enum cursor_type new_cursor_type) {
-  qCDebug(FC) << "TODO: update_mouse_cursor";
+void update_mouse_cursor(cursor_type ct) {
+  // qCDebug(FC) << "update_mouse_cursor";
+  KV::Application::UpdateCursor(ct);
 }
 
 void update_turn_done_button(bool do_restore) {
-  qCDebug(FC) << "TODO: update_turn_done_button";
+  // qCDebug(FC) << "update_turn_done_button";
+  KV::Application::UpdateTurnDone(do_restore);
 }
 
 void update_city_descriptions() {
@@ -40,25 +45,28 @@ void get_overview_area_dimensions(int *width, int *height) {
   qCDebug(FC) << "TODO: get_overview_area_dimensions";
 }
 
-struct canvas * get_overview_window() {
-  qCDebug(FC) << "TODO: get_overview_window";
-  return new canvas;
+canvas* get_overview_window() {
+  // qCDebug(FC) << "TODO: get_overview_window";
+  return nullptr;
 }
 
 void flush_mapcanvas(int canvas_x, int canvas_y, int pixel_width, int pixel_height) {
   qCDebug(FC) << "TODO: flush_mapcanvas";
 }
 
-void dirty_rect(int canvas_x, int canvas_y, int pixel_width, int pixel_height) {
-  qCDebug(FC) << "TODO: dirty_rect";
+void dirty_rect(int x, int y, int w, int h) {
+  // qCDebug(FC) << "dirty_rect";
+  KV::Application::DirtyRect(QRect(x, y, w, h));
 }
 
 void dirty_all() {
-  qCDebug(FC) << "TODO: dirty_all";
+  // qCDebug(FC) << "dirty_all";
+  KV::Application::DirtyAll();
 }
 
 void flush_dirty() {
-  qCDebug(FC) << "TODO: flush_dirty";
+  // qCDebug(FC) << "flush_dirty";
+  KV::Application::FlushDirty();
 }
 
 void gui_flush() {
@@ -66,11 +74,11 @@ void gui_flush() {
 }
 
 void update_map_canvas_scrollbars() {
-  qCDebug(FC) << "TODO: update_map_canvas_scrollbars";
+  // qCDebug(FC) << "TODO: update_map_canvas_scrollbars";
 }
 
 void update_map_canvas_scrollbars_size() {
-  qCDebug(FC) << "TODO: update_map_canvas_scrollbars_size";
+  // qCDebug(FC) << "TODO: update_map_canvas_scrollbars_size";
 }
 
 void put_cross_overlay_tile(struct tile *ptile) {

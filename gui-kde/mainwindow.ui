@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>636</width>
-    <height>476</height>
+    <width>634</width>
+    <height>474</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>636</width>
+     <width>634</width>
      <height>25</height>
     </rect>
    </property>
@@ -974,7 +974,7 @@
   </action>
   <action name="actionConfigureShortcuts">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset theme="configure">
@@ -986,7 +986,7 @@
   </action>
   <action name="actionConfigureToolbar">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset theme="configure">
@@ -1001,7 +1001,7 @@
   </action>
   <action name="actionOptions">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset theme="configure">

@@ -11,7 +11,6 @@ SOURCES += \
     mainwindow.cpp \
     spritefactory.cpp \
     state.cpp \
-    mapwidget.cpp \
     startdialog.cpp \
     networkdialog.cpp \
     chatwindow.cpp \
@@ -42,7 +41,18 @@ SOURCES += \
     sprite_g.cpp \
     voteinfo_bar_g.cpp \
     wldlg_g.cpp \
-    nationdialog.cpp
+    nationdialog.cpp \
+    mapitem.cpp \
+    mapview.cpp \
+    unitinfo.cpp \
+    gameinfo.cpp \
+    endturnrect.cpp \
+    spritewidget.cpp \
+    govmenu.cpp \
+    minimapview.cpp \
+    tileinfo.cpp \
+    buildables.cpp \
+    unitselector.cpp
 
 
 HEADERS += \
@@ -56,12 +66,22 @@ HEADERS += \
     colors.h \
     spritefactory.h \
     state.h \
-    mapwidget.h \
     startdialog.h \
     networkdialog.h \
     chatwindow.h \
     chatlineedit.h \
-    nationdialog.h
+    nationdialog.h \
+    mapitem.h \
+    mapview.h \
+    unitinfo.h \
+    gameinfo.h \
+    endturnrect.h \
+    spritewidget.h \
+    govmenu.h \
+    minimapview.h \
+    tileinfo.h \
+    buildables.h \
+    unitselector.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \

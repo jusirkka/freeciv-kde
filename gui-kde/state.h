@@ -8,13 +8,14 @@
 
 class QWidget;
 class QDialog;
+class QGraphicsView;
 
 namespace KV {
 
 class MainWindow;
-class MapWidget;
 class NetworkDialog;
 class StartDialog;
+class MapView;
 
 namespace State {
 
@@ -78,11 +79,12 @@ public:
   ~Game() override;
 protected:
   void onEntry(QEvent *event) override;
-
-
+  void onExit(QEvent *event) override;
 
 private:
-  MapWidget* createMapWidget();
+
+  KV::MapView* createMapWidget();
+
 };
 
 

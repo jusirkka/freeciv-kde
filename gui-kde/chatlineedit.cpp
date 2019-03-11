@@ -13,6 +13,7 @@
 #include "chatline_common.h"
 #include "client_main.h"
 #include "options.h"
+#include "control.h"
 
 using namespace KV;
 
@@ -165,7 +166,18 @@ void ChatLineEdit::sendChatMessage(const QString& message) {
   }
 }
 
-
+void ChatLineEdit::makeLink(tile *ptile) {
+    auto punit = find_visible_unit(ptile);
+    auto pcity = tile_city(ptile);
+    if (pcity) {
+      insert(city_link(pcity));
+    } else if (punit) {
+      insert(unit_link(punit));
+    } else if (ptile) {
+      insert(tile_link(ptile));
+    }
+    setFocus();
+}
 
 
 

@@ -7,6 +7,7 @@
 #include "featured_text.h"
 #include "audio.h"
 #include "game.h"
+#include "unit.h"
 
 #include "client_main.h"
 #include "tilespec.h"
@@ -271,13 +272,58 @@ void Application::UpdateUsers(void *) {
   instance()->updateUsers();
 }
 
+void Application::UpdateCursor(cursor_type ct) {
+  instance()->updateCursor(ct);
+}
+
+void Application::FlushDirty() {
+  instance()->flushDirty();
+}
+
+void Application::DirtyAll() {
+  instance()->dirtyAll();
+}
+
+void Application::DirtyRect(const QRect& r) {
+  instance()->dirtyRect(r);
+}
+
+void Application::UpdateUnitInfo(unit_list *punits) {
+  instance()->updateUnitInfo(punits);
+}
+
+void Application::UpdateGameInfo() {
+  instance()->updateGameInfo();
+}
+
+void Application::UpdateTurnTimeout() {
+  instance()->updateTurnTimeout();
+}
+
+void Application::ToggleTurnDone(bool on) {
+  instance()->toggleTurnDone(on);
+}
+
+void Application::UpdateTurnDone(bool on) {
+  instance()->updateTurnDone(on);
+}
+
+void Application::CreateLineAtMousePos() {
+  instance()->createLineAtMousePos();
+}
+
+void Application::UnitSelectDialog(tile *ptile) {
+  instance()->unitSelectDialog(ptile);
+}
+
 void Application::AddIdleCallback(void callback(void *), void *data) {
-  qCDebug(FC) << "AddIdleCallback";
+  // qCDebug(FC) << "AddIdleCallback";
   instance()->addIdleCallback(callback, data);
 }
 
 void Application::StateChange(client_pages page) {
-  qCDebug(FC) << "TODO: Application::StateChange" << client_pages_name(page);
+  qCDebug(FC) << "Application::StateChange" << client_pages_name(page);
+  instance()->stateChange(page);
 }
 
 client_pages Application::CurrentState() {
@@ -298,7 +344,7 @@ void Application::addIdleCallback(void callback(void *), void *data) {
 
 void Application::processTasks() {
   while (!m_tasks.isEmpty()) {
-    qCDebug(FC) << "Processing idle task";
+    // qCDebug(FC) << "Processing idle task";
     auto cb = m_tasks.takeFirst();
     cb.callback(cb.data);
   }

@@ -4,13 +4,15 @@
 #include "logging.h"
 #include "networkdialog.h"
 #include "startdialog.h"
-#include "mapwidget.h"
+#include "mapitem.h"
 #include "messagebox.h"
+#include "mapview.h"
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QApplication>
 #include <QStateMachine>
+// #include <QGraphicsView>
 
 #include "tilespec.h"
 #include "version.h"
@@ -78,7 +80,7 @@ QWidget* Intro::createIntroWidget() {
 }
 
 void Intro::onEntry(QEvent* event) {
-  auto v = qobject_cast<KV::MapWidget*>(m_parent->centralWidget());
+  auto v = qobject_cast<KV::MapView*>(m_parent->centralWidget());
   if (v) {
     // a game is already active - leave intro state
     emit playing();
@@ -154,15 +156,28 @@ Game::Game(MainWindow *parent)
   init_mapcanvas_and_overview();
 }
 
-KV::MapWidget* Game::createMapWidget() {
-  return new MapWidget;
+KV::MapView* Game::createMapWidget() {
+  auto view = new MapView(m_parent);
+  // auto scene = new QGraphicsScene;
+  // auto item = new MapItem;
+  // scene->addItem(item);
+  // view->setScene(scene);
+  // scene->setSceneRect(item->boundingRect());
+  // qCDebug(FC) << "Game::createMapWidget" << item->pos();
+  return view;
 }
 
 Game::~Game() {}
 
 void Game::onEntry(QEvent* event) {
   m_parent->setCentralWidget(createMapWidget());
+  m_parent->enableGameMenus(true);
   QState::onEntry(event);
+}
+
+void Game::onExit(QEvent* event) {
+  m_parent->enableGameMenus(false);
+  QState::onExit(event);
 }
 
 
