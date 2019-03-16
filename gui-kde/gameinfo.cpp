@@ -30,8 +30,6 @@ GameInfo::GameInfo(QWidget *parent)
   , m_researchTimer(new QTimer(this))
   , m_blinkState(false)
 {
-  QSpacerItem *si;
-
   setStyleSheet("QFrame { background-color: rgba(0, 0, 0, 195); }");
 
   auto layout = new QHBoxLayout;

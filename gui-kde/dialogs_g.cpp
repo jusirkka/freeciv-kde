@@ -9,7 +9,9 @@ void popup_notify_goto_dialog(const char *headline, const char *lines, const str
 }
 
 void popup_notify_dialog(const char *caption, const char *headline, const char *lines) {
-  qCDebug(FC) << "TODO: popup_notify_dialog";
+  // qCDebug(FC) << "TODO: popup_notify_dialog";
+  QStringList s{caption, headline, lines};
+  KV::Application::UpdateReport(s);
 }
 
 void popup_connect_msg(const char *headline, const char *message) {

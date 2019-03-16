@@ -38,7 +38,7 @@ void overview_size_changed() {
 }
 
 void update_overview_scroll_window_pos(int x, int y) {
-  qCDebug(FC) << "TODO: update_overview_scroll_window_pos";
+  // qCDebug(FC) << "TODO: update_overview_scroll_window_pos";
 }
 
 void get_overview_area_dimensions(int *width, int *height) {
@@ -70,7 +70,8 @@ void flush_dirty() {
 }
 
 void gui_flush() {
-  qCDebug(FC) << "TODO: gui_flush";
+  // qCDebug(FC) << "TODO: gui_flush";
+  KV::Application::FlushMapview();
 }
 
 void update_map_canvas_scrollbars() {

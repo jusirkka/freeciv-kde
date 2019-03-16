@@ -18,6 +18,8 @@ class Network;
 }
 
 class ChatLineEdit;
+class OutputPaneManager;
+class MapView;
 
 class MainWindow: public QMainWindow
 {
@@ -33,12 +35,14 @@ public:
 
   client_pages state() const;
   void enableGameMenus(bool ok);
-  ChatLineEdit* chatLine() {return m_chatLine;}
+  void setMapView(MapView* map);
 
+  ChatLineEdit* chatLine() {return m_chatLine;}
 
 protected:
 
-    void closeEvent(QCloseEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
 
 
 private slots:
@@ -87,12 +91,12 @@ private slots:
   void on_actionBuildCity_triggered();
   void on_actionAutoWorker_triggered();
   void on_actionBuildRoad_triggered();
-  void on_actionTransformToPlains_triggered();
-  void on_actionTransformToGrassland_triggered();
+  void on_actionIrrigate_triggered();
+  void on_actionMine_triggered();
   void on_actionConnectWithRoad_triggered();
   void on_actionConnectWithRailway_triggered();
   void on_actionConnectWithIrrigation_triggered();
-  void on_actionTransformTerrain_triggered();
+  void on_actionTransform_triggered();
   void on_actionCleanPollution_triggered();
   void on_actionCleanNuclearFallout_triggered();
   void on_actionHelpBuildWonder_triggered();
@@ -131,7 +135,9 @@ private:
   QStateMachine m_states;
   State::Base* m_currentState;
   QVector<State::Base*> m_stateList;
-  ChatLineEdit* m_chatLine;
+  MapView* m_mapView;
+  OutputPaneManager* m_panes;
+  ChatLineEdit* m_chatLine = nullptr;
 
 };
 

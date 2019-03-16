@@ -36,6 +36,8 @@ class Application: public QObject {
   friend class GameInfo;
   friend class EndTurnRect;
   friend class GovMenu;
+  friend class BrowserWidget;
+  friend class ReportWidget;
 
 public:
 
@@ -84,6 +86,11 @@ public:
   static void UpdateTurnDone(bool on);
   static void CreateLineAtMousePos();
   static void UnitSelectDialog(tile *ptile);
+  static void FlushMapview();
+  static QString ApplyTags(const char *s, const text_tag_list *tags);
+  static void UpdateMessages();
+  static void UpdateReport(const QStringList& report);
+
 
 signals:
 
@@ -104,6 +111,9 @@ signals:
   void updateTurnDone(bool on);
   void createLineAtMousePos();
   void unitSelectDialog(tile *ptile);
+  void flushMapview();
+  void updateMessages();
+  void updateReport(const QStringList& report);
 
 private:
 

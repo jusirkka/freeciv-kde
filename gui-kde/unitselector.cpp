@@ -19,7 +19,7 @@ UnitSelector::UnitSelector(tile* t, QWidget *parent)
   , m_tile(t)
 {
   m_font.setItalic(true);
-  m_infoFont.setPointSize(16);
+  m_infoFont.setPointSize(12);
 
   setMouseTracking(true);
 
@@ -76,18 +76,8 @@ void UnitSelector::createPixmap()
 
   if (m_unitList.isEmpty()) return;
 
-  float isosize = 0.7;
-  if (tileset_hex_height(tileset) > 0 || tileset_hex_width(tileset) > 0) {
-    isosize = 0.5;
-  }
-
-  if (tileset_is_isometric(tileset) == false) {
-    m_itemSize.setWidth(tileset_unit_width(tileset));
-    m_itemSize.setHeight(tileset_unit_width(tileset));
-  } else {
-    m_itemSize.setWidth(tileset_unit_width(tileset) * isosize);
-    m_itemSize.setHeight(tileset_unit_width(tileset) * isosize);
-  }
+  m_itemSize.setWidth(tileset_full_tile_width(tileset));
+  m_itemSize.setHeight(tileset_tile_height(tileset) * 3 / 2);
 
   m_pixHigh = QPixmap(m_itemSize);
   m_pixHigh.fill(palette().color(QPalette::HighlightedText));
@@ -105,21 +95,11 @@ void UnitSelector::createPixmap()
   QVector<QPixmap> pixes;
   for (int i = m_unitOffset; i < unitCount; i++) {
     unit* punit = m_unitList[i];
-    auto pix = canvas_create(tileset_unit_width(tileset),
-                             tileset_unit_height(tileset));
+    auto pix = canvas_create(tileset_full_tile_width(tileset),
+                             tileset_tile_height(tileset) * 3 / 2);
     pix->map_pixmap.fill(Qt::transparent);
     put_unit(punit, pix, 1.0, 0, 0);
-    if (tileset_is_isometric(tileset) == false) {
-      pixes << pix->map_pixmap.scaled(tileset_unit_width(tileset),
-                                      tileset_unit_width(tileset),
-                                      Qt::KeepAspectRatio,
-                                      Qt::SmoothTransformation);
-    } else {
-      pixes << pix->map_pixmap.scaled(tileset_unit_width(tileset) * isosize,
-                                      tileset_unit_width(tileset) * isosize,
-                                      Qt::KeepAspectRatio,
-                                      Qt::SmoothTransformation);
-    }
+    pixes << pix->map_pixmap;
     canvas_free(pix);
   }
 
@@ -156,7 +136,7 @@ void UnitSelector::createPixmap()
 }
 
 
-void UnitSelector::paintEvent(QPaintEvent *event)
+void UnitSelector::paintEvent(QPaintEvent */*event*/)
 {
 
   QString textHigh;
@@ -185,6 +165,11 @@ void UnitSelector::paintEvent(QPaintEvent *event)
   QPainter painter;
 
   painter.begin(this);
+
+  painter.setBrush(palette().color(QPalette::Background));
+  painter.setPen(palette().color(QPalette::Background));
+  painter.drawRect(0, 0, width(), height());
+
   painter.drawPixmap(10, h + 3, m_pix);
 
   QPen pen;
@@ -197,8 +182,8 @@ void UnitSelector::paintEvent(QPaintEvent *event)
   }
   // draw scroll
   if (m_unitList.size() > 12) {
-    painter.setBrush(palette().color(QPalette::HighlightedText));
-    painter.setPen(palette().color(QPalette::HighlightedText));
+    painter.setBrush(palette().color(QPalette::HighlightedText).darker());
+    painter.setPen(palette().color(QPalette::HighlightedText).darker());
     painter.drawRect(m_pix.width() + 10,
                      h,
                      8,
@@ -239,12 +224,6 @@ void UnitSelector::mouseMoveEvent(QMouseEvent *event)
 
 void UnitSelector::mousePressEvent(QMouseEvent *event)
 {
-  if (event->button() == Qt::RightButton) {
-    close();
-    destroy();
-    return;
-  }
-
   if (event->button() == Qt::LeftButton) {
     if (m_indexHigh < 0 || m_indexHigh >= m_unitList.size()) {
       return;
@@ -285,6 +264,7 @@ void UnitSelector::keyPressEvent(QKeyEvent *event)
 
 void UnitSelector::closeEvent(QCloseEvent* event)
 {
+  m_delay.stop();
   parentWidget()->setFocus();
   QWidget::closeEvent(event);
 }

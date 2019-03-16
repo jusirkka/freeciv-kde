@@ -79,8 +79,8 @@ static void setup_gui_funcs() {
     // qCDebug(FC) << "canvas_free";
     delete store;
   };
-  funcs->canvas_set_zoom = [] (struct canvas*, float) {
-    qCDebug(FC) << "TODO: canvas_set_zoom";
+  funcs->canvas_set_zoom = [] (canvas*, float) {
+    // qCDebug(FC) << "TODO: canvas_set_zoom";
   };
   funcs->has_zoom_support = [] () {
     return false;

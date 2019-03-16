@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>474</height>
+    <width>630</width>
+    <height>470</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>634</width>
+     <width>630</width>
      <height>25</height>
     </rect>
    </property>
@@ -120,14 +120,14 @@
     <addaction name="separator"/>
     <addaction name="actionBuildRoad"/>
     <addaction name="menuBuildPath"/>
-    <addaction name="actionTransformToPlains"/>
-    <addaction name="actionTransformToGrassland"/>
+    <addaction name="actionIrrigate"/>
+    <addaction name="actionMine"/>
     <addaction name="separator"/>
     <addaction name="actionConnectWithRoad"/>
     <addaction name="actionConnectWithRailway"/>
     <addaction name="actionConnectWithIrrigation"/>
     <addaction name="separator"/>
-    <addaction name="actionTransformTerrain"/>
+    <addaction name="actionTransform"/>
     <addaction name="actionCleanPollution"/>
     <addaction name="actionCleanNuclearFallout"/>
     <addaction name="actionHelpBuildWonder"/>
@@ -179,6 +179,15 @@
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::TopToolBarArea</set>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -263,6 +272,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -275,6 +287,9 @@
   </action>
   <action name="actionMinimap">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="enabled">
@@ -770,23 +785,29 @@
     <string>R</string>
    </property>
   </action>
-  <action name="actionTransformToPlains">
+  <action name="actionIrrigate">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Transform to Plains</string>
+    <string>Irrigate</string>
+   </property>
+   <property name="toolTip">
+    <string>Irrigate</string>
    </property>
    <property name="shortcut">
     <string>I</string>
    </property>
   </action>
-  <action name="actionTransformToGrassland">
+  <action name="actionMine">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Transform to Grassland</string>
+    <string>Mine</string>
+   </property>
+   <property name="toolTip">
+    <string>Mine</string>
    </property>
    <property name="shortcut">
     <string>M</string>
@@ -825,12 +846,15 @@
     <string>Shift+L</string>
    </property>
   </action>
-  <action name="actionTransformTerrain">
+  <action name="actionTransform">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Transform Terrain</string>
+    <string>Transform</string>
+   </property>
+   <property name="toolTip">
+    <string>Transform</string>
    </property>
    <property name="shortcut">
     <string>O</string>

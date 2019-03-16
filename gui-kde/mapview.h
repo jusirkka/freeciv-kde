@@ -16,6 +16,7 @@ class GameInfo;
 class MinimapView;
 class EndTurnRect;
 class MainWindow;
+class UnitSelector;
 
 class MapView: public QWidget
 {
@@ -24,7 +25,9 @@ class MapView: public QWidget
 public:
   MapView(MainWindow* parent);
 
-  float zoomLevel() const {return m_zoom;}
+  qreal zoomLevel() const {return m_zoom;}
+  void zoomIn();
+  void zoomOut();
 
 protected:
 
@@ -45,6 +48,7 @@ private slots:
   void dirtyRect(const QRect& r);
   void updateCursor(cursor_type ct);
   void createLine();
+  void popupUnitSelector(tile* t);
 
   void handleSelectPress(const QPoint& p);
   void handleSelectRelease(const QPoint& p);
@@ -74,9 +78,10 @@ private:
   UnitInfo* m_unitInfo;
   MinimapView* m_minimap;
   EndTurnRect* m_endTurn;
-  float m_zoom;
+  qreal m_zoom;
   MainWindow* m_mainWindow;
   bool m_storedAutocenter;
+  UnitSelector* m_unitSelector;
 
 };
 

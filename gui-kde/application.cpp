@@ -107,7 +107,7 @@ void Application::VersionMessage(const char *version) {
 }
 
 
-static QString applyTags(const char *s, const text_tag_list *tags) {
+QString Application::ApplyTags(const char *s, const text_tag_list *tags) {
   if (!tags) {
     return QString(s);
   }
@@ -223,7 +223,7 @@ void Application::ChatMessage(const char *s, const text_tag_list *tags, int) {
     audio_play_sound("e_player_wake", nullptr);
   }
 
-  instance()->chatMessage(applyTags(s, tags));
+  instance()->chatMessage(ApplyTags(s, tags));
 }
 
 QFont Application::Font(enum client_font /*font*/) {
@@ -314,6 +314,18 @@ void Application::CreateLineAtMousePos() {
 
 void Application::UnitSelectDialog(tile *ptile) {
   instance()->unitSelectDialog(ptile);
+}
+
+void Application::FlushMapview() {
+  instance()->flushMapview();
+}
+
+void Application::UpdateMessages() {
+  instance()->updateMessages();
+}
+
+void Application::UpdateReport(const QStringList &report) {
+  instance()->updateReport(report);
 }
 
 void Application::AddIdleCallback(void callback(void *), void *data) {

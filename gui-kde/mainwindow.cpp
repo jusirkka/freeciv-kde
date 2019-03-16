@@ -1,5 +1,10 @@
 #include "fc_config.h"
 
+extern "C" {
+#include "gotodlg_g.h"
+#include "dialogs_g.h"
+}
+
 #include "client_main.h"
 #include "clinet.h"
 #include "control.h"
@@ -12,6 +17,12 @@
 #include "application.h"
 #include "chatlineedit.h"
 #include <QFinalState>
+#include "mapview.h"
+#include "minimapview.h"
+#include "outputpanemanager.h"
+#include "messagepane.h"
+#include "chatpane.h"
+#include "reportpane.h"
 
 using namespace KV;
 
@@ -20,10 +31,20 @@ MainWindow::MainWindow()
   , m_ui(new Ui::MainWindow)
   , m_currentState(nullptr)
   , m_stateList()
-  // , m_chatLine(new ChatLineEdit(this))
+  , m_mapView(nullptr)
 {
   m_ui->setupUi(this);
   setWindowTitle(qAppName());
+
+  auto chatPane = new ChatPane;
+  m_chatLine = chatPane->chatLine();
+  m_panes = new OutputPaneManager({
+                                    new MessagePane,
+                                    new Top5CitiesPane,
+                                    new WondersPane,
+                                    new DemographicsPane,
+                                    new AchievementsPane,
+                                    chatPane}, this);
 
   auto intro = new State::Intro(this);
   connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);
@@ -74,6 +95,20 @@ MainWindow::MainWindow()
   m_states.setInitialState(intro);
   m_states.start();
 
+  m_ui->actionCityOutlines->setChecked(gui_options.draw_city_outlines);
+  m_ui->actionCityOutput->setChecked(gui_options.draw_city_output);
+  m_ui->actionMapGrid->setChecked(gui_options.draw_map_grid);
+  m_ui->actionNationalBorders->setChecked(gui_options.draw_borders);
+  m_ui->actionNativeTiles->setChecked(gui_options.draw_native);
+  m_ui->actionCityFullBar->setChecked(gui_options.draw_full_citybar);
+  m_ui->actionCityNames->setChecked(gui_options.draw_city_names);
+  m_ui->actionCityGrowth->setChecked(gui_options.draw_city_growth);
+  m_ui->actionCityProductionLevels->setChecked(gui_options.draw_city_productions);
+  m_ui->actionCityBuyCost->setChecked(gui_options.draw_city_buycost);
+  m_ui->actionCityTradeRoutes->setChecked(gui_options.draw_city_trade_routes);
+
+  m_ui->actionShowMenubar->setChecked(true);
+  m_ui->actionShowToolbar->setChecked(true);
 }
 
 void MainWindow::enableGameMenus(bool ok) {
@@ -118,12 +153,12 @@ void MainWindow::enableGameMenus(bool ok) {
   m_ui->actionBuildCity->setEnabled(ok);
   m_ui->actionAutoWorker->setEnabled(ok);
   m_ui->actionBuildRoad->setEnabled(ok);
-  m_ui->actionTransformToPlains->setEnabled(ok);
-  m_ui->actionTransformToGrassland->setEnabled(ok);
+  m_ui->actionIrrigate->setEnabled(ok);
+  m_ui->actionMine->setEnabled(ok);
   m_ui->actionConnectWithRoad->setEnabled(ok);
   m_ui->actionConnectWithRailway->setEnabled(ok);
   m_ui->actionConnectWithIrrigation->setEnabled(ok);
-  m_ui->actionTransformTerrain->setEnabled(ok);
+  m_ui->actionTransform->setEnabled(ok);
   m_ui->actionCleanPollution->setEnabled(ok);
   m_ui->actionCleanNuclearFallout->setEnabled(ok);
   m_ui->actionHelpBuildWonder->setEnabled(ok);
@@ -136,6 +171,11 @@ void MainWindow::enableGameMenus(bool ok) {
   m_ui->actionSpaceship->setEnabled(ok);
   m_ui->actionAchievements->setEnabled(ok);
   m_ui->actionOptions->setEnabled(ok);
+}
+
+void MainWindow::setMapView(MapView *map) {
+  m_mapView = map;
+  setCentralWidget(map);
 }
 
 void MainWindow::setCurrentState(bool active) {
@@ -182,6 +222,12 @@ MainWindow::~MainWindow() {
 void MainWindow::closeEvent(QCloseEvent */*event*/) {
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event) {
+  auto p = statusBar()->pos();
+  m_panes->move(p.x(), p.y() - m_panes->height());
+  QMainWindow::resizeEvent(event);
+}
+
 void MainWindow::on_actionSaveGameAs_triggered() {}
 void MainWindow::on_actionLoadScenario_triggered() {}
 void MainWindow::on_actionLoadGame_triggered() {}
@@ -207,60 +253,280 @@ void MainWindow::on_actionQuit_triggered() {
 void MainWindow::writeSettings() {}
 void MainWindow::readSettings() {}
 
-void MainWindow::on_actionFullscreen_toggled(bool on) {}
-void MainWindow::on_actionMinimap_toggled(bool on) {}
-void MainWindow::on_actionCityOutlines_toggled(bool on) {}
-void MainWindow::on_actionCityOutput_toggled(bool on) {}
-void MainWindow::on_actionMapGrid_toggled(bool on) {}
-void MainWindow::on_actionNationalBorders_toggled(bool on) {}
-void MainWindow::on_actionNativeTiles_toggled(bool on) {}
-void MainWindow::on_actionCityFullBar_toggled(bool on) {}
-void MainWindow::on_actionCityNames_toggled(bool on) {}
-void MainWindow::on_actionCityGrowth_toggled(bool on) {}
-void MainWindow::on_actionCityProductionLevels_toggled(bool on) {}
-void MainWindow::on_actionCityBuyCost_toggled(bool on) {}
-void MainWindow::on_actionCityTradeRoutes_toggled(bool on) {}
-void MainWindow::on_actionCenterView_triggered() {}
-void MainWindow::on_actionZoomIn_triggered() {}
-void MainWindow::on_actionZoomOut_triggered() {}
+void MainWindow::on_actionFullscreen_toggled(bool on) {
+  if (on) {
+    showFullScreen();
+  } else {
+    showNormal();
+  }
+}
+
+void MainWindow::on_actionMinimap_toggled(bool on) {
+  auto minis = findChildren<MinimapView*>();
+  for (auto mini: minis) {
+    mini->setVisible(on);
+  }
+}
+
+void MainWindow::on_actionCityOutlines_toggled(bool on) {
+  if (gui_options.draw_city_outlines != on) {
+    key_city_outlines_toggle();
+  }
+}
+
+void MainWindow::on_actionCityOutput_toggled(bool on) {
+  if (gui_options.draw_city_output != on) {
+    key_city_output_toggle();
+  }
+}
+
+void MainWindow::on_actionMapGrid_toggled(bool on) {
+  if (gui_options.draw_map_grid != on) {
+    key_map_grid_toggle();
+  }
+}
+
+void MainWindow::on_actionNationalBorders_toggled(bool on) {
+  if (gui_options.draw_borders != on) {
+    key_map_borders_toggle();
+  }
+}
+
+void MainWindow::on_actionNativeTiles_toggled(bool on) {
+  if (gui_options.draw_native != on) {
+    key_map_native_toggle();
+  }
+}
+
+void MainWindow::on_actionCityFullBar_toggled(bool on) {
+  if (gui_options.draw_full_citybar != on) {
+    key_city_full_bar_toggle();
+  }
+}
+
+
+void MainWindow::on_actionCityNames_toggled(bool on) {
+  if (gui_options.draw_city_names != on) {
+    key_city_names_toggle();
+  }
+}
+
+void MainWindow::on_actionCityGrowth_toggled(bool on) {
+  if (gui_options.draw_city_growth != on) {
+    key_city_growth_toggle();
+  }
+}
+
+void MainWindow::on_actionCityProductionLevels_toggled(bool on) {
+  if (gui_options.draw_city_productions != on) {
+    key_city_productions_toggle();
+  }
+}
+
+void MainWindow::on_actionCityBuyCost_toggled(bool on) {
+  if (gui_options.draw_city_buycost != on) {
+    key_city_buycost_toggle();
+  }
+}
+
+void MainWindow::on_actionCityTradeRoutes_toggled(bool on) {
+  if (gui_options.draw_city_trade_routes != on) {
+    key_city_trade_routes_toggle();
+  }
+}
+
+void MainWindow::on_actionCenterView_triggered() {
+  request_center_focus_unit();
+}
+
+void MainWindow::on_actionZoomIn_triggered() {
+  m_mapView->zoomIn();
+  tilespec_reread(tileset_basename(tileset), true, m_mapView->zoomLevel());
+}
+
+void MainWindow::on_actionZoomOut_triggered() {
+  m_mapView->zoomOut();
+  tilespec_reread(tileset_basename(tileset), true, m_mapView->zoomLevel());
+}
+
+
 void MainWindow::on_actionScaleFonts_toggled(bool on) {}
 
 void MainWindow::on_actionGotoTile_triggered() {
   key_unit_goto();
 }
 
-void MainWindow::on_actionGotoNearestCity_triggered() {}
-void MainWindow::on_actionGoAirlifttoCity_triggered() {}
-void MainWindow::on_actionAutoExplore_triggered() {}
-void MainWindow::on_actionPatrol_triggered() {}
-void MainWindow::on_actionSentry_triggered() {}
-void MainWindow::on_actionUnsentryAllOnTile_triggered() {}
-void MainWindow::on_actionLoad_triggered() {}
-void MainWindow::on_actionUnload_triggered() {}
-void MainWindow::on_actionUnloadAllFromTransporter_triggered() {}
-void MainWindow::on_actionSetHomeCity_triggered() {}
-void MainWindow::on_actionUpgrade_triggered() {}
-void MainWindow::on_actionConvert_triggered() {}
-void MainWindow::on_actionDisband_triggered() {}
-void MainWindow::on_actionWait_triggered() {}
-void MainWindow::on_actionDone_triggered() {}
-void MainWindow::on_actionFortifyUnit_triggered() {}
-void MainWindow::on_actionBuildFortFortressBuoy_triggered() {}
-void MainWindow::on_actionBuildAirstripAirbase_triggered() {}
-void MainWindow::on_actionPillage_triggered() {}
-void MainWindow::on_actionBuildCity_triggered() {}
-void MainWindow::on_actionAutoWorker_triggered() {}
-void MainWindow::on_actionBuildRoad_triggered() {}
-void MainWindow::on_actionTransformToPlains_triggered() {}
-void MainWindow::on_actionTransformToGrassland_triggered() {}
-void MainWindow::on_actionConnectWithRoad_triggered() {}
-void MainWindow::on_actionConnectWithRailway_triggered() {}
-void MainWindow::on_actionConnectWithIrrigation_triggered() {}
-void MainWindow::on_actionTransformTerrain_triggered() {}
-void MainWindow::on_actionCleanPollution_triggered() {}
-void MainWindow::on_actionCleanNuclearFallout_triggered() {}
-void MainWindow::on_actionHelpBuildWonder_triggered() {}
-void MainWindow::on_actionEstablishTraderoute_triggered() {}
+void MainWindow::on_actionGotoNearestCity_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    request_unit_return(punit);
+  } unit_list_iterate_end;
+}
+
+void MainWindow::on_actionGoAirlifttoCity_triggered() {
+  popup_goto_dialog();
+}
+
+void MainWindow::on_actionAutoExplore_triggered() {
+  key_unit_auto_explore();
+}
+
+void MainWindow::on_actionPatrol_triggered() {
+  key_unit_patrol();
+}
+
+void MainWindow::on_actionSentry_triggered() {
+  key_unit_sentry();
+}
+
+void MainWindow::on_actionUnsentryAllOnTile_triggered() {
+  key_unit_wakeup_others();
+}
+
+void MainWindow::on_actionLoad_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    request_transport(punit, unit_tile(punit));
+  } unit_list_iterate_end;
+}
+
+void MainWindow::on_actionUnload_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    request_unit_unload(punit);
+  } unit_list_iterate_end;
+}
+
+void MainWindow::on_actionUnloadAllFromTransporter_triggered() {
+  key_unit_unload_all();
+}
+
+void MainWindow::on_actionSetHomeCity_triggered() {
+  key_unit_homecity();
+}
+
+void MainWindow::on_actionUpgrade_triggered() {
+  popup_upgrade_dialog(get_units_in_focus());
+}
+
+void MainWindow::on_actionConvert_triggered() {
+  key_unit_convert();
+}
+
+void MainWindow::on_actionDisband_triggered() {
+  popup_disband_dialog(get_units_in_focus());
+}
+
+void MainWindow::on_actionWait_triggered() {
+  key_unit_wait();
+}
+
+void MainWindow::on_actionDone_triggered() {
+  key_unit_done();
+}
+
+void MainWindow::on_actionFortifyUnit_triggered() {
+  key_unit_fortify();
+}
+
+void MainWindow::on_actionBuildFortFortressBuoy_triggered() {
+  key_unit_fortress();
+}
+
+void MainWindow::on_actionBuildAirstripAirbase_triggered() {
+  key_unit_airbase();
+}
+
+void MainWindow::on_actionPillage_triggered() {
+  key_unit_pillage();
+}
+
+void MainWindow::on_actionBuildCity_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    if (unit_can_add_or_build_city(punit)) {
+      request_unit_build_city(punit);
+    }
+  } unit_list_iterate_end;
+}
+
+void MainWindow::on_actionAutoWorker_triggered() {
+  key_unit_auto_settle();
+}
+
+void MainWindow::on_actionBuildRoad_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    auto t = next_extra_for_tile(unit_tile(punit),
+                                 EC_ROAD,
+                                 unit_owner(punit),
+                                 punit);
+    if (t != nullptr && can_unit_do_activity_targeted(punit, ACTIVITY_GEN_ROAD, t)) {
+      request_new_unit_activity_targeted(punit, ACTIVITY_GEN_ROAD, t);
+    }
+  } unit_list_iterate_end;
+}
+
+void MainWindow::on_actionIrrigate_triggered() {
+  key_unit_irrigate();
+}
+
+void MainWindow::on_actionMine_triggered() {
+  key_unit_mine();
+}
+
+void MainWindow::on_actionConnectWithRoad_triggered() {
+  auto proad = road_by_compat_special(ROCO_ROAD);
+  if (proad != nullptr) {
+    key_unit_connect(ACTIVITY_GEN_ROAD, road_extra_get(proad));
+  }
+}
+
+void MainWindow::on_actionConnectWithRailway_triggered() {
+  auto proad = road_by_compat_special(ROCO_RAILROAD);
+  if (proad != nullptr) {
+    key_unit_connect(ACTIVITY_GEN_ROAD, road_extra_get(proad));
+  }
+}
+
+void MainWindow::on_actionConnectWithIrrigation_triggered() {
+  auto extras = extra_type_list_by_cause(EC_IRRIGATION);
+  if (extra_type_list_size(extras) > 0) {
+    auto pextra = extra_type_list_get(extra_type_list_by_cause(EC_IRRIGATION), 0);
+    key_unit_connect(ACTIVITY_IRRIGATE, pextra);
+  }
+}
+
+void MainWindow::on_actionTransform_triggered() {
+  key_unit_transform();
+}
+
+void MainWindow::on_actionCleanPollution_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    auto pextra = prev_extra_in_tile(unit_tile(punit), ERM_CLEANPOLLUTION,
+                                     unit_owner(punit), punit);
+    if (pextra != nullptr) {
+      request_new_unit_activity_targeted(punit, ACTIVITY_POLLUTION, pextra);
+    }
+  } unit_list_iterate_end;
+}
+
+void MainWindow::on_actionCleanNuclearFallout_triggered() {
+  key_unit_fallout();
+}
+
+void MainWindow::on_actionHelpBuildWonder_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    if (utype_can_do_action(unit_type_get(punit), ACTION_HELP_WONDER)) {
+      request_unit_caravan_action(punit, ACTION_HELP_WONDER);
+    }
+  } unit_list_iterate_end;
+}
+
+
+void MainWindow::on_actionEstablishTraderoute_triggered() {
+  unit_list_iterate(get_units_in_focus(), punit) {
+    if (unit_can_est_trade_route_here(punit)) {
+      request_unit_caravan_action(punit, ACTION_TRADE_ROUTE);
+    }
+  } unit_list_iterate_end;
+}
+
 void MainWindow::on_actionUnits_triggered() {}
 void MainWindow::on_actionPlayers_triggered() {}
 void MainWindow::on_actionCities_triggered() {}
@@ -273,5 +539,11 @@ void MainWindow::on_actionHandbook_triggered() {}
 void MainWindow::on_actionConfigureShortcuts_triggered() {}
 void MainWindow::on_actionConfigureToolbar_triggered() {}
 void MainWindow::on_actionOptions_triggered() {}
-void MainWindow::on_actionShowMenubar_toggled(bool on) {}
-void MainWindow::on_actionShowToolbar_toggled(bool on) {}
+
+void MainWindow::on_actionShowMenubar_toggled(bool on) {
+  menuBar()->setVisible(on);
+}
+
+void MainWindow::on_actionShowToolbar_toggled(bool on) {
+  m_ui->toolBar->setVisible(on);
+}

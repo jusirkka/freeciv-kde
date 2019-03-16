@@ -6,16 +6,16 @@ extern "C" {
 
 void option_dialog_popup(const char *name, const struct option_set *poptset) {
   qCDebug(FC) << "TODO: option_dialog_popup" << name;
-  options_iterate(poptset, p) {
-    qCDebug(FC) << option_name(p) << option_description(p);
-  } options_iterate_end;
+//  options_iterate(poptset, p) {
+//    qCDebug(FC) << option_name(p) << option_description(p);
+//  } options_iterate_end;
 }
 
 void option_dialog_popdown(const struct option_set *poptset) {
   qCDebug(FC) << "TODO: option_dialog_popdown";
-  options_iterate(poptset, p) {
-    qCDebug(FC) << option_name(p) << option_description(p);
-  } options_iterate_end;
+//  options_iterate(poptset, p) {
+//    qCDebug(FC) << option_name(p) << option_description(p);
+//  } options_iterate_end;
 }
 
 void option_gui_update(struct option *poption) {

@@ -158,19 +158,13 @@ Game::Game(MainWindow *parent)
 
 KV::MapView* Game::createMapWidget() {
   auto view = new MapView(m_parent);
-  // auto scene = new QGraphicsScene;
-  // auto item = new MapItem;
-  // scene->addItem(item);
-  // view->setScene(scene);
-  // scene->setSceneRect(item->boundingRect());
-  // qCDebug(FC) << "Game::createMapWidget" << item->pos();
   return view;
 }
 
 Game::~Game() {}
 
 void Game::onEntry(QEvent* event) {
-  m_parent->setCentralWidget(createMapWidget());
+  m_parent->setMapView(createMapWidget());
   m_parent->enableGameMenus(true);
   QState::onEntry(event);
 }

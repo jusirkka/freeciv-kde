@@ -2,6 +2,8 @@ TEMPLATE = app
 TARGET = freeciv-kde
 QT += core gui widgets
 
+QMAKE_CXXFLAGS_DEBUG = -g -Wall -pipe -Wno-unused-parameter
+
 SOURCES += \
     themesmanager.cpp \
     messagebox.cpp \
@@ -52,7 +54,14 @@ SOURCES += \
     minimapview.cpp \
     tileinfo.cpp \
     buildables.cpp \
-    unitselector.cpp
+    unitselector.cpp \
+    outputpanemanager.cpp \
+    messagepane.cpp \
+    textbrowser.cpp \
+    chatpane.cpp \
+    reportpane.cpp \
+    playerdialog.cpp \
+    treatydialog.cpp
 
 
 HEADERS += \
@@ -81,7 +90,15 @@ HEADERS += \
     minimapview.h \
     tileinfo.h \
     buildables.h \
-    unitselector.h
+    unitselector.h \
+    ioutputpane.h \
+    outputpanemanager.h \
+    messagepane.h \
+    textbrowser.h \
+    chatpane.h \
+    reportpane.h \
+    playerdialog.h \
+    treatydialog.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -105,4 +122,6 @@ FORMS += \
     mainwindow.ui \
     startdialog.ui \
     networkdialog.ui \
-    nationdialog.ui
+    nationdialog.ui \
+    playerdialog.ui \
+    treatydialog.ui

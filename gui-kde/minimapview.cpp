@@ -79,7 +79,7 @@ void MinimapView::setScale(qreal factor)
   if (m_scale < 0.1) {
     m_scale = 0.1;
   };
-  update();
+  repaint();
 }
 
 qreal MinimapView::scale() const {
@@ -295,7 +295,7 @@ void MinimapView::mousePressEvent(QMouseEvent * event)
       r = unscalePoint(r, m_scale);
     }
     viewportCenterTo(r);
-    update();
+    repaint();
   }
   event->setAccepted(true);
 }
@@ -345,7 +345,7 @@ void MinimapView::mouseMoveEvent(QMouseEvent* event)
 void MinimapView::mouseReleaseEvent(QMouseEvent* /*event*/)
 {
   setCursor(Qt::CrossCursor);
-  update();
+  repaint();
 }
 
 void MinimapView::acquireEmptyFrame() {

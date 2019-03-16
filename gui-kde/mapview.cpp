@@ -36,6 +36,7 @@ MapView::MapView(MainWindow* parent)
   , m_dirtyCount(0)
   , m_zoom(1.0)
   , m_mainWindow(parent)
+  , m_unitSelector(nullptr)
 {
 
   m_unitInfo = new UnitInfo(this);
@@ -65,19 +66,41 @@ MapView::MapView(MainWindow* parent)
   connect(Application::instance(), &Application::createLineAtMousePos,
           this, &MapView::createLine);
   connect(Application::instance(), &Application::unitSelectDialog,
-          this, [=] (tile* t) {
-    auto d = new UnitSelector(t, this);
-    d->show();
-  });
-
+          this, &MapView::popupUnitSelector);
+  connect(Application::instance(), &Application::flushMapview,
+          this, QOverload<>::of(&MapView::repaint));
 
   QTimer *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, &MapView::animate);
   timer->start(200);
 
   setMouseTracking(true);
-  setMinimumWidth(600);
+  setMinimumWidth(650);
+  setMinimumHeight(300);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+}
+
+void MapView::zoomIn() {
+  m_zoom *= 1.2;
+  if (m_zoom > 10) m_zoom = 10;
+}
+
+void MapView::zoomOut() {
+  m_zoom *= 0.833;
+  if (m_zoom < 0.1) m_zoom = 0.1;
+}
+
+void MapView::popupUnitSelector(tile *t) {
+  if (m_unitSelector) {
+    m_unitSelector->close();
+    delete m_unitSelector;
+  }
+  m_unitSelector = new UnitSelector(t, this);
+  connect(m_unitSelector, &UnitSelector::destroyed,
+          this, [=] () {
+    m_unitSelector = nullptr;
+  });
+  m_unitSelector->show();
 }
 
 void MapView::createLine() {
@@ -141,10 +164,10 @@ void MapView::resizeEvent(QResizeEvent *event) {
 
 void MapView::flushDirty() {
   if (m_dirtyCount >= m_maxCountDirties) {
-    update();
+    repaint();
   } else {
     for (int i = 0; i < m_dirtyCount; i++) {
-      update(m_dirties[i]);
+      repaint(m_dirties[i]);
     }
   }
   m_dirtyCount = 0;
@@ -171,71 +194,75 @@ void MapView::dirtyRect(const QRect &r) {
 
 void MapView::keyPressEvent(QKeyEvent * event)
 {
+
+  // TODO: replace with QActions
+
   if (client_state() != C_S_RUNNING) return;
 
   bool shift = event->modifiers().testFlag(Qt::ShiftModifier);
   bool none = event->modifiers().testFlag(Qt::NoModifier);
+  bool alt = event->modifiers().testFlag(Qt::AltModifier);
 
   switch (event->key()) {
   case Qt::Key_Up:
   case Qt::Key_8:
     if (shift) {
-      recenter_button_pressed(width() / 2, 0);
-    } else if (none) {
       key_unit_move(DIR8_NORTH);
+    } else if (alt) {
+      recenter_button_pressed(width() / 2, 0);
     }
     return;
 
   case Qt::Key_Left:
   case Qt::Key_4:
     if (shift) {
-      recenter_button_pressed(0, height() / 2);
-    } else if (none)  {
       key_unit_move(DIR8_WEST);
+    } else if (alt)  {
+      recenter_button_pressed(0, height() / 2);
     }
     return;
 
   case Qt::Key_Right:
   case Qt::Key_6:
     if (shift) {
-      recenter_button_pressed(width(), height() / 2);
-    } else if (none)  {
       key_unit_move(DIR8_EAST);
+    } else if (alt)  {
+      recenter_button_pressed(width(), height() / 2);
     }
     return;
 
   case Qt::Key_Down:
   case Qt::Key_2:
     if (shift) {
-      recenter_button_pressed(width() / 2, height());
-    } else if (none)  {
       key_unit_move(DIR8_SOUTH);
+    } else if (alt)  {
+      recenter_button_pressed(width() / 2, height());
     }
     return;
 
   case Qt::Key_PageUp:
   case Qt::Key_9:
-    if (none) key_unit_move(DIR8_NORTHEAST);
+    if (shift) key_unit_move(DIR8_NORTHEAST);
     return;
 
   case Qt::Key_PageDown:
   case Qt::Key_3:
-    if (none) key_unit_move(DIR8_SOUTHEAST);
+    if (shift) key_unit_move(DIR8_SOUTHEAST);
     return;
 
   case Qt::Key_Home:
   case Qt::Key_7:
-    if (none) key_unit_move(DIR8_NORTHWEST);
+    if (shift) key_unit_move(DIR8_NORTHWEST);
     return;
 
   case Qt::Key_End:
   case Qt::Key_1:
-    if (none) key_unit_move(DIR8_SOUTHWEST);
+    if (shift) key_unit_move(DIR8_SOUTHWEST);
     return;
 
   case Qt::Key_5:
   case Qt::Key_Clear:
-    if (none) key_recall_previous_focus_unit();
+    if (alt) key_recall_previous_focus_unit();
     return;
 
   case Qt::Key_Escape:
@@ -269,6 +296,7 @@ void MapView::mousePressEvent(QMouseEvent *event)
       if (alt) {
         return;
       }
+      handleTileInfoPopup(pos);
       return;
     }
     if (ctrl) {
@@ -318,7 +346,6 @@ void MapView::mousePressEvent(QMouseEvent *event)
 
   if (event->button() == Qt::MiddleButton) {
     if (none) {
-      handleTileInfoPopup(pos);
       return;
     }
     if (shift) {
@@ -435,17 +462,17 @@ void MapView::handleQuickBuy(const QPoint &p) {
 }
 
 void MapView::handleSelectPress(const QPoint &p) {
-  if (!goto_is_active()) {
-    m_storedAutocenter = gui_options.auto_center_on_unit;
-    gui_options.auto_center_on_unit = false;
-    action_button_pressed(p.x(), p.y(), SELECT_FOCUS);
-  }
+  m_storedAutocenter = gui_options.auto_center_on_unit;
+  gui_options.auto_center_on_unit = false;
+  action_button_pressed(p.x(), p.y(), SELECT_POPUP);
+  gui_options.auto_center_on_unit = m_storedAutocenter;
 }
 
 
 void MapView::mouseReleaseEvent(QMouseEvent *event)
 {
   bool none = event->modifiers().testFlag(Qt::NoModifier);
+  bool shift = event->modifiers().testFlag(Qt::ShiftModifier);
   QPoint p = event->pos();
 
   if (event->button() == Qt::LeftButton) {
@@ -453,10 +480,7 @@ void MapView::mouseReleaseEvent(QMouseEvent *event)
       handleSelectRelease(p);
       return;
     }
-    return;
-  }
-  if (event->button() == Qt::MiddleButton) {
-    if (none) {
+    if (shift) {
       handleTileInfoPopdown(p);
       return;
     }
@@ -476,8 +500,6 @@ void MapView::handleTileInfoPopdown(const QPoint &) {
 }
 
 void MapView::handleSelectRelease(const QPoint &p) {
-  action_button_pressed(p.x(), p.y(), SELECT_POPUP);
-  gui_options.auto_center_on_unit = m_storedAutocenter;
   release_goto_button(p.x(), p.y());
 }
 
@@ -485,7 +507,9 @@ void MapView::handleSelectRelease(const QPoint &p) {
 void MapView::mouseMoveEvent(QMouseEvent *event)
 {
   QPoint p = event->pos();
-  update_line(p.x(), p.y());
+  if (goto_is_active()) {
+    update_line(p.x(), p.y());
+  }
   control_mouse_cursor(canvas_pos_to_tile(p.x(), p.y()));
 }
 
