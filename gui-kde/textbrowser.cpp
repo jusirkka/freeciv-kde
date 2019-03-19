@@ -11,6 +11,7 @@ using namespace KV;
 TextBrowser::TextBrowser(QWidget *parent)
   : QTextBrowser(parent)
 {
+  setOpenLinks(false);
   connect(this, &TextBrowser::anchorClicked,
           this, &TextBrowser::handleAnchorClick);
 }

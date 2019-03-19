@@ -21,16 +21,22 @@ public:
   explicit TreatyDialog(player* away, QWidget *parent = nullptr);
   ~TreatyDialog();
 
-private:
+  void removeClause(const Clause& clause);
+  void createClause(const Clause& clause);
+  void awayResolution(bool accept);
+
+  int away() const;
+
+private slots:
 
   void on_homeClauseButton_clicked();
   void on_awayClauseButton_clicked();
   void on_acceptButton_clicked();
   void on_cancelButton_clicked();
-  void on_homeGoldLine_textChanged();
-  void on_awayGoldLine_textChanged();
+  void on_homeGoldLine_returnPressed();
+  void on_awayGoldLine_returnPressed();
 
-  void removeClause(QListWidgetItem*);
+  void removeItem(QListWidgetItem*);
   void popupClauses(player* giver, player* taker);
   void allAdvances(player* giver, player* taker);
   void updateTreaty();

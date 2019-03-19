@@ -3,6 +3,8 @@
 #include <QSortFilterProxyModel>
 #include <QMenu>
 #include <QStringList>
+#include "application.h"
+#include "logging.h"
 
 #include "plrdlg_common.h"
 #include "research.h"
@@ -26,7 +28,7 @@ PlayerDialog::PlayerDialog(QWidget *parent)
   m_filter->setDynamicSortFilter(true);
   m_filter->setSourceModel(m_players);
   m_filter->setFilterRole(Qt::DisplayRole);
-  m_ui->playerView->setModel(m_players);
+  m_ui->playerView->setModel(m_filter);
   m_ui->playerView->setAllColumnsShowFocus(true);
   m_ui->playerView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -35,6 +37,42 @@ PlayerDialog::PlayerDialog(QWidget *parent)
           this, &PlayerDialog::popupHeaderMenu);
   connect(m_ui->playerView->selectionModel(), &QItemSelectionModel::selectionChanged,
           this, &PlayerDialog::playerSelected);
+
+  updatePlayers();
+
+  connect(Application::instance(), &Application::updatePlayers,
+          this, &PlayerDialog::updatePlayers);
+
+}
+
+
+void PlayerDialog::updatePlayers() {
+  auto curr = m_ui->playerView->selectionModel()->selection();
+  player* s = nullptr;
+  if (!curr.isEmpty()) {
+    auto i = curr.first().indexes().first();
+    s = reinterpret_cast<player*>(i.data(Qt::UserRole).value<void*>());
+  }
+
+  m_players->reset();
+
+  if (s) {
+    int cnt = m_filter->rowCount();
+    for (int row = 0; row < cnt; row++) {
+      auto d = m_filter->index(row, 0).data(Qt::UserRole);
+      if (d.isNull()) continue;
+      auto p = reinterpret_cast<player*>(d.value<void*>());
+      if (s == p) {
+        m_ui->playerView->selectionModel()->select(
+              m_filter->index(row, 0),
+              QItemSelectionModel::Rows|QItemSelectionModel::Select);
+        break;
+      }
+    }
+  } else {
+    playerSelected(QItemSelection(), QItemSelection());
+  }
+
 }
 
 void PlayerDialog::popupHeaderMenu(const QPoint &p)
@@ -255,7 +293,7 @@ void PlayerDialog::on_withdrawVisionButton_clicked()
 }
 
 void PlayerDialog::on_closeButton_clicked() {
-  hide();
+  emit closeRequest();
 }
 
 PlayerDialog::~PlayerDialog()
@@ -270,6 +308,10 @@ PlayerModel::PlayerModel(QObject *parent)
 
 int PlayerModel::rowCount(const QModelIndex &/*parent*/) const {
   return m_players.size();
+}
+
+int PlayerModel::columnCount(const QModelIndex &/*parent*/) const {
+  return num_player_dlg_columns;
 }
 
 QVariant PlayerModel::data(const QModelIndex &index, int role) const {

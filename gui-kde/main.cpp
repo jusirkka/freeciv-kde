@@ -330,17 +330,21 @@ static void setup_gui_funcs() {
     // qCDebug(FC) << "update_timeout_label";
     KV::Application::UpdateTurnTimeout();
   };
-  funcs->real_city_dialog_popup = [] (struct city* /*pcity*/) {
-    qCDebug(FC) << "TODO: real_city_dialog_popup";
+  funcs->real_city_dialog_popup = [] (struct city* pcity) {
+    qCDebug(FC) << "real_city_dialog_popup";
+    KV::Application::RefreshCityDialog(pcity, true);
   };
-  funcs->real_city_dialog_refresh = [] (struct city* /*pcity*/) {
-    qCDebug(FC) << "TODO: real_city_dialog_refresh";
+  funcs->real_city_dialog_refresh = [] (struct city* pcity) {
+    qCDebug(FC) << "real_city_dialog_refresh";
+    KV::Application::RefreshCityDialog(pcity, false);
   };
-  funcs->popdown_city_dialog = [] (struct city* /*pcity*/) {
-    qCDebug(FC) << "TODO: popdown_city_dialog";
+  funcs->popdown_city_dialog = [] (struct city* pcity) {
+    qCDebug(FC) << "popdown_city_dialog";
+    KV::Application::PopdownCityDialog(pcity);
   };
   funcs->popdown_all_city_dialogs = [] () {
-    qCDebug(FC) << "TODO: popdown_all_city_dialogs";
+    qCDebug(FC) << "popdown_all_city_dialogs";
+    KV::Application::PopdownCityDialog(nullptr);
   };
   funcs->handmade_scenario_warning = [] () {
     qCDebug(FC) << "TODO: handmade_scenario_warning";

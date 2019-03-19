@@ -2,17 +2,21 @@ extern "C" {
 #include "cityrep_g.h"
 }
 #include "logging.h"
+#include "application.h"
 
-void city_report_dialog_popup(bool raise) {
-  qCDebug(FC) << "TODO: city_report_dialog_popup";
+void city_report_dialog_popup(bool /*raise*/) {
+  qCDebug(FC) << "city_report_dialog_popup";
+  KV::Application::PopupCityReport();
 }
 
-void real_city_report_dialog_update(void *unused) {
-  qCDebug(FC) << "TODO: real_city_report_dialog_update";
+void real_city_report_dialog_update(void */*unused*/) {
+  qCDebug(FC) << "real_city_report_dialog_update";
+  KV::Application::UpdateCityReport();
 }
 
 void real_city_report_update_city(struct city *pcity) {
-  qCDebug(FC) << "TODO: real_city_report_update_city";
+  qCDebug(FC) << "real_city_report_update_city";
+  KV::Application::UpdateCity(pcity);
 }
 
 void hilite_cities_from_canvas() {

@@ -51,9 +51,9 @@ GameInfo::GameInfo(QWidget *parent)
   layout->addWidget(m_turnTime);
   layout->addSpacerItem(new QSpacerItem(spacer));
 
-  m_researchTimer->setSingleShot(true);
   setLayout(layout);
 
+  m_researchTimer->setSingleShot(true);
   connect(m_researchTimer, &QTimer::timeout,
           this, &GameInfo::blink);
 
@@ -136,8 +136,7 @@ void GameInfo::blink() {
 
   if (client.conn.playing != nullptr) {
     research *r = research_get(client_player());
-    if (m_researchTimer->isActive() && (r->researching != A_UNSET
-                                        || r->tech_goal != A_UNSET)) {
+    if (r->researching != A_UNSET || r->tech_goal != A_UNSET) {
       m_researchTimer->stop();
       m_research->setStyleSheet(researchInfoStyle);
     } else {

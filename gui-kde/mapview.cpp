@@ -435,11 +435,10 @@ void MapView::handleProductionSelect(const QPoint &p) {
   city* pcity = tile_city(ptile);
   bool mycity = pcity  && pcity->owner == client_player();
   if (mycity) {
-    auto w = new Buildables(pcity, Buildables::ShowUnits, this);
-    connect(w, &Buildables::selected, this, [=] (universal* u){
-      city_change_production(pcity, u);
+    auto w = new Buildables(pcity, BuildablesFilter::UnitsBuildingsWonders, this);
+    connect(w, &Buildables::selected, this, [=] (universal u){
+      city_change_production(pcity, &u);
       w->close();
-      w->deleteLater();
     });
     w->show();
   }
@@ -450,12 +449,11 @@ void MapView::handleQuickBuy(const QPoint &p) {
   city* pcity = tile_city(ptile);
   bool mycity = pcity  && pcity->owner == client_player();
   if (mycity) {
-    auto w = new Buildables(pcity, Buildables::ShowUnits, this);
-    connect(w, &Buildables::selected, this, [=] (universal* u){
-      city_change_production(pcity, u);
+    auto w = new Buildables(pcity, BuildablesFilter::UnitsBuildingsWonders, this);
+    connect(w, &Buildables::selected, this, [=] (universal u){
+      city_change_production(pcity, &u);
       city_buy_production(pcity);
       w->close();
-      w->deleteLater();
     });
     w->show();
   }

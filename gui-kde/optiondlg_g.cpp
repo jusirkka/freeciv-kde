@@ -24,8 +24,12 @@ void option_gui_update(struct option *poption) {
 }
 
 void option_gui_add(struct option *poption) {
-  qCDebug(FC) << "TODO: option_gui_add"
-              << option_name(poption) << option_description(poption);
+  static bool once = true;
+  if (once) {
+    qCDebug(FC) << "TODO: option_gui_add"
+                << option_name(poption) << option_description(poption);
+    once = false;
+  }
 }
 
 void option_gui_remove(struct option *poption) {

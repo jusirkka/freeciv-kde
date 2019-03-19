@@ -33,11 +33,16 @@ MinimapView::MinimapView(QWidget *parent)
   , m_empty(m_bufferSize)
 {
   setCursor(Qt::CrossCursor);
+  connect(m_thread, &MinimapThread::finished, this, [=] () {
+    setDisabled(true);
+  });
   m_thread->start();
 }
 
 void MinimapView::paintEvent(QPaintEvent */*event*/)
 {
+
+  if (!isEnabled()) return;
 
   m_filled.acquire();
 

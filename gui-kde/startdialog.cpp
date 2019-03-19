@@ -247,6 +247,9 @@ void StartDialog::popupTreeMenu(const QPoint &p) {
     a = new QAction(_("Take this player"));
     connect(a, &QAction::triggered, this, [=]() {
       send_chat(serverCommand(QString("take %1").arg(name)).toUtf8());
+      if (is_ai(selected)) {
+        send_chat(serverCommand("away").toUtf8());
+      }
     });
     menu->addAction(a);
   }

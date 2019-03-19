@@ -20,6 +20,9 @@ class Network;
 class ChatLineEdit;
 class OutputPaneManager;
 class MapView;
+class PlayerWidget;
+class CityView;
+class CityDialog;
 
 class MainWindow: public QMainWindow
 {
@@ -107,7 +110,6 @@ private slots:
   void on_actionEconomy_triggered();
   void on_actionResearch_triggered();
   void on_actionSpaceship_triggered();
-  void on_actionAchievements_triggered();
   void on_actionAbout_triggered();
   void on_actionHandbook_triggered();
   void on_actionConfigureShortcuts_triggered();
@@ -138,6 +140,9 @@ private:
   MapView* m_mapView;
   OutputPaneManager* m_panes;
   ChatLineEdit* m_chatLine = nullptr;
+  PlayerWidget* m_players;
+  CityView* m_cityReport;
+  CityDialog* m_cityManager;
 
 };
 

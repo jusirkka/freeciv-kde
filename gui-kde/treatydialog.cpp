@@ -68,11 +68,11 @@ TreatyDialog::TreatyDialog(player* away, QWidget *parent)
     m_ui->awayLeaderLabel->setToolTip(tip);
   }
 
-
-  auto leader = QString("<b><h3>%1</h3></b>").arg(nation_plural_for_player(me));
+  char buf[1024];
+  auto leader = QString("<b><h3>%1</h3></b>").arg(ruler_title_for_player(me, buf, sizeof(buf)));
   m_ui->homeLeaderLabel->setText(leader);
 
-  leader = QString("<b><h3>%1</h3></b>").arg(nation_plural_for_player(m_away));
+  leader = QString("<b><h3>%1</h3></b>").arg(ruler_title_for_player(m_away, buf, sizeof(buf)));
   m_ui->awayLeaderLabel->setText(leader);
 
   if (game.info.trading_gold) {
@@ -84,45 +84,50 @@ TreatyDialog::TreatyDialog(player* away, QWidget *parent)
   }
 
   connect(m_ui->clauseList, &QListWidget::itemDoubleClicked,
-          this, &TreatyDialog::removeClause);
+          this, &TreatyDialog::removeItem);
 
   updateTreaty();
 }
 
-void TreatyDialog::removeClause(QListWidgetItem *item)
+void TreatyDialog::removeItem(QListWidgetItem *item)
 {
   int row = item->data(Qt::UserRole).toInt();
   const Clause& d = m_clauses.at(row);
   dsend_packet_diplomacy_remove_clause_req(&client.conn,
-                                           player_number(m_away),
+                                           away(),
                                            player_number(d.from),
                                            d.type, d.value);
 }
 
 
-void TreatyDialog::on_awayGoldLine_textChanged()
+void TreatyDialog::on_awayGoldLine_returnPressed()
 {
   bool ok;
   int gold = m_ui->awayGoldLine->text().toInt(&ok);
   if (!ok) return;
-  int aid = player_number(m_away);
-  dsend_packet_diplomacy_create_clause_req(&client.conn, aid, aid, CLAUSE_GOLD, gold);
+  dsend_packet_diplomacy_create_clause_req(&client.conn, away(), away(), CLAUSE_GOLD, gold);
 }
 
-void TreatyDialog::on_homeGoldLine_textChanged()
+void TreatyDialog::on_homeGoldLine_returnPressed()
 {
   bool ok;
   int gold = m_ui->homeGoldLine->text().toInt(&ok);
   if (!ok) return;
-  int aid = player_number(m_away);
   int hid = player_number(client_player());
-  dsend_packet_diplomacy_create_clause_req(&client.conn, aid, hid, CLAUSE_GOLD, gold);
+  dsend_packet_diplomacy_create_clause_req(&client.conn, away(), hid, CLAUSE_GOLD, gold);
+}
+
+void TreatyDialog::on_homeClauseButton_clicked() {
+  popupClauses(client_player(), m_away);
+}
+
+void TreatyDialog::on_awayClauseButton_clicked() {
+  popupClauses(m_away, client_player());
 }
 
 void TreatyDialog::popupClauses(player* giver, player* taker)
 {
   auto gid = player_number(giver);
-  auto aid = player_number(m_away);
 
   QMenu menu;
   /* Maps */
@@ -130,14 +135,14 @@ void TreatyDialog::popupClauses(player* giver, player* taker)
   auto a = new QAction(_("Worldmap"));
   connect(a, &QAction::triggered, this, [=] () {
     dsend_packet_diplomacy_create_clause_req(&client.conn,
-                                             player_number(m_away),
+                                             away(),
                                              gid, CLAUSE_MAP, 0);
   });
   maps->addAction(a);
   a = new QAction(_("Seamap"));
   connect(a, &QAction::triggered, this, [=] () {
     dsend_packet_diplomacy_create_clause_req(&client.conn,
-                                             player_number(m_away),
+                                             away(),
                                              gid, CLAUSE_SEAMAP, 0);
   });
   maps->addAction(a);
@@ -165,7 +170,7 @@ void TreatyDialog::popupClauses(player* giver, player* taker)
               || research_invention_state(tres, id) == TECH_PREREQS_KNOWN)) {
         a = new QAction(advance_name_translation(p));
         connect(a, &QAction::triggered, this, [=] () {
-          dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_ADVANCE, id);
+          dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_ADVANCE, id);
         });
         advances->addAction(a);
       }
@@ -180,7 +185,7 @@ void TreatyDialog::popupClauses(player* giver, player* taker)
       if (is_capital(pcity)) continue;
       a = new QAction(pcity->name);
       connect(a, &QAction::triggered, this, [=] () {
-        dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_CITY, pcity->id);
+        dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_CITY, pcity->id);
       });
       cities->addAction(a);
     } city_list_iterate_end;
@@ -188,7 +193,7 @@ void TreatyDialog::popupClauses(player* giver, player* taker)
 
   a = new QAction(_("Give shared vision"));
   connect(a, &QAction::triggered, this, [=] () {
-    dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_VISION, 0);
+    dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_VISION, 0);
   });
   menu.addAction(a);
 
@@ -198,7 +203,7 @@ void TreatyDialog::popupClauses(player* giver, player* taker)
 
   a = new QAction(_("Give embassy"));
   connect(a, &QAction::triggered, this, [=] () {
-    dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_EMBASSY, 0);
+    dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_EMBASSY, 0);
   });
   menu.addAction(a);
   a->setDisabled(player_has_real_embassy(taker, giver));
@@ -208,21 +213,21 @@ void TreatyDialog::popupClauses(player* giver, player* taker)
   auto state = player_diplstate_get(giver, taker)->type;
   a = new QAction(Q_("?diplomatic_state:Cease-fire"));
   connect(a, &QAction::triggered, this, [=] () {
-    dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_CEASEFIRE, 0);
+    dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_CEASEFIRE, 0);
   });
   pacts->addAction(a);
   a->setDisabled(state == DS_CEASEFIRE || state == DS_TEAM);
 
   a = new QAction(Q_("?diplomatic_state:Peace"));
   connect(a, &QAction::triggered, this, [=] () {
-    dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_PEACE, 0);
+    dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_PEACE, 0);
   });
   pacts->addAction(a);
   a->setDisabled(state == DS_PEACE || state == DS_TEAM);
 
   a = new QAction(Q_("?diplomatic_state:Alliance"));
   connect(a, &QAction::triggered, this, [=] () {
-    dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_ALLIANCE, 0);
+    dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_ALLIANCE, 0);
   });
   pacts->addAction(a);
   a->setDisabled(state == DS_ALLIANCE || state == DS_TEAM);
@@ -236,7 +241,6 @@ void TreatyDialog::allAdvances(player* giver, player* taker) {
   auto tres = research_get(taker);
 
   auto gid = player_number(giver);
-  auto aid = player_number(m_away);
 
   advance_iterate(A_FIRST, p) {
     Tech_type_id id = advance_number(p);
@@ -245,9 +249,44 @@ void TreatyDialog::allAdvances(player* giver, player* taker) {
         && research_invention_gettable(tres, id, game.info.tech_trade_allow_holes)
         && (research_invention_state(tres, id) == TECH_UNKNOWN
             || research_invention_state(tres, id) == TECH_PREREQS_KNOWN)) {
-      dsend_packet_diplomacy_create_clause_req(&client.conn, aid, gid, CLAUSE_ADVANCE, id);
+      dsend_packet_diplomacy_create_clause_req(&client.conn, away(), gid, CLAUSE_ADVANCE, id);
     }
   } advance_iterate_end;
+}
+
+static bool clausesEqual(const Clause& c1, const Clause& c2) {
+  return c1.type == c2.type && c1.from == c2.from && c1.value == c2.value;
+}
+
+void TreatyDialog::removeClause(const Clause& clause) {
+  int found = -1;
+  for (int i = 0; i < m_clauses.count(); i++) {
+    if (clausesEqual(m_clauses[i], clause)) {
+      found = i;
+      break;
+    }
+  }
+  if (found < 0) return;
+  m_clauses.remove(found);
+  updateTreaty();
+}
+
+void TreatyDialog::createClause(const Clause& clause) {
+  int found = -1;
+  for (int i = 0; i < m_clauses.count(); i++) {
+    if (clausesEqual(m_clauses[i], clause)) {
+      found = i;
+      break;
+    }
+  }
+  if (found > 0) return;
+  m_clauses.append(clause);
+  updateTreaty();
+}
+
+void TreatyDialog::awayResolution(bool accept) {
+  m_awayAccepts = accept;
+  updateTreaty();
 }
 
 void TreatyDialog::updateTreaty() {
@@ -277,11 +316,15 @@ void TreatyDialog::updateTreaty() {
 }
 
 void TreatyDialog::on_acceptButton_clicked() {
-  dsend_packet_diplomacy_accept_treaty_req(&client.conn, player_number(m_away));
+  dsend_packet_diplomacy_accept_treaty_req(&client.conn, away());
 }
 
 void TreatyDialog::on_cancelButton_clicked() {
-  dsend_packet_diplomacy_cancel_meeting_req(&client.conn, player_number(m_away));
+  dsend_packet_diplomacy_cancel_meeting_req(&client.conn, away());
+}
+
+int TreatyDialog::away() const {
+  return player_number(m_away);
 }
 
 TreatyDialog::~TreatyDialog() {

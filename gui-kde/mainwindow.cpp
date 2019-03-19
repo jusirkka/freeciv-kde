@@ -23,6 +23,9 @@ extern "C" {
 #include "messagepane.h"
 #include "chatpane.h"
 #include "reportpane.h"
+#include "playerwidget.h"
+#include "cityview.h"
+#include "citydialog.h"
 
 using namespace KV;
 
@@ -45,6 +48,35 @@ MainWindow::MainWindow()
                                     new DemographicsPane,
                                     new AchievementsPane,
                                     chatPane}, this);
+
+  m_players = new PlayerWidget(this);
+  connect(Application::instance(), &Application::popupPlayers,
+          this, &MainWindow::on_actionPlayers_triggered);
+
+
+  m_cityReport = new CityView(this);
+  connect(Application::instance(), &Application::popupCityReport,
+          this, &MainWindow::on_actionCities_triggered);
+
+  m_cityManager = new CityDialog(m_cityReport, this);
+  connect(Application::instance(), &Application::refreshCityDialog,
+          this, [=] (city* c, bool pop) {
+    if (pop) {
+      m_cityManager->changeCity(c);
+      m_cityManager->show();
+      m_cityManager->raise();
+    } else {
+      if (c == m_cityManager->current() && m_cityManager->isVisible()) {
+        m_cityManager->refresh();
+      }
+    }
+  });
+  connect(Application::instance(), &Application::popdownCityDialog,
+          this, [=] (city* c) {
+    if (c == nullptr || c == m_cityManager->current()) {
+      m_cityManager->hide();
+    }
+  });
 
   auto intro = new State::Intro(this);
   connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);
@@ -169,7 +201,6 @@ void MainWindow::enableGameMenus(bool ok) {
   m_ui->actionEconomy->setEnabled(ok);
   m_ui->actionResearch->setEnabled(ok);
   m_ui->actionSpaceship->setEnabled(ok);
-  m_ui->actionAchievements->setEnabled(ok);
   m_ui->actionOptions->setEnabled(ok);
 }
 
@@ -528,12 +559,28 @@ void MainWindow::on_actionEstablishTraderoute_triggered() {
 }
 
 void MainWindow::on_actionUnits_triggered() {}
-void MainWindow::on_actionPlayers_triggered() {}
-void MainWindow::on_actionCities_triggered() {}
+
+void MainWindow::on_actionPlayers_triggered() {
+  if (m_players->isVisible()) {
+      m_players->hide();
+  } else {
+    m_players->show();
+    m_players->raise();
+  }
+}
+
+void MainWindow::on_actionCities_triggered() {
+  if (m_cityReport->isVisible()) {
+      m_cityReport->hide();
+  } else {
+    m_cityReport->show();
+    m_cityReport->raise();
+  }
+}
+
 void MainWindow::on_actionEconomy_triggered() {}
 void MainWindow::on_actionResearch_triggered() {}
 void MainWindow::on_actionSpaceship_triggered() {}
-void MainWindow::on_actionAchievements_triggered() {}
 void MainWindow::on_actionAbout_triggered() {}
 void MainWindow::on_actionHandbook_triggered() {}
 void MainWindow::on_actionConfigureShortcuts_triggered() {}

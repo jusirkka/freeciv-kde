@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>638</width>
-    <height>478</height>
+    <width>636</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,6 +47,19 @@
              </item>
             </layout>
            </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
          <item>
@@ -80,7 +93,8 @@
               <string>Add Clause...</string>
              </property>
              <property name="icon">
-              <iconset theme="arrow-right"/>
+              <iconset theme="arrow-right">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -105,6 +119,19 @@
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item>
             <widget class="QLabel" name="awayFlagLabel">
              <property name="text">
@@ -163,7 +190,8 @@
               <string>Add Clause...</string>
              </property>
              <property name="icon">
-              <iconset theme="arrow-right"/>
+              <iconset theme="arrow-right">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -214,7 +242,8 @@
           <string>Accept Treaty</string>
          </property>
          <property name="icon">
-          <iconset theme="dialog-ok"/>
+          <iconset theme="dialog-ok">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
@@ -224,7 +253,8 @@
           <string>Cancel Meeting</string>
          </property>
          <property name="icon">
-          <iconset theme="dialog-cancel"/>
+          <iconset theme="dialog-cancel">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>

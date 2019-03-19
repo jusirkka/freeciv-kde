@@ -12,6 +12,9 @@
 #include "client_main.h"
 #include "tilespec.h"
 #include "clinet.h"
+#include "mapview_common.h"
+#include "overview_common.h"
+#include "citydlg_common.h"
 
 #include "colors.h"
 #include "sprite.h"
@@ -80,6 +83,9 @@ void Application::Main(int argc, char *argv[]) {
 
 
   set_client_state(C_S_DISCONNECTED);
+
+  init_mapcanvas_and_overview();
+  calculate_overview_dimensions();
 
   // mainwindow ctor refers to application instance:
   // create it first
@@ -227,7 +233,11 @@ void Application::ChatMessage(const char *s, const text_tag_list *tags, int) {
 }
 
 QFont Application::Font(enum client_font /*font*/) {
-  qCDebug(FC) << "TODO: Application::Font";
+  static bool once = true;
+  if (once) {
+    qCDebug(FC) << "TODO: Application::Font";
+    once = false;
+  }
   return QFontDatabase::systemFont(QFontDatabase::GeneralFont);
 }
 
@@ -246,6 +256,10 @@ QIcon Application::Icon(const QString& name) {
   }
 
   return QIcon(icon);
+}
+
+MainWindow* Application::Mainwin() {
+  return instance()->m_mainWindow;
 }
 
 void Application::SetRulesets(int num_rulesets, char **rulesets) {
@@ -327,6 +341,60 @@ void Application::UpdateMessages() {
 void Application::UpdateReport(const QStringList &report) {
   instance()->updateReport(report);
 }
+
+void Application::PopupPlayers() {
+  instance()->popupPlayers();
+}
+
+void Application::UpdatePlayers() {
+  instance()->updatePlayers();
+}
+
+void Application::InitMeeting(int counterpart) {
+  instance()->initMeeting(counterpart);
+}
+
+
+void Application::CancelMeeting(int counterpart) {
+  instance()->cancelMeeting(counterpart);
+}
+
+void Application::CreateClause(int counterpart, const Clause& clause) {
+  instance()->createClause(counterpart, clause);
+}
+
+void Application::RemoveClause(int counterpart, const Clause& clause) {
+  instance()->removeClause(counterpart, clause);
+}
+
+void Application::AcceptTreaty(int counterpart, bool resolution) {
+  instance()->acceptTreaty(counterpart, resolution);
+}
+
+void Application::CloseAllTreatyDialogs() {
+  instance()->closeAllTreatyDialogs();
+}
+
+void Application::PopupCityReport() {
+  instance()->popupCityReport();
+}
+
+void Application::UpdateCityReport() {
+  instance()->updateCityReport();
+}
+
+void Application::UpdateCity(city* c) {
+  instance()->updateCity(c);
+}
+
+void Application::RefreshCityDialog(city* c, bool popup) {
+  instance()->refreshCityDialog(c, popup);
+}
+
+void Application::PopdownCityDialog(city* c) {
+  instance()->popdownCityDialog(c);
+}
+
 
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";

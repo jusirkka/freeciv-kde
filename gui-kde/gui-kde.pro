@@ -61,7 +61,14 @@ SOURCES += \
     chatpane.cpp \
     reportpane.cpp \
     playerdialog.cpp \
-    treatydialog.cpp
+    treatydialog.cpp \
+    playerwidget.cpp \
+    citydialog.cpp \
+    productionheader.cpp \
+    citymap.cpp \
+    unitlistwidget.cpp \
+    cityview.cpp \
+    cityinfowidget.cpp
 
 
 HEADERS += \
@@ -98,7 +105,14 @@ HEADERS += \
     chatpane.h \
     reportpane.h \
     playerdialog.h \
-    treatydialog.h
+    treatydialog.h \
+    playerwidget.h \
+    citydialog.h \
+    productionheader.h \
+    citymap.h \
+    unitlistwidget.h \
+    cityview.h \
+    cityinfowidget.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -107,6 +121,7 @@ INCLUDEPATH += ../freeciv/common \
     ../freeciv/utility \
     ../freeciv/gen_headers \
     ../freeciv/client \
+    ../freeciv/client/agents \
     ../freeciv/client/include \
 
 DEFINES += HAVE_CONFIG_H \
@@ -124,4 +139,7 @@ FORMS += \
     networkdialog.ui \
     nationdialog.ui \
     playerdialog.ui \
-    treatydialog.ui
+    treatydialog.ui \
+    citydialog.ui \
+    productionheader.ui \
+    cityview.ui

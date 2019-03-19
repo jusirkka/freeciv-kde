@@ -20,7 +20,6 @@
 #include "clinet.h"
 #include "client_main.h"
 #include "connectdlg_common.h"
-#include "mapview_common.h"
 
 
 using namespace KV::State;
@@ -153,7 +152,6 @@ void Network::onExit(QEvent* event) {
 Game::Game(MainWindow *parent)
   : Base(parent, PAGE_GAME)
 {
-  init_mapcanvas_and_overview();
 }
 
 KV::MapView* Game::createMapWidget() {

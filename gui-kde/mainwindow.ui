@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
-    <height>470</height>
+    <width>626</width>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>630</width>
+     <width>626</width>
      <height>25</height>
     </rect>
    </property>
@@ -150,7 +150,6 @@
     <addaction name="actionEconomy"/>
     <addaction name="actionResearch"/>
     <addaction name="actionSpaceship"/>
-    <addaction name="actionAchievements"/>
     <addaction name="separator"/>
     <addaction name="actionConfigureShortcuts"/>
     <addaction name="actionConfigureToolbar"/>
@@ -968,14 +967,6 @@
    </property>
    <property name="shortcut">
     <string>F12</string>
-   </property>
-  </action>
-  <action name="actionAchievements">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Achievements</string>
    </property>
   </action>
   <action name="actionAbout">

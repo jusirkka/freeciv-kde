@@ -17,6 +17,7 @@ class QIcon;
 class QSocketNotifier;
 
 struct text_tag_list;
+struct Clause;
 
 namespace KV {
 
@@ -38,6 +39,9 @@ class Application: public QObject {
   friend class GovMenu;
   friend class BrowserWidget;
   friend class ReportWidget;
+  friend class PlayerWidget;
+  friend class PlayerDialog;
+  friend class CityModel;
 
 public:
 
@@ -59,6 +63,7 @@ public:
    */
   static void Beep();
 
+  static MainWindow* Mainwin();
   static void VersionMessage(const char* version);
   static void ChatMessage(const char *astring,
                           const text_tag_list* tags,
@@ -90,6 +95,20 @@ public:
   static QString ApplyTags(const char *s, const text_tag_list *tags);
   static void UpdateMessages();
   static void UpdateReport(const QStringList& report);
+  static void PopupPlayers();
+  static void UpdatePlayers();
+  static void InitMeeting(int counterpart);
+  static void CancelMeeting(int counterpart);
+  static void CreateClause(int counterpart, const Clause& clause);
+  static void RemoveClause(int counterpart, const Clause& clause);
+  static void AcceptTreaty(int counterpart, bool resolution);
+  static void CloseAllTreatyDialogs();
+  static void PopupCityReport();
+  static void UpdateCityReport();
+  static void UpdateCity(city*);
+  static void RefreshCityDialog(city*, bool popup);
+  static void PopdownCityDialog(city*);
+
 
 
 signals:
@@ -114,6 +133,21 @@ signals:
   void flushMapview();
   void updateMessages();
   void updateReport(const QStringList& report);
+  void popupPlayers();
+  void updatePlayers();
+  void initMeeting(int counterpart);
+  void cancelMeeting(int counterpart);
+  void createClause(int counterpart, const Clause& clause);
+  void removeClause(int counterpart, const Clause& clause);
+  void acceptTreaty(int counterpart, bool resolution);
+  void closeAllTreatyDialogs();
+  void popupCityReport();
+  void updateCityReport();
+  void updateCity(city*);
+  void refreshCityDialog(city*, bool popup);
+  void popdownCityDialog(city*);
+
+
 
 private:
 

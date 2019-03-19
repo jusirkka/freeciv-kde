@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CityView</class>
+ <widget class="QDialog" name="CityView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>585</width>
+    <height>365</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QTableView" name="cityView">
+       <property name="minimumSize">
+        <size>
+         <width>500</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="showGrid">
+        <bool>false</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="filterButton">
+         <property name="text">
+          <string>Filter...</string>
+         </property>
+         <property name="icon">
+          <iconset theme="view-filter"/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>308</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="closeButton">
+         <property name="text">
+          <string>Close</string>
+         </property>
+         <property name="icon">
+          <iconset theme="dialog-close"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CityView</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>523</x>
+     <y>333</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
