@@ -65,10 +65,8 @@ MainWindow::MainWindow()
       m_cityManager->changeCity(c);
       m_cityManager->show();
       m_cityManager->raise();
-    } else {
-      if (c == m_cityManager->current() && m_cityManager->isVisible()) {
-        m_cityManager->refresh();
-      }
+    } else if (m_cityManager->isVisible()) {
+      m_cityManager->refresh(c);
     }
   });
   connect(Application::instance(), &Application::popdownCityDialog,
@@ -77,6 +75,13 @@ MainWindow::MainWindow()
       m_cityManager->hide();
     }
   });
+  connect(m_cityReport, &CityView::manageCity, this, [=] (city* c) {
+    m_cityManager->changeCity(c);
+    m_cityManager->show();
+    m_cityManager->raise();
+  });
+
+
 
   auto intro = new State::Intro(this);
   connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);

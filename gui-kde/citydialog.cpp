@@ -1,15 +1,16 @@
 #include "citydialog.h"
 #include "ui_citydialog.h"
-#include "city.h"
 #include "citymap.h"
-#include "productionheader.h"
 #include "cityview.h"
 #include <QPixmap>
 #include "sprite.h"
 #include "messagebox.h"
 #include "cityinfowidget.h"
+#include "productiondialog.h"
+#include "governordialog.h"
 
 
+#include "city.h"
 #include "climisc.h"
 #include "tilespec.h"
 #include "client_main.h"
@@ -23,6 +24,8 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
   : QDialog(parent)
   , m_ui(new Ui::CityDialog)
   , m_cities(cities)
+  , m_production(new ProductionDialog(cities, this))
+  , m_governor(new GovernorDialog(cities, this))
 {
   m_ui->setupUi(this);
   // map widget
@@ -44,14 +47,31 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
   // present units
   connect(this, &CityDialog::cityChanged,
           m_ui->presentFrame, &UnitListWidget::changeCity);
-  // buttons
+  // next/prev buttons
   updateButtons();
 
   connect(m_cities, &CityView::orderingChanged,
           this, &CityDialog::updateButtons);
 
-  connect(m_cities, &CityView::manageCity,
-          this, &CityDialog::changeCity);
+  connect(m_ui->nextButton, &QPushButton::clicked, this, [=] () {
+    changeCity(m_cities->next(m_city));
+  });
+
+  connect(m_ui->previousButton, &QPushButton::clicked, this, [=] () {
+    changeCity(m_cities->prev(m_city));
+  });
+
+  // production/governor buttons
+  connect(m_ui->productionButton, &QPushButton::clicked, this, [=] () {
+    m_production->changeCity(m_city);
+    m_production->show();
+  });
+
+  connect(m_ui->governorButton, &QPushButton::clicked, this, [=] () {
+    m_governor->changeCity(m_city);
+    m_governor->show();
+  });
+
 }
 
 CityDialog::~CityDialog()
@@ -63,10 +83,18 @@ city* CityDialog::current() const {
   return m_city;
 }
 
-void CityDialog::refresh() {
-  changeCity(m_city);
+void CityDialog::refresh(city* c) {
+  if (c == m_city) {
+    changeCity(c);
+  } else {
+    if (m_production->isVisible()) {
+      m_production->refresh(c);
+    }
+    if (m_governor->isVisible()) {
+      m_governor->refresh(c);
+    }
+  }
 }
-
 
 void CityDialog::changeCity(city *c) {
   m_city = c;
@@ -79,8 +107,16 @@ void CityDialog::changeCity(city *c) {
   // city info signalled
   // supported units signalled
   // present units signalled
-  // buttons
+  // next/prev buttons
   updateButtons();
+  // gov/prod dialogs work independently - only refresh
+  if (m_production->isVisible()) {
+    m_production->refresh(m_city);
+  }
+  if (m_governor->isVisible()) {
+    m_governor->refresh(m_city);
+  }
+
 
   updateTitle();
 }
@@ -103,7 +139,6 @@ void CityDialog::updateButtons() {
   canGo = m_cities->hasPrev(m_city);
   m_ui->previousButton->setEnabled(canGo);
   m_ui->previousButton->setText(canGo ? city_name_get(m_cities->prev(m_city)) : "Previous");
-
 }
 
 

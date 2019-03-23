@@ -9,6 +9,7 @@
 #include <QToolTip>
 #include "logging.h"
 #include <QItemSelectionModel>
+#include <QMimeData>
 
 #include "city.h"
 #include "tech.h"
@@ -39,13 +40,8 @@ BuildablesModel::BuildablesModel(city *c, QObject *parent)
   : QAbstractListModel(parent)
   , m_city(c)
 {
-  universal targets[MAX_NUM_PRODUCTION_TARGETS];
-  auto numTargets = collect_eventually_buildable_targets(targets, m_city, true);
-  item props[numTargets];
-  name_and_sort_items(targets, numTargets, props, false, m_city);
-
-  for (int row = 0; row < numTargets; row++) {
-    m_targets << cid_encode(props[row].item);
+  if (m_city != nullptr) {
+    changeCity(m_city);
   }
 }
 
@@ -58,9 +54,40 @@ QVariant BuildablesModel::data(const QModelIndex &index, int role) const {
 
   int row = index.row();
 
+  if (role == Qt::UserRole) {
+    return m_targets[row];
+  }
+
+  universal u = cid_decode(m_targets[row]);
+
+  if (role == Qt::DisplayRole) {
+    if (u.kind == VUT_UTYPE) {
+      return QString(utype_name_translation(u.value.utype));
+    }
+    return QString(improvement_name_translation(u.value.building));
+  }
+
+  if (role == Qt::DecorationRole) {
+    int h = QApplication::fontMetrics().height() + 6;
+    QPixmap pix;
+    if (u.kind == VUT_UTYPE) {
+      pix = get_unittype_sprite(get_tileset(),
+                                u.value.utype,
+                                direction8_invalid())->pm;
+    } else {
+      pix = get_building_sprite(get_tileset(), u.value.building)->pm;
+      if (is_improvement_redundant(m_city, u.value.building)) {
+        pixmap_put_x(&pix);
+      }
+    }
+    return pix.scaledToHeight(h);
+  }
+
+  if (role == Qt::BackgroundRole) {
+    return getItemColor(u);
+  }
 
   if (role == Qt::ToolTipRole) {
-    universal u = cid_decode(m_targets[row]);
     if (u.kind == VUT_UTYPE) {
       return unitTooltip(u.value.utype);
     }
@@ -70,16 +97,72 @@ QVariant BuildablesModel::data(const QModelIndex &index, int role) const {
     return QVariant();
   }
 
-  if (role == Qt::UserRole) {
-    // qCDebug(FC) << "BuildablesModel::data" << row;
-    return m_targets[row];
-  }
 
   return QVariant();
 }
 
+
+QColor BuildablesModel::getItemColor(const universal &u) const {
+
+  if (u.kind == VUT_UTYPE) {
+    auto ut = u.value.utype;
+    auto c = utype_class(ut);
+
+    if ((utype_fuel(ut)
+       && !uclass_has_flag(c, UCF_TERRAIN_DEFENSE)
+       && !uclass_has_flag(c, UCF_CAN_PILLAGE)
+       && !uclass_has_flag(c, UCF_CAN_FORTIFY)
+       && !uclass_has_flag(c, UCF_ZOC))
+      /* FIXME: Assumed to be flying since only missiles can do suicide
+       * attacks in classic-like rulesets. This isn't true for all
+       * rulesets. Not a high priority to fix since all is_flying and
+       * is_sea is used for is to set a color. */
+      || utype_can_do_action(ut, ACTION_SUICIDE_ATTACK)) {
+      return QColor(220, 0, 0, 80);
+    }
+
+    if (!uclass_has_flag(c, UCF_TERRAIN_DEFENSE)
+      && !uclass_has_flag(c, UCF_CAN_FORTIFY)
+      && !uclass_has_flag(c, UCF_ZOC)) {
+      return QColor(0, 0, 255, 80);
+    }
+
+    if (utype_has_flag(ut, UTYF_CIVILIAN)) {
+      return QColor(0, 120, 0, 40);
+    }
+
+    return QColor(0, 0, 150, 40);
+
+  }
+
+  if (improvement_has_flag(u.value.building, IF_GOLD)) {
+    return QColor(255, 255, 0, 70);
+  }
+
+  return QColor(Qt::transparent);
+}
+
+void BuildablesModel::changeCity(city *c) {
+  beginResetModel();
+  m_city = c;
+  m_targets.clear();
+  if (m_city != nullptr) {
+    universal targets[MAX_NUM_PRODUCTION_TARGETS];
+    auto numTargets = collect_eventually_buildable_targets(targets, m_city, true);
+    item props[numTargets];
+    name_and_sort_items(targets, numTargets, props, false, m_city);
+
+    for (int row = 0; row < numTargets; row++) {
+      m_targets << cid_encode(props[row].item);
+    }
+  }
+  endResetModel();
+}
+
 QString BuildablesModel::improvementTooltip(impr_type *building) const
 {
+
+  if (m_city == nullptr) return "";
 
   QString tip = "<p style='white-space:pre'>";
 
@@ -87,9 +170,7 @@ QString BuildablesModel::improvementTooltip(impr_type *building) const
       .arg(improvement_name_translation(building));
 
   int upkeep = building->upkeep;
-  if (m_city != nullptr) {
-    upkeep = city_improvement_upkeep(m_city, building);
-  }
+  upkeep = city_improvement_upkeep(m_city, building);
 
   tip += QString(_("Cost: %1, Upkeep: %2\n"))
              .arg(impr_build_shield_cost(m_city,building))
@@ -103,7 +184,7 @@ QString BuildablesModel::improvementTooltip(impr_type *building) const
     }
   } requirement_vector_iterate_end;
 
-  tip += QString(_("Obsolete by: % 1\n"))
+  tip += QString(_("Obsoleted by: %1\n"))
       .arg(req);
 
   return tip;
@@ -151,30 +232,96 @@ QString BuildablesModel::unitTooltip(unit_type *unit) const
 BuildablesFilter::BuildablesFilter(city* c, int flags, QObject* parent)
   : QSortFilterProxyModel(parent)
   , m_city(c)
-  , m_units((flags & Units) == Units)
-  , m_buildings((flags & Buildings) == Buildings)
-  , m_wonders((flags & Wonders) == Wonders)
-  , m_future((flags & Future) == Future)
-{}
+  , m_flags(flags)
+{
+  m_flags = flags;
+}
+
+
+void BuildablesFilter::setFilterFlags(int flags) {
+  beginResetModel();
+  m_flags = flags;
+  endResetModel();
+}
+
+int BuildablesFilter::filterFlags() const {
+  return m_flags;
+}
 
 bool BuildablesFilter::filterAcceptsRow(int row, const QModelIndex &/*parent*/) const {
+
+  if (m_city == nullptr) return true;
 
   auto idx = sourceModel()->index(row, 0);
   cid id = sourceModel()->data(idx, Qt::UserRole).toInt();
   universal u = cid_decode(id);
 
-  if (!m_future && !can_city_build_now(m_city, &u)) return false;
-  if (m_units && u.kind == VUT_UTYPE) return true;
+  if (!(m_flags & Future) && !can_city_build_now(m_city, &u)) return false;
+  if ((m_flags & Units) && u.kind == VUT_UTYPE) return true;
   if (u.kind != VUT_UTYPE) {
-    if (m_wonders && is_improvement(u.value.building)) return true;
-    if (m_buildings && is_improvement(u.value.building)) return true;
-    if (m_buildings && is_special_improvement(u.value.building)) return true;
+    if ((m_flags & Wonders) && is_wonder(u.value.building)) return true;
+    if ((m_flags & Buildings) && is_improvement(u.value.building)) return true;
+    if ((m_flags & Buildings) && is_special_improvement(u.value.building)) return true;
     if (improvement_has_flag(u.value.building, IF_GOLD)) return true;
   }
 
   return false;
 
 }
+
+void BuildablesFilter::changeCity(city* c) {
+  auto src = qobject_cast<BuildablesModel*>(sourceModel());
+  if (src) { // source model takes car of resetting
+    m_city = c;
+    src->changeCity(c);
+  } else {
+    beginResetModel();
+    m_city = c;
+    endResetModel();
+  }
+}
+
+const char* BuildablesDragModel::CidMimeType = "freeciv/cid";
+
+BuildablesDragModel::BuildablesDragModel(QObject *parent)
+  : QIdentityProxyModel(parent)
+  , m_mimeTypes{CidMimeType}
+{}
+
+
+
+QMimeData* BuildablesDragModel::mimeData(const QModelIndexList &indices) const {
+  auto data = new QMimeData;
+  QByteArray encoded;
+  QDataStream stream(&encoded, QIODevice::WriteOnly);
+
+  for (auto idx: indices) {
+    auto sourceIndex = mapToSource(idx);
+    if (sourceIndex.isValid()) {
+      cid id = sourceIndex.data(Qt::UserRole).value<cid>();
+      stream << id;
+    }
+  }
+  data->setData(CidMimeType, encoded);
+
+  return data;
+}
+
+
+QStringList BuildablesDragModel::mimeTypes() const {
+  return m_mimeTypes;
+}
+
+Qt::ItemFlags BuildablesDragModel::flags(const QModelIndex &index) const {
+  Qt::ItemFlags defaultFlags = QIdentityProxyModel::flags(index);
+
+  if (index.isValid()) {
+    return Qt::ItemIsDragEnabled | defaultFlags;
+  }
+
+  return defaultFlags;
+}
+
 
 BuildablesTableModel::BuildablesTableModel(int columns, QObject* parent)
   : QAbstractProxyModel(parent)
@@ -234,118 +381,38 @@ void BuildablesDelegate::paint(QPainter *painter,
     return;
   }
 
-
-  // auto opt = QItemDelegate::setOptions(index, option);
+  auto opt = QItemDelegate::setOptions(index, option);
   painter->save();
-  // opt.displayAlignment = Qt::AlignLeft;
-  // opt.textElideMode = Qt::ElideMiddle;
-  QItemDelegate::drawBackground(painter, option, index);
+  opt.displayAlignment = Qt::AlignLeft;
+  opt.textElideMode = Qt::ElideMiddle;
+  QItemDelegate::drawBackground(painter, opt, index);
 
-  QString name;
-  QPixmap pix;
-  bool useless = false;
-  bool is_coinage = false;
-  bool is_neutral = false;
-  bool is_sea = false;
-  bool is_flying = false;
-  bool is_unit = false;
-
-  auto d = index.data(Qt::UserRole);
-  if (!d.isValid()) {
-    QIcon icon = qApp->style()->standardIcon(QStyle::SP_DialogCancelButton);
-    pix = icon.pixmap(100, 100);
-    name = _("Cancel");
-  } else {
-    auto u = cid_decode(d.toInt());
-    if (u.kind == VUT_UTYPE) {
-      name = utype_name_translation(u.value.utype);
-      pix = get_unittype_sprite(get_tileset(), u.value.utype,
-                                direction8_invalid())->pm;
-      auto flags = getUnitFlags(u.value.utype);
-      is_neutral = (flags & Neutral) == Neutral;
-      is_sea = (flags & Sea) == Sea;
-      is_flying = (flags & Flying) == Flying;
-      is_unit = true;
-    } else {
-      name = improvement_name_translation(u.value.building);
-      pix = get_building_sprite(get_tileset(), u.value.building)->pm;
-      useless = is_improvement_redundant(m_city, u.value.building);
-      is_coinage = improvement_has_flag(u.value.building, IF_GOLD);
-    }
-  }
+  auto d = index.data(Qt::DecorationRole);
+  if (!d.isValid()) return;
+  auto pix = d.value<QPixmap>();
   pix = pix.scaledToHeight(m_hint.height() - 2, Qt::SmoothTransformation);
-  if (useless) {
-    pixmap_put_x(&pix);
-  }
 
   auto rect = option.rect;
   rect.setLeft(rect.left() + pix.width() + 4);
   rect.setTop(rect.top() + (rect.height() - painter->fontMetrics().height()) / 2);
-  QItemDelegate::drawDisplay(painter, option, rect, name);
+  auto name = index.data(Qt::DisplayRole).toString();
+  QItemDelegate::drawDisplay(painter, opt, rect, name);
 
   QPixmap deco(option.rect.width(), option.rect.height());
+  auto c = index.data(Qt::BackgroundRole).value<QColor>();
+  deco.fill(c);
 
-  if (is_unit) {
-    if (is_sea) {
-      deco.fill(QColor(0, 0, 255, 80));
-    } else if (is_flying) {
-      deco.fill(QColor(220, 0, 0, 80));
-    } else if (is_neutral) {
-      deco.fill(QColor(0, 120, 0, 40));
-    } else {
-      deco.fill(QColor(0, 0, 150, 40));
-    }
+  QItemDelegate::drawDecoration(painter, option, option.rect, deco);
 
-    QItemDelegate::drawDecoration(painter, option, option.rect, deco);
-  }
-
-  if (is_coinage) {
-    deco.fill(QColor(255, 255, 0, 70));
-    QItemDelegate::drawDecoration(painter, option, option.rect, deco);
-  }
-
-  if (!pix.isNull()) {
-    auto rect = option.rect;
-    rect.setWidth(pix.width() + 4);
-    QItemDelegate::drawDecoration(painter, option, rect, pix);
-  }
+  rect = option.rect;
+  rect.setWidth(pix.width() + 4);
+  QItemDelegate::drawDecoration(painter, option, rect, pix);
 
   drawFocus(painter, option, option.rect);
 
   painter->restore();
-
 }
 
-int BuildablesDelegate::getUnitFlags(unit_type* ut) const {
-  int flags = 0;
-
-  if (utype_has_flag(ut, UTYF_CIVILIAN)) {
-    flags |= Neutral;
-  }
-
-  auto c = utype_class(ut);
-  if (!uclass_has_flag(c, UCF_TERRAIN_DEFENSE)
-    && !uclass_has_flag(c, UCF_CAN_FORTIFY)
-    && !uclass_has_flag(c, UCF_ZOC)) {
-    flags |= Sea;
-  }
-
-  if ((utype_fuel(ut)
-     && !uclass_has_flag(c, UCF_TERRAIN_DEFENSE)
-     && !uclass_has_flag(c, UCF_CAN_PILLAGE)
-     && !uclass_has_flag(c, UCF_CAN_FORTIFY)
-     && !uclass_has_flag(c, UCF_ZOC))
-    /* FIXME: Assumed to be flying since only missiles can do suicide
-     * attacks in classic-like rulesets. This isn't true for all
-     * rulesets. Not a high priority to fix since all is_flying and
-     * is_sea is used for is to set a color. */
-    || utype_can_do_action(ut, ACTION_SUICIDE_ATTACK)) {
-    flags &= ~Sea;
-    flags |= Flying;
-  }
-
-  return flags;
-}
 
 void BuildablesDelegate::drawFocus(QPainter *painter,
     const QStyleOptionViewItem &option,
@@ -499,8 +566,8 @@ bool Buildables::eventFilter(QObject *object, QEvent *event) {
   return false;
 }
 
-void Buildables::buildingSelected(const QItemSelection &sl,
-                                  const QItemSelection &ds)
+void Buildables::buildingSelected(const QItemSelection &,
+                                  const QItemSelection &)
 {
   // qCDebug(FC) << "buildingSelected";
 

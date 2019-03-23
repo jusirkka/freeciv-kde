@@ -14,6 +14,8 @@ class CityDialog;
 namespace KV {
 
 class CityView;
+class ProductionDialog;
+class GovernorDialog;
 
 class CityDialog : public QDialog
 {
@@ -24,7 +26,7 @@ public:
   ~CityDialog();
 
   city* current() const;
-  void refresh();
+  void refresh(city* c);
 
 public slots:
 
@@ -48,6 +50,8 @@ private:
   Ui::CityDialog *m_ui;
   city* m_city = nullptr;
   CityView* m_cities;
+  ProductionDialog* m_production;
+  GovernorDialog* m_governor;
 };
 
 }

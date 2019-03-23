@@ -1,11 +1,11 @@
-#ifndef BUILDABLES_H
-#define BUILDABLES_H
+#pragma once
 
 #include <QTableView>
 #include <QItemDelegate>
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
 #include <QAbstractProxyModel>
+#include <QIdentityProxyModel>
 
 #include "climisc.h" // cid
 
@@ -25,10 +25,13 @@ public:
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 
+  void changeCity(city* c);
+
 private:
 
   QString unitTooltip(unit_type* u) const;
   QString improvementTooltip(impr_type* i) const;
+  QColor getItemColor(const universal& u) const;
 
 private:
 
@@ -49,19 +52,36 @@ public:
   static const quint64 Future = 8;
   static const quint64 UnitsBuildingsWonders = 7;
 
-
   BuildablesFilter(city* c, int flags, QObject* parent = nullptr);
   bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
+
+  void setFilterFlags(int flags);
+  int filterFlags() const;
+  void changeCity(city* c);
 
 private:
 
   city* m_city;
-  bool m_units;
-  bool m_buildings;
-  bool m_wonders;
-  bool m_future;
+  int m_flags;
 };
 
+class BuildablesDragModel: public QIdentityProxyModel {
+  Q_OBJECT
+
+public:
+
+  static const char* CidMimeType;
+
+  BuildablesDragModel(QObject *parent = nullptr);
+  QMimeData* mimeData(const QModelIndexList &indexes) const override;
+  QStringList mimeTypes() const override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+private:
+
+  QStringList m_mimeTypes;
+
+};
 
 class BuildablesTableModel: public QAbstractProxyModel {
   Q_OBJECT
@@ -99,9 +119,6 @@ protected:
                  const QRect &rect) const override;
 private:
 
-  int getUnitFlags(unit_type* t) const;
-
-private:
 
   static const int Sea = 1;
   static const int Flying = 2;
@@ -143,5 +160,3 @@ private:
 };
 
 }
-
-#endif // BUILDABLES_H

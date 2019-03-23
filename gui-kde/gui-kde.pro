@@ -68,7 +68,10 @@ SOURCES += \
     citymap.cpp \
     unitlistwidget.cpp \
     cityview.cpp \
-    cityinfowidget.cpp
+    cityinfowidget.cpp \
+    productiondialog.cpp \
+    governordialog.cpp \
+    workmodel.cpp
 
 
 HEADERS += \
@@ -112,7 +115,10 @@ HEADERS += \
     citymap.h \
     unitlistwidget.h \
     cityview.h \
-    cityinfowidget.h
+    cityinfowidget.h \
+    productiondialog.h \
+    governordialog.h \
+    workmodel.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -142,4 +148,6 @@ FORMS += \
     treatydialog.ui \
     citydialog.ui \
     productionheader.ui \
-    cityview.ui
+    cityview.ui \
+    productiondialog.ui \
+    governordialog.ui

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QFrame>
+#include <QScrollArea>
 #include <QLabel>
 
 struct city;
@@ -9,7 +9,7 @@ class QHBoxLayout;
 
 namespace KV {
 
-class UnitListWidget : public QFrame
+class UnitListWidget : public QScrollArea
 {
   Q_OBJECT
 public:
@@ -19,14 +19,28 @@ public slots:
 
   void changeCity(city* c);
 
+protected:
+
+  void mousePressEvent(QMouseEvent *event) override;
+  void mouseReleaseEvent(QMouseEvent *event) override;
+  void mouseMoveEvent(QMouseEvent *event) override;
+
 private:
 
   virtual void createUnits() = 0;
+  void slide();
 
 protected:
 
   city* m_city = nullptr;
   QHBoxLayout* m_lay;
+  int m_minHeight;
+
+private:
+
+  int m_dx;
+  int m_lastX;
+  QTimer* m_timer;
 
 };
 
@@ -62,18 +76,18 @@ public:
 
   UnitItem(unit* punit, QWidget* parent = nullptr);
 
-
 protected:
 
-  void mousePressEvent(QMouseEvent *event) override;
   void leaveEvent(QEvent *event) override;
   void enterEvent(QEvent *event) override;
+  void mouseDoubleClickEvent(QMouseEvent *event) override;
 
   void contextMenuEvent(QContextMenuEvent *ev) override;
 
 protected:
 
   QPixmap m_pix;
+  QPixmap m_hpix;
   unit* m_unit;
 
 
