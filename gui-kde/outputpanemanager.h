@@ -67,7 +67,7 @@ private:
   using Panes = QVector<IOutputPane*>;
 
   explicit OutputPaneManager(const Panes& panes, MainWindow *parent = nullptr);
-  ~OutputPaneManager() override;
+  ~OutputPaneManager() override = default;
 
   friend class MainWindow;
   friend class OutputPaneManageButton;

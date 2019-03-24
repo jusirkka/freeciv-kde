@@ -57,23 +57,15 @@ const int buttonBorderWidth = 3;
 const int numberAreaWidth = 19;
 
 
-
-void OutputPaneManager::updateStatusButtons(bool visible)
-{
-    int idx = currentIndex();
-    if (idx == -1) return;
-    const OutputPaneData &data = m_outputPanes.at(idx);
-    data.button->setChecked(visible);
-    data.pane->visibilityChanged(visible);
-}
-
-
 // Return shortcut as Alt+<number> if number is a non-zero digit
 static QKeySequence paneShortCut(int number)
 {
   if (number < 1 || number > 9) return QKeySequence();
   return QKeySequence(Qt::ALT | (Qt::Key_0 + number));
 }
+
+
+
 
 OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   : QWidget(parent)
@@ -83,7 +75,8 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   , m_opToolBarWidgets(new QStackedWidget)
   , m_parent(parent)
 {
-  setWindowFlags(Qt::WindowStaysOnTopHint);
+  setWindowFlag(Qt::WindowStaysOnTopHint);
+  setStyleSheet("KV--OutputPaneManager {background-color: rgb(100, 100, 100);}");
 
   for (auto pane: panes) {
     m_outputPanes.append(OutputPaneData(pane));
@@ -132,7 +125,6 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
 
   m_toolBar = new QWidget;
   m_toolBar->setLayout(toolLayout);
-
   auto mainlayout = new QVBoxLayout;
   mainlayout->setSpacing(0);
   mainlayout->setMargin(0);
@@ -224,13 +216,20 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   connect(m_manageButton, &QAbstractButton::clicked, this, &OutputPaneManager::popupMenu);
 
   setMinimumHeight(100);
-  setMinimumWidth(200);
+  setMinimumWidth(300);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
   hidePane();
 }
 
-OutputPaneManager::~OutputPaneManager() = default;
+void OutputPaneManager::updateStatusButtons(bool visible)
+{
+    int idx = currentIndex();
+    if (idx == -1) return;
+    const OutputPaneData &data = m_outputPanes.at(idx);
+    data.button->setChecked(visible);
+    data.pane->visibilityChanged(visible);
+}
 
 
 void OutputPaneManager::buttonTriggered(int idx)

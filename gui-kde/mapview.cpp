@@ -155,7 +155,7 @@ void MapView::resizeEvent(QResizeEvent *event) {
 
   m_endTurn->move(s.width() - m_endTurn->width(), s.height() - m_endTurn->height());
 
-  m_minimap->resize(size() * 0.125);
+  m_minimap->resize(height() * 0.2, height() * 0.2);
   m_minimap->move(s.width() - m_minimap->width() - 5,
                   s.height() - m_endTurn->height() - m_minimap->height() - 10);
 }

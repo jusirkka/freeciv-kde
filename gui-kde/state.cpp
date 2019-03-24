@@ -4,7 +4,6 @@
 #include "logging.h"
 #include "networkdialog.h"
 #include "startdialog.h"
-#include "mapitem.h"
 #include "messagebox.h"
 #include "mapview.h"
 #include <QLabel>
@@ -12,7 +11,7 @@
 #include <QPainter>
 #include <QApplication>
 #include <QStateMachine>
-// #include <QGraphicsView>
+#include "themesmanager.h"
 
 #include "tilespec.h"
 #include "version.h"
@@ -211,19 +210,6 @@ void Start::playerReady() {
 
   emit accepted();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

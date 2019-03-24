@@ -4,6 +4,7 @@ extern "C" {
 #include "logging.h"
 #include "canvas.h"
 #include "application.h"
+#include "mainwindow.h"
 
 void update_info_label() {
   // qCDebug(FC) << "update_info_label";
@@ -26,7 +27,8 @@ void update_turn_done_button(bool do_restore) {
 }
 
 void update_city_descriptions() {
-  qCDebug(FC) << "TODO: update_city_descriptions";
+  // qCDebug(FC) << "TODO: update_city_descriptions";
+  update_map_canvas_visible();
 }
 
 void set_indicator_icons(struct sprite *bulb, struct sprite *sol, struct sprite *flake, struct sprite *gov) {
@@ -34,7 +36,8 @@ void set_indicator_icons(struct sprite *bulb, struct sprite *sol, struct sprite 
 }
 
 void overview_size_changed() {
-  qCDebug(FC) << "TODO: overview_size_changed";
+  // qCDebug(FC) << "overview_size_changed: dummy";
+  KV::Application::UpdateOverview();
 }
 
 void update_overview_scroll_window_pos(int x, int y) {
@@ -42,7 +45,9 @@ void update_overview_scroll_window_pos(int x, int y) {
 }
 
 void get_overview_area_dimensions(int *width, int *height) {
-  qCDebug(FC) << "TODO: get_overview_area_dimensions";
+  // qCDebug(FC) << "get_overview_area_dimensions: dummy";
+  *width = 0;
+  *height = 0;
 }
 
 canvas* get_overview_window() {

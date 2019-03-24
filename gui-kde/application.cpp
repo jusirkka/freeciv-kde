@@ -395,6 +395,13 @@ void Application::PopdownCityDialog(city* c) {
   instance()->popdownCityDialog(c);
 }
 
+void Application::UpdateUnitSelector() {
+  instance()->updateUnitSelector();
+}
+
+void Application::UpdateOverview() {
+  instance()->updateOverview();
+}
 
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";

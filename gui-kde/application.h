@@ -32,6 +32,7 @@ class Application: public QObject {
   friend class ChatWindow;
   friend class ChatLineEdit;
   friend class MapView;
+  friend class MinimapView;
   friend class MainWindow;
   friend class UnitInfo;
   friend class GameInfo;
@@ -42,6 +43,7 @@ class Application: public QObject {
   friend class PlayerWidget;
   friend class PlayerDialog;
   friend class CityModel;
+  friend class UnitSelector;
 
 public:
 
@@ -85,6 +87,7 @@ public:
   static void StateChange(client_pages page);
   static client_pages CurrentState();
   static void UpdateUnitInfo(unit_list* punits);
+  static void UpdateUnitSelector();
   static void UpdateGameInfo();
   static void UpdateTurnTimeout();
   static void ToggleTurnDone(bool on);
@@ -108,6 +111,7 @@ public:
   static void UpdateCity(city*);
   static void RefreshCityDialog(city*, bool popup);
   static void PopdownCityDialog(city*);
+  static void UpdateOverview();
 
 
 
@@ -146,6 +150,8 @@ signals:
   void updateCity(city*);
   void refreshCityDialog(city*, bool popup);
   void popdownCityDialog(city*);
+  void updateUnitSelector();
+  void updateOverview();
 
 
 

@@ -1,105 +1,398 @@
 #include "playerwidget.h"
-#include "playerdialog.h"
-#include "treatydialog.h"
-#include <QVBoxLayout>
-#include "logging.h"
-#include "sprite.h"
-#include <QMap>
-#include "tilespec.h"
+#include "ui_playerwidget.h"
+#include <QSortFilterProxyModel>
+#include <QMenu>
+#include <QStringList>
 #include "application.h"
-#include <QApplication>
+#include "logging.h"
+
+#include "plrdlg_common.h"
+#include "research.h"
+#include "client_main.h"
+#include "tilespec.h"
+#include "sprite.h"
+#include "colors_common.h"
+#include "colors.h"
+#include "government.h"
 
 using namespace KV;
 
 PlayerWidget::PlayerWidget(QWidget *parent)
-  : QTabWidget(parent)
-  , m_players(new PlayerDialog)
+  : QWidget(parent)
+  , m_ui(new Ui::PlayerWidget)
+  , m_players(new PlayerModel(this))
+  , m_filter(new QSortFilterProxyModel(this))
 {
-  setTabBarAutoHide(true);
-  setTabsClosable(false);
-  setWindowFlags(Qt::Window);
-  setWindowTitle(qAppName() + ": Players");
+  m_ui->setupUi(this);
 
-  // players tab
-  auto layout = new QVBoxLayout;
-  layout->addWidget(m_players);
-  auto players = new QWidget;
-  players->setLayout(layout);
-  addTab(players, "Players");
+  m_filter->setDynamicSortFilter(true);
+  m_filter->setSourceModel(m_players);
+  m_filter->setFilterRole(Qt::DisplayRole);
+  m_ui->playerView->setModel(m_filter);
+  m_ui->playerView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
+  m_ui->playerView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-  connect(m_players, &PlayerDialog::closeRequest, this, &PlayerWidget::hide);
-
-  connect(Application::instance(), &Application::initMeeting,
-          this, &PlayerWidget::initMeeting);
-  connect(Application::instance(), &Application::cancelMeeting,
-          this, &PlayerWidget::cancelMeeting);
-  connect(Application::instance(), &Application::createClause,
-          this, &PlayerWidget::createClause);
-  connect(Application::instance(), &Application::removeClause,
-          this, &PlayerWidget::removeClause);
-  connect(Application::instance(), &Application::acceptTreaty,
-          this, &PlayerWidget::acceptTreaty);
-  connect(Application::instance(), &Application::closeAllTreatyDialogs,
-          this, &PlayerWidget::closeAllTreatyDialogs);
-}
-
-void PlayerWidget::initMeeting(int counterpart) {
-  qCDebug(FC) << "initMeeting" << counterpart;
-  cancelMeeting(counterpart);
-
-  auto p = player_by_number(counterpart);
-  // create a new tab
-  auto layout = new QVBoxLayout;
-  layout->addWidget(new TreatyDialog(p));
-  auto meeting = new QWidget;
-  meeting->setLayout(layout);
-  QString label = nation_plural_for_player(p);
-  auto icon = QIcon(get_nation_flag_sprite(tileset, nation_of_player(p))->pm);
-  m_meetings[counterpart] = addTab(meeting, icon, label);
-  setCurrentIndex(m_meetings[counterpart]);
-
-  show();
-  raise();
-
-}
-
-void PlayerWidget::cancelMeeting(int counterpart) {
-  // qCDebug(FC) << "cancelMeeting" << counterpart;
-
-  if (!m_meetings.contains(counterpart)) return;
-
-  qCDebug(FC) << "cancelMeeting: found" << counterpart;
-  auto w = widget(m_meetings[counterpart]);
-  removeTab(m_meetings[counterpart]);
-  delete w;
-  m_meetings.remove(counterpart);
-  for (int i = 1; i < count(); i++) {
-    auto meeting = widget(i)->findChild<TreatyDialog*>();
-    m_meetings[meeting->away()] = i;
+  for (int col = 0; col < m_players->columnCount(); col++) {
+    bool show = m_players->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+    m_ui->playerView->setColumnHidden(col, !show);
   }
+
+  connect(m_ui->playerView->header(), &QWidget::customContextMenuRequested,
+          this, &PlayerWidget::popupHeaderMenu);
+  connect(m_ui->playerView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          this, &PlayerWidget::playerSelected);
+
+  updatePlayers();
+
+  connect(Application::instance(), &Application::updatePlayers,
+          this, &PlayerWidget::updatePlayers);
+
 }
 
 
-void PlayerWidget::createClause(int counterpart, const Clause& clause) {
-  if (!m_meetings.contains(counterpart)) return;
-  auto meeting = widget(m_meetings[counterpart])->findChild<TreatyDialog*>();
-  meeting->createClause(clause);
-}
-
-void PlayerWidget::removeClause(int counterpart, const Clause& clause) {
-  if (!m_meetings.contains(counterpart)) return;
-  auto meeting = widget(m_meetings[counterpart])->findChild<TreatyDialog*>();
-  meeting->removeClause(clause);
-}
-
-void PlayerWidget::acceptTreaty(int counterpart, bool resolution) {
-  if (!m_meetings.contains(counterpart)) return;
-  auto meeting = widget(m_meetings[counterpart])->findChild<TreatyDialog*>();
-  meeting->awayResolution(resolution);
-}
-
-void PlayerWidget::closeAllTreatyDialogs() {
-  for (auto id: m_meetings.keys()) {
-    cancelMeeting(id);
+void PlayerWidget::updatePlayers() {
+  auto curr = m_ui->playerView->selectionModel()->selection();
+  player* s = nullptr;
+  if (!curr.isEmpty()) {
+    auto i = curr.first().indexes().first();
+    s = reinterpret_cast<player*>(i.data(Qt::UserRole).value<void*>());
   }
+
+  m_players->reset();
+
+  if (s) {
+    int cnt = m_filter->rowCount();
+    for (int row = 0; row < cnt; row++) {
+      auto d = m_filter->index(row, 0).data(Qt::UserRole);
+      if (d.isNull()) continue;
+      auto p = reinterpret_cast<player*>(d.value<void*>());
+      if (s == p) {
+        m_ui->playerView->selectionModel()->select(
+              m_filter->index(row, 0),
+              QItemSelectionModel::Rows|QItemSelectionModel::Select);
+        break;
+      }
+    }
+  } else {
+    playerSelected(QItemSelection(), QItemSelection());
+  }
+
 }
+
+void PlayerWidget::popupHeaderMenu(const QPoint &p)
+{
+  QMenu menu(this);
+  menu.setTitle(_("Column visibility"));
+  int n = m_ui->playerView->header()->count();
+  for (int i = 0; i < n; ++i) {
+    QAction *a = menu.addAction(m_players->headerData(i, Qt::Horizontal).toString());
+    a->setCheckable(true);
+    a->setChecked(!m_ui->playerView->isColumnHidden(i));
+    connect(a, &QAction::toggled, this, [this, i] (bool visible) {
+      m_ui->playerView->setColumnHidden(i, !visible);
+      player_dlg_columns[i].show = visible;
+    });
+  }
+  menu.exec(mapToGlobal(p));
+}
+
+class PlayerData {
+public:
+  PlayerData(player* p);
+  QString table() const;
+  QString tax;
+  QString luxury;
+  QString science;
+  QString gold;
+  QString gov;
+  QString researching;
+  QString nation;
+  QString title;
+  QString capital;
+};
+
+PlayerData::PlayerData(player *p) {
+  auto me = client_player();
+  auto res = research_get(p);
+  if (res->researching == A_UNKNOWN) {
+    researching =  _("(Unknown)");
+  } else if (res->researching == A_UNSET) {
+    if (player_has_embassy(me, p)) {
+      researching = _("(None)");
+    } else {
+      researching = _("(Unknown)");
+    }
+  } else {
+    researching = QString("%1 (%2/%3)")
+        .arg(research_advance_name_translation(res, res->researching))
+        .arg(res->bulbs_researched)
+        .arg(res->client.researching_cost);
+  }
+
+  tax = _("(Unknown)");
+  science = _("(Unknown)");
+  luxury = _("(Unknown)");
+  if (player_has_embassy(me, p)) {
+    tax = QString("%1%").arg(p->economic.tax);
+    science = QString("%1%").arg(p->economic.science);
+    luxury = QString("%1%").arg(p->economic.luxury);
+  }
+
+  gold = _("(Unknown)");
+  gov = _("(Unknown)");
+  if (could_intel_with_player(me, p)) {
+    gold = QString("%1").arg(p->economic.gold);
+    gov = government_name_for_player(p);
+  }
+
+  nation = nation_adjective_for_player(p);
+  char buf[1024];
+  title = ruler_title_for_player(p, buf, sizeof(buf));
+
+  capital = _("Unknown");
+  if (player_capital(p)) {
+    capital = city_name_get(player_capital(p));
+  }
+
+}
+
+QString PlayerData::table() const {
+  QString r = "<table>";
+  QString line = "<tr><td><b>%1</b></td><td>%2</td></tr>";
+
+  r += line.arg(_("Nation")).arg(nation);
+  r += line.arg(_("Ruler")).arg(title);
+  r += line.arg(_("Government")).arg(gov);
+  r += line.arg(_("Capital")).arg(capital);
+  r += line.arg(_("Gold")).arg(gold);
+  r += line.arg(_("Tax")).arg(tax);
+  r += line.arg(_("Science")).arg(science);
+  r += line.arg(_("Luxury")).arg(luxury);
+  r += line.arg(_("Researching")).arg(researching);
+  r += "</table>";
+
+  return r;
+}
+
+void PlayerWidget::playerSelected(const QItemSelection &s, const QItemSelection &)
+{
+  m_ui->playerLabel->clear();
+  m_ui->allyLabel->clear();
+  m_ui->techLabel->clear();
+
+  m_ui->meetButton->setDisabled(true);
+  m_ui->withdrawVisionButton->setDisabled(true);
+  m_ui->cancelTreatyButton->setDisabled(true);
+
+  if (s.indexes().isEmpty()) {
+    return;
+  }
+
+  QModelIndex index = s.indexes().at(0);
+  auto pplayer = reinterpret_cast<player*>(index.data(Qt::UserRole).value<void*>());
+
+  if (!pplayer->is_alive) {
+    return;
+  }
+
+  auto me = client_player();
+  m_ui->meetButton->setEnabled(can_meet_with_player(pplayer));
+  m_ui->withdrawVisionButton->setEnabled(gives_shared_vision(me, pplayer)
+                                         && !players_on_same_team(me, pplayer));
+  m_ui->cancelTreatyButton->setEnabled(pplayer_can_cancel_treaty(me, pplayer) != DIPL_ERROR);
+
+  auto d = PlayerData(pplayer);
+  m_ui->playerLabel->setText(d.table());
+
+
+  if (could_intel_with_player(me, pplayer)) {
+    QMap<QString, QStringList> diplo;
+    players_iterate_alive(other) {
+      if (other == pplayer || is_barbarian(other)) continue;
+      auto state = player_diplstate_get(pplayer, other);
+      QString stateName = diplstate_type_translated_name(state->type);
+      QString nation = nation_plural_for_player(other);
+      if (gives_shared_vision(pplayer, other)) {
+        nation += "(◐‿◑)";
+      }
+      diplo[stateName] << nation;
+    } players_iterate_alive_end;
+    QString allies = "";
+    QMapIterator<QString, QStringList> it(diplo);
+    while (it.hasNext()) {
+      it.next();
+      allies += "<b>" + it.key() + "</b><br>";
+      allies += it.value().join(", ") + ".<br>";
+    }
+    m_ui->allyLabel->setText(allies);
+  }
+
+  if (client_is_global_observer()) {
+    auto s = QString(_("<b>Techs known by %1: </b>")).arg(nation_plural_for_player(pplayer));
+    QStringList techs;
+    auto res = research_get(pplayer);
+    advance_iterate(A_FIRST, padvance) {
+      auto id = advance_number(padvance);
+      if (research_invention_state(res, id) == TECH_KNOWN) {
+        techs << research_advance_name_translation(res, id);
+      }
+    } advance_iterate_end;
+    techs.sort(Qt::CaseInsensitive);
+    s += "<i>" + techs.join(", ") + ".</i>" ;
+    m_ui->techLabel->setText(s);
+
+  } else {
+    if (player_has_embassy(me, pplayer) && me != pplayer) {
+      auto known = QString(_("<b>Techs unknown by %1: </b>")).
+          arg(nation_plural_for_player(pplayer));
+      auto unknown = QString(_("<b>Techs unknown by you: </b>"));
+
+      auto r1 = research_get(me);
+      auto r2 = research_get(pplayer);
+      QStringList knownTechs;
+      QStringList unknownTechs;
+      advance_iterate(A_FIRST, padvance) {
+        auto id = advance_number(padvance);
+        if (research_invention_state(r1, id) == TECH_KNOWN
+            && (research_invention_state(r2, id) != TECH_KNOWN)) {
+          knownTechs << research_advance_name_translation(r1, id);
+        }
+        if (research_invention_state(r1, id) != TECH_KNOWN
+            && (research_invention_state(r2, id) == TECH_KNOWN)) {
+          unknownTechs << research_advance_name_translation(r1, id);
+        }
+      } advance_iterate_end;
+      knownTechs.sort(Qt::CaseInsensitive);
+      unknownTechs.sort(Qt::CaseInsensitive);
+      if (knownTechs.isEmpty()) knownTechs << "None";
+      if (unknownTechs.isEmpty()) unknownTechs << "None";
+      known += "<i>" + knownTechs.join(", ") + ".</i>";
+      unknown += "<i>" + unknownTechs.join(", ") + ".</i>";
+      m_ui->techLabel->setText(known + "<br>" + unknown);
+    }
+  }
+
+}
+
+
+void PlayerWidget::on_cancelTreatyButton_clicked() {
+  auto rows = m_ui->playerView->selectionModel()->selectedRows();
+  if (rows.isEmpty()) return;
+  auto p = reinterpret_cast<player*>(m_ui->playerView->model()->data(rows[0], Qt::UserRole).value<void*>());
+  dsend_packet_diplomacy_cancel_pact(&client.conn, player_number(p), CLAUSE_CEASEFIRE);
+}
+
+void PlayerWidget::on_meetButton_clicked() {
+  auto rows = m_ui->playerView->selectionModel()->selectedRows();
+  if (rows.isEmpty()) return;
+  auto p = reinterpret_cast<player*>(m_ui->playerView->model()->data(rows[0], Qt::UserRole).value<void*>());
+  dsend_packet_diplomacy_init_meeting_req(&client.conn, player_number(p));
+}
+
+void PlayerWidget::on_withdrawVisionButton_clicked()
+{
+  auto rows = m_ui->playerView->selectionModel()->selectedRows();
+  if (rows.isEmpty()) return;
+  auto p = reinterpret_cast<player*>(m_ui->playerView->model()->data(rows[0], Qt::UserRole).value<void*>());
+  dsend_packet_diplomacy_cancel_pact(&client.conn, player_number(p), CLAUSE_VISION);
+}
+
+void PlayerWidget::on_closeButton_clicked() {
+  emit closeRequest();
+}
+
+PlayerWidget::~PlayerWidget()
+{
+  delete m_ui;
+}
+
+
+PlayerModel::PlayerModel(QObject *parent)
+  : QAbstractListModel(parent)
+{}
+
+int PlayerModel::rowCount(const QModelIndex &/*parent*/) const {
+  return m_players.size();
+}
+
+int PlayerModel::columnCount(const QModelIndex &/*parent*/) const {
+  return num_player_dlg_columns;
+}
+
+QVariant PlayerModel::data(const QModelIndex &index, int role) const {
+
+  if (!index.isValid()) return QVariant();
+
+  int row = index.row();
+  auto pplayer = m_players[row];
+
+  if (role == Qt::UserRole) {
+    return QVariant::fromValue(reinterpret_cast<void*>(pplayer));
+  }
+
+  int col = index.column();
+  auto pcol = &player_dlg_columns[col];
+
+  if (role == Qt::DecorationRole) {
+    if (pcol->type == COL_FLAG) {
+      if (nation_of_player(pplayer)) {
+        return get_nation_flag_sprite(tileset, nation_of_player(pplayer))->pm;
+      }
+      return QVariant();
+    }
+    if (pcol->type == COL_COLOR) {
+      return get_player_color(tileset, pplayer)->qcolor;
+    }
+    return QVariant();
+  }
+
+  if (role == Qt::DisplayRole) {
+    if (pcol->type == COL_BOOLEAN) {
+      return pcol->bool_func(pplayer);
+    }
+    if (pcol->type == COL_TEXT) {
+      if (nation_of_player(pplayer)) {
+        return pcol->func(pplayer);
+      }
+      return QVariant();
+    }
+    if (pcol->type == COL_RIGHT_TEXT) {
+      QString r = pcol->func(pplayer);
+      bool ok;
+      int v = r.toInt(&ok);
+      if (ok) return v;
+      if (r == "?") return -1;
+      return r;
+    }
+    return QVariant();
+  }
+  return QVariant();
+}
+
+QVariant PlayerModel::headerData(int section, Qt::Orientation orientation,
+                                 int role) const
+{
+  if (orientation == Qt::Horizontal && section < num_player_dlg_columns) {
+    struct player_dlg_column* pcol = &player_dlg_columns[section];
+    if (role == Qt::DisplayRole) {
+      return pcol->title;
+    }
+    if (role == Qt::UserRole) {
+      return pcol->show;
+    }
+  }
+  return QVariant();
+}
+
+
+void PlayerModel::reset() {
+  beginResetModel();
+  m_players.clear();
+  players_iterate(pplayer) {
+    if (is_barbarian(pplayer)) continue;
+    m_players.append(pplayer);
+  } players_iterate_end;
+  endResetModel();
+}
+
+

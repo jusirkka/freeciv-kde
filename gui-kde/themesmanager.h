@@ -2,10 +2,14 @@
 #define THEMESMANAGER_H
 
 #include <QString>
+#include <QObject>
+
+class QFileSystemWatcher;
 
 namespace KV {
 
-class ThemesManager {
+class ThemesManager: public QObject {
+  Q_OBJECT
 public:
     static void LoadTheme(const char *themes_path, const char *theme_name);
     static void ClearTheme();
@@ -16,7 +20,7 @@ public:
 
 private:
     static ThemesManager* instance();
-    ThemesManager();
+    ThemesManager(QObject* parent = nullptr);
     ThemesManager(const ThemesManager&);
     ThemesManager& operator=(const ThemesManager&);
 
@@ -24,11 +28,17 @@ private:
     QStringList getPaths() const;
     QStringList getThemes(const QString& themes_path) const;
 
+private slots:
+
+    void reloadStyle(const QString& path);
+
 private:
 
     QString m_Current;
+    QString m_path;
     QString m_Default;
     QString m_Template;
+    QFileSystemWatcher* m_styleWatcher;
 
 };
 

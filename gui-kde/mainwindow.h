@@ -20,7 +20,7 @@ class Network;
 class ChatLineEdit;
 class OutputPaneManager;
 class MapView;
-class PlayerWidget;
+class PlayerDialog;
 class CityView;
 class CityDialog;
 
@@ -140,7 +140,7 @@ private:
   MapView* m_mapView;
   OutputPaneManager* m_panes;
   ChatLineEdit* m_chatLine = nullptr;
-  PlayerWidget* m_players;
+  PlayerDialog* m_players;
   CityView* m_cityReport;
   CityDialog* m_cityManager;
 

@@ -1,35 +1,72 @@
 #pragma once
 
-#include <QTabWidget>
-#include <QMap>
+#include <QDialog>
+#include <QAbstractListModel>
+#include <QItemSelection>
 
-struct Clause;
+#include "player.h"
+
+namespace Ui {
+class PlayerWidget;
+}
+
+class QSortFilterProxyModel;
 
 namespace KV {
 
-class PlayerDialog;
 
-class PlayerWidget: public QTabWidget
-{
+class PlayerModel: public QAbstractListModel {
+
+  Q_OBJECT
 
 public:
 
-  PlayerWidget(QWidget* parent = nullptr);
+  void reset();
+
+  PlayerModel(QObject* parent = nullptr);
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
 
 private:
 
-  void initMeeting(int counterpart);
-  void cancelMeeting(int counterpart);
-  void createClause(int counterpart, const Clause& clause);
-  void removeClause(int counterpart, const Clause& clause);
-  void acceptTreaty(int counterpart, bool other_accepted);
-  void closeAllTreatyDialogs();
+
+  QVector<player*> m_players;
+
+};
+
+
+class PlayerWidget : public QWidget
+{
+  Q_OBJECT
+
+public:
+  explicit PlayerWidget(QWidget *parent = nullptr);
+  ~PlayerWidget();
+
+
+signals:
+
+  void closeRequest();
+
+private slots:
+
+  void on_closeButton_clicked();
+  void on_meetButton_clicked();
+  void on_withdrawVisionButton_clicked();
+  void on_cancelTreatyButton_clicked();
+  void updatePlayers();
+  void playerSelected(const QItemSelection &s, const QItemSelection &);
 
 private:
 
-  PlayerDialog* m_players;
-  QMap<int, int> m_meetings;
+  void popupHeaderMenu(const QPoint&);
 
+private:
+  Ui::PlayerWidget *m_ui;
+  PlayerModel* m_players;
+  QSortFilterProxyModel* m_filter;
 };
 
 }

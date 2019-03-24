@@ -7,6 +7,7 @@
 #include <QApplication>
 #include "canvas.h"
 #include "logging.h"
+#include "application.h"
 
 
 #include "options.h"
@@ -35,6 +36,15 @@ MinimapView::MinimapView(QWidget *parent)
   setCursor(Qt::CrossCursor);
   connect(m_thread, &MinimapThread::finished, this, [=] () {
     setDisabled(true);
+  });
+  connect(Application::instance(), &Application::updateOverview, this, [=] () {
+    if (m_thread->isFinished()) {
+      setEnabled(true);
+      m_filled.acquire(m_filled.available());
+      m_empty.release(m_bufferSize - m_empty.available());
+      m_bufferIndex = 0;
+      m_thread->start();
+    }
   });
   m_thread->start();
 }

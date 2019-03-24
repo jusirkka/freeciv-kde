@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
-    <height>466</height>
+    <width>624</width>
+    <height>464</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>626</width>
+     <width>624</width>
      <height>25</height>
     </rect>
    </property>
@@ -55,9 +55,6 @@
     <addaction name="actionCityProductionLevels"/>
     <addaction name="actionCityBuyCost"/>
     <addaction name="actionCityTradeRoutes"/>
-    <addaction name="separator"/>
-    <addaction name="actionShowMenubar"/>
-    <addaction name="actionShowToolbar"/>
    </widget>
    <widget class="QMenu" name="menuUnit">
     <property name="title">
@@ -1024,29 +1021,6 @@
    </property>
    <property name="text">
     <string>Options...</string>
-   </property>
-  </action>
-  <action name="actionShowMenubar">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="show-menu">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Show Menubar</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+M</string>
-   </property>
-  </action>
-  <action name="actionShowToolbar">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Toolbar</string>
    </property>
   </action>
  </widget>

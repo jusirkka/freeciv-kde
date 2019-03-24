@@ -1,63 +1,70 @@
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include "themesmanager.h"
 #include "fc_config.h"
-
-// Qt
 #include <QApplication>
 #include <QDir>
 #include <QPalette>
 #include <QStyleFactory>
 #include <QTextStream>
-#include <QDebug>
 #include <QPixmapCache>
+#include <QFileSystemWatcher>
+#include "logging.h"
 
-/* utility */
 #include "mem.h"
-
-/* client */
 #include "themes_common.h"
-
-
-
-#pragma GCC diagnostic pop
-
-
-
 
 using namespace KV;
 
-ThemesManager::ThemesManager()
-    : m_Current()
-    , m_Default("System")
-    , m_Template("%1/themes/gui-kde")
+ThemesManager::ThemesManager(QObject* parent)
+  : QObject(parent)
+  , m_Default("System")
+  , m_Template("%1/themes/gui-kde")
+  , m_styleWatcher(new QFileSystemWatcher(this))
 {
+  connect(m_styleWatcher, &QFileSystemWatcher::fileChanged,
+          this, &ThemesManager::reloadStyle);
 }
 
+void ThemesManager::reloadStyle(const QString& path) {
+  QFile res(path);
+  if (!res.open(QFile::ReadOnly | QFile::Text)) {
+    qWarning() << "Cannot open" << path
+               << ", not changing the current theme" << m_Current;
+    return;
+  }
+  qCDebug(FC) << "ThemesManager: reloading" << path;
+  QTextStream s(&res);
+  qApp->setStyleSheet(s.readAll());
+}
 
 ThemesManager* ThemesManager::instance() {
-    static ThemesManager* manager = new ThemesManager();
-    return manager;
+  static ThemesManager* manager = new ThemesManager();
+  return manager;
 }
 
 
 void ThemesManager::loadTheme(const QString& theme_name, const QString& theme_path) {
 
-    QFile res(theme_path);
-    if (!res.open(QFile::ReadOnly | QFile::Text)) {
-        qWarning() << "Cannot open" << theme_path
-                << ", not changing the current theme" << m_Current;
-        return;
-    }
+  QFile res(theme_path);
+  if (!res.open(QFile::ReadOnly | QFile::Text)) {
+    qWarning() << "Cannot open" << theme_path
+               << ", not changing the current theme" << m_Current;
+    return;
+  }
 
-    m_Current = theme_name;
+  if (!m_path.isEmpty()) {
+    m_styleWatcher->removePath(m_path);
+  }
+  m_path = theme_path;
+  if (m_styleWatcher->addPath(m_path)) {
+    qCDebug(FC) << "ThemesManager: loading" << m_path;
+  } else {
+    qCDebug(FC) << "ThemesManager: failed to load" << m_path;
+  }
+  m_Current = theme_name;
 
-    QPixmapCache::clear();
-    QTextStream s(&res);
-    qApp->setStyleSheet(s.readAll());
-
+  QPixmapCache::clear();
+  QTextStream s(&res);
+  qApp->setStyleSheet(s.readAll());
 }
 
 QStringList ThemesManager::getPaths() const {
@@ -109,10 +116,6 @@ const QString& ThemesManager::Default() {
 void ThemesManager::LoadTheme(const char *themes_path, const char *theme_name) {
     auto theme_path = QString(themes_path) + "/" + theme_name + "/resource.qss";
     instance()->loadTheme(theme_name, theme_path);
-    QPalette pal;
-    pal.setBrush(QPalette::Link, QColor(92,170,229));
-    pal.setBrush(QPalette::LinkVisited, QColor(54,150,229));
-    QApplication::setPalette(pal);
 }
 
 /*************************************************************************//**

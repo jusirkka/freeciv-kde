@@ -34,7 +34,7 @@ static void setup_gui_funcs() {
   funcs->get_gui_type = [] () {return GUI_QT;};
 
   funcs->insert_client_build_info = [] (char *, size_t) {
-    qCDebug(FC) << "TODO: insert_client_build_info";
+    qCDebug(FC) << "insert_client_build_info: dummy";
   };
   funcs->adjust_default_options = [] () {
     qCDebug(FC) << "TODO: adjust_default_options";
@@ -52,7 +52,7 @@ static void setup_gui_funcs() {
     qCDebug(FC) << "TODO: tileset_type_set";
   };
   funcs->free_intro_radar_sprites = [] () {
-    qCDebug(FC) << "TODO: free_intro_radar_sprites";
+    qCDebug(FC) << "free_intro_radar_sprites: dummy";
   };
   funcs->load_gfxfile = KV::SpriteFactory::Load;
   funcs->create_sprite = KV::SpriteFactory::Create;

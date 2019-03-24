@@ -23,7 +23,7 @@ extern "C" {
 #include "messagepane.h"
 #include "chatpane.h"
 #include "reportpane.h"
-#include "playerwidget.h"
+#include "playerdialog.h"
 #include "cityview.h"
 #include "citydialog.h"
 
@@ -49,7 +49,7 @@ MainWindow::MainWindow()
                                     new AchievementsPane,
                                     chatPane}, this);
 
-  m_players = new PlayerWidget(this);
+  m_players = new PlayerDialog(this);
   connect(Application::instance(), &Application::popupPlayers,
           this, &MainWindow::on_actionPlayers_triggered);
 
@@ -143,9 +143,6 @@ MainWindow::MainWindow()
   m_ui->actionCityProductionLevels->setChecked(gui_options.draw_city_productions);
   m_ui->actionCityBuyCost->setChecked(gui_options.draw_city_buycost);
   m_ui->actionCityTradeRoutes->setChecked(gui_options.draw_city_trade_routes);
-
-  m_ui->actionShowMenubar->setChecked(true);
-  m_ui->actionShowToolbar->setChecked(true);
 }
 
 void MainWindow::enableGameMenus(bool ok) {

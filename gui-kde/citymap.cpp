@@ -1,5 +1,6 @@
 #include "citymap.h"
 #include "canvas.h"
+#include "logging.h"
 #include <QMouseEvent>
 #include <QPainter>
 #include <cmath>
@@ -19,6 +20,7 @@ CityMap::~CityMap()
 {}
 
 void CityMap::paintEvent(QPaintEvent */*event*/) {
+
   if (m_city == nullptr) return;
 
   QPainter painter;
@@ -66,6 +68,8 @@ void CityMap::changeCity(city *c)
 
   canvas_free(miniview);
   canvas_free(view);
+
+  repaint();
 }
 
 QSize CityMap::sizeHint() const {

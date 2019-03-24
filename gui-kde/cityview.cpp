@@ -12,6 +12,7 @@ using namespace KV;
 CityModel::CityModel(QObject *parent)
   : QAbstractTableModel(parent)
 {
+  init_city_report_game_data();
   reset();
   connect(Application::instance(), &Application::updateCity,
           this, &CityModel::updateCity);
@@ -24,7 +25,7 @@ int CityModel::rowCount(const QModelIndex &/*index*/) const {
 }
 
 int CityModel::columnCount(const QModelIndex &/*parent*/) const {
-  return NUM_CREPORT_COLS;
+  return num_city_report_spec();
 }
 
 QVariant CityModel::data(const QModelIndex &index, int role) const {
@@ -196,10 +197,6 @@ CityView::CityView(QWidget* parent)
   m_filter = new CityFilterModel(this);
   m_cities = new CityModel(this);
 
-  for (int col = 0; col < m_cities->columnCount(); col++) {
-    bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
-    m_ui->cityView->setColumnHidden(col, !show);
-  }
 
   m_filter->setSourceModel(m_cities);
   m_ui->cityView->setModel(m_filter);
@@ -207,6 +204,10 @@ CityView::CityView(QWidget* parent)
   m_filter->setDynamicSortFilter(true);
   m_ui->cityView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
   m_ui->cityView->setContextMenuPolicy(Qt::CustomContextMenu);
+  for (int col = 0; col < m_cities->columnCount(); col++) {
+    bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+    m_ui->cityView->setColumnHidden(col, !show);
+  }
   connect(m_ui->cityView->horizontalHeader(),
           &QTableView::customContextMenuRequested,
           this,
@@ -224,6 +225,12 @@ CityView::CityView(QWidget* parent)
           &CityFilterModel::layoutChanged,
           this,
           &CityView::orderingChanged);
+
+  setWindowTitle(qAppName() + ": Cities");
+
+  setMinimumWidth(800);
+  setMinimumHeight(450);
+  setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
 bool CityView::hasPrev(city* c) const {

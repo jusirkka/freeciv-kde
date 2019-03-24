@@ -44,7 +44,6 @@ SOURCES += \
     voteinfo_bar_g.cpp \
     wldlg_g.cpp \
     nationdialog.cpp \
-    mapitem.cpp \
     mapview.cpp \
     unitinfo.cpp \
     gameinfo.cpp \
@@ -60,9 +59,7 @@ SOURCES += \
     textbrowser.cpp \
     chatpane.cpp \
     reportpane.cpp \
-    playerdialog.cpp \
     treatydialog.cpp \
-    playerwidget.cpp \
     citydialog.cpp \
     productionheader.cpp \
     citymap.cpp \
@@ -71,7 +68,9 @@ SOURCES += \
     cityinfowidget.cpp \
     productiondialog.cpp \
     governordialog.cpp \
-    workmodel.cpp
+    workmodel.cpp \
+    playerdialog.cpp \
+    playerwidget.cpp
 
 
 HEADERS += \
@@ -90,7 +89,6 @@ HEADERS += \
     chatwindow.h \
     chatlineedit.h \
     nationdialog.h \
-    mapitem.h \
     mapview.h \
     unitinfo.h \
     gameinfo.h \
@@ -107,9 +105,7 @@ HEADERS += \
     textbrowser.h \
     chatpane.h \
     reportpane.h \
-    playerdialog.h \
     treatydialog.h \
-    playerwidget.h \
     citydialog.h \
     productionheader.h \
     citymap.h \
@@ -118,7 +114,9 @@ HEADERS += \
     cityinfowidget.h \
     productiondialog.h \
     governordialog.h \
-    workmodel.h
+    workmodel.h \
+    playerdialog.h \
+    playerwidget.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -144,10 +142,10 @@ FORMS += \
     startdialog.ui \
     networkdialog.ui \
     nationdialog.ui \
-    playerdialog.ui \
     treatydialog.ui \
     citydialog.ui \
     productionheader.ui \
     cityview.ui \
     productiondialog.ui \
-    governordialog.ui
+    governordialog.ui \
+    playerwidget.ui

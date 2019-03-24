@@ -31,8 +31,9 @@ void unit_select_dialog_popup(tile *ptile) {
   KV::Application::UnitSelectDialog(ptile);
 }
 
-void unit_select_dialog_update_real(void *unused) {
-  qCDebug(FC) << "TODO: unit_select_dialog_update_real";
+void unit_select_dialog_update_real(void */*unused*/) {
+  // qCDebug(FC) << "unit_select_dialog_update_real";
+  KV::Application::UpdateUnitSelector();
 }
 
 void races_toggles_set_sensitive() {
@@ -138,6 +139,6 @@ void show_tileset_error(const char *msg) {
 }
 
 void popdown_all_game_dialogs() {
-  qCDebug(FC) << "TODO: popdown_all_game_dialogs";
+  qCDebug(FC) << "popdown_all_game_dialogs: dummy";
 }
 

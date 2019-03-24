@@ -2,11 +2,13 @@
 #include <QPainter>
 #include <QWheelEvent>
 #include "canvas.h"
+#include "application.h"
 
 #include "tilespec.h"
 #include "control.h"
 #include "mapview_common.h"
 #include "movement.h"
+
 
 using namespace KV;
 
@@ -18,6 +20,8 @@ UnitSelector::UnitSelector(tile* t, QWidget *parent)
   , m_unitOffset(0)
   , m_tile(t)
 {
+  setAttribute(Qt::WA_DeleteOnClose);
+
   m_font.setItalic(true);
   m_infoFont.setPointSize(12);
 
@@ -38,6 +42,9 @@ UnitSelector::UnitSelector(tile* t, QWidget *parent)
   connect(&m_delay, &QTimer::timeout, this, [=] () {
     close();
   });
+
+  connect(Application::instance(), &Application::updateUnitSelector,
+          this, &UnitSelector::updateUnits);
 }
 
 
@@ -231,7 +238,6 @@ void UnitSelector::mousePressEvent(QMouseEvent *event)
     auto punit = m_unitList[m_indexHigh];
     unit_focus_set(punit);
     close();
-    destroy();
   }
 }
 
@@ -257,7 +263,6 @@ void UnitSelector::keyPressEvent(QKeyEvent *event)
 {
   if (event->key() == Qt::Key_Escape) {
     close();
-    destroy();
   }
   QWidget::keyPressEvent(event);
 }
