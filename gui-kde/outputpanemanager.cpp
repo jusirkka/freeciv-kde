@@ -27,6 +27,7 @@
 #include "ioutputpane.h"
 #include "application.h"
 #include "mainwindow.h"
+#include "logging.h"
 
 #include <QAction>
 #include <QApplication>
@@ -76,7 +77,6 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   , m_parent(parent)
 {
   setWindowFlag(Qt::WindowStaysOnTopHint);
-  setStyleSheet("KV--OutputPaneManager {background-color: rgb(100, 100, 100);}");
 
   for (auto pane: panes) {
     m_outputPanes.append(OutputPaneData(pane));
@@ -101,26 +101,30 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   m_refreshAction->setText(tr("Refresh view"));
   connect(m_refreshAction, &QAction::triggered, this, &OutputPaneManager::refreshOutput);
 
-  m_resizeButton = new OutputPaneResizeButton(this);
-  m_resizeButton->setIcon(Application::Icon("resize"));
 
 
   auto toolLayout = new QHBoxLayout;
   toolLayout->setMargin(0);
   toolLayout->setSpacing(0);
   toolLayout->addWidget(m_titleLabel);
-  toolLayout->addWidget(new OuputPaneSeparator);
+  toolLayout->addSpacing(200);
+
+  toolLayout->addWidget(m_opToolBarWidgets);
+
   m_refreshButton = new QToolButton;
   m_refreshButton->setDefaultAction(m_refreshAction);
   toolLayout->addWidget(m_refreshButton);
+
   m_configButton = new QToolButton;
   m_configButton->setDefaultAction(m_configAction);
   toolLayout->addWidget(m_configButton);
+
   m_clearButton = new QToolButton;
   m_clearButton->setDefaultAction(m_clearAction);
   toolLayout->addWidget(m_clearButton);
-  toolLayout->addWidget(m_opToolBarWidgets);
-  toolLayout->addSpacing(100);
+
+  m_resizeButton = new OutputPaneResizeButton(this);
+  m_resizeButton->setIcon(Application::Icon("resize"));
   toolLayout->addWidget(m_resizeButton);
 
   m_toolBar = new QWidget;
@@ -188,7 +192,7 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
     data.action = new QAction(outPane->displayName(), this);
     data.action->setShortcut(paneShortCut(idx));
     auto button = new OutputPaneToggleButton(shortcutNumber, outPane->displayName(),
-                                                 data.action);
+                                             data.action);
     data.button = button;
 
     connect(outPane, &IOutputPane::flashButton, button, [button] {button->flash(); });
@@ -215,12 +219,21 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   m_buttonsWidget->layout()->addWidget(m_manageButton);
   connect(m_manageButton, &QAbstractButton::clicked, this, &OutputPaneManager::popupMenu);
 
-  setMinimumHeight(100);
+  setMinimumHeight(50);
   setMinimumWidth(300);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
   hidePane();
 }
+
+void OutputPaneManager::paintEvent(QPaintEvent *)
+{
+  QStyleOption opt;
+  opt.init(this);
+  QPainter p(this);
+  style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
 
 void OutputPaneManager::updateStatusButtons(bool visible)
 {
@@ -234,11 +247,11 @@ void OutputPaneManager::updateStatusButtons(bool visible)
 
 void OutputPaneManager::buttonTriggered(int idx)
 {
-    if (idx == currentIndex() && isVisible()) {
-      hidePane();
-    } else {
-      showPane(idx);
-    }
+  if (idx == currentIndex() && isVisible()) {
+    hidePane();
+  } else {
+    showPane(idx);
+  }
 }
 
 
@@ -258,8 +271,6 @@ void OutputPaneManager::showPane(int idx)
   setCurrentIndex(idx);
   setVisible(true);
   raise();
-  IOutputPane *out = m_outputPanes.at(idx).pane;
-  out->visibilityChanged(true);
 }
 
 void OutputPaneManager::setCurrentIndex(int idx)
@@ -275,12 +286,12 @@ void OutputPaneManager::setCurrentIndex(int idx)
         m_outputWidgetPane->setCurrentIndex(idx);
         m_opToolBarWidgets->setCurrentIndex(idx);
 
-        IOutputPane *pane = m_outputPanes.at(idx).pane;
-        pane->visibilityChanged(true);
+        m_outputPanes.at(idx).button->setChecked(true);
+        m_outputPanes.at(idx).pane->visibilityChanged(true);
 
+        auto pane = m_outputPanes.at(idx).pane;
         m_configAction->setEnabled(pane->canConfigure());
         m_refreshAction->setEnabled(pane->canRefresh());
-        m_outputPanes.at(idx).button->setChecked(isVisible());
         m_titleLabel->setText(pane->displayName());
     }
 
@@ -340,31 +351,35 @@ int OutputPaneManager::currentIndex() const
 
 OutputPaneToggleButton::OutputPaneToggleButton(int number, const QString &text,
                                                QAction *action, QWidget *parent)
-    : QToolButton(parent)
-    , m_number(QString::number(number))
-    , m_text(text)
-    , m_action(action)
-    , m_flashTimer(new QTimeLine(1000, this))
+  : QToolButton(parent)
+  , m_number(QString::number(number))
+  , m_text(text)
+  , m_action(action)
+  , m_flashTimer(new QTimeLine(1000, this))
+  , m_flashColor(Qt::red)
 {
-    setFocusPolicy(Qt::NoFocus);
-    setCheckable(true);
-    QFont fnt = QApplication::font();
-    setFont(fnt);
-    if (m_action)
-        connect(m_action, &QAction::changed, this, &OutputPaneToggleButton::updateToolTip);
-
-    m_flashTimer->setDirection(QTimeLine::Forward);
-    m_flashTimer->setCurveShape(QTimeLine::SineCurve);
-    m_flashTimer->setFrameRange(0, 92);
-    auto updateSlot = static_cast<void (QWidget::*)()>(&QWidget::update);
-    connect(m_flashTimer, &QTimeLine::valueChanged, this, updateSlot);
-    connect(m_flashTimer, &QTimeLine::finished, this, updateSlot);
-    updateToolTip();
+  setFocusPolicy(Qt::NoFocus);
+  setCheckable(true);
+  QFont fnt = QApplication::font();
+  setFont(fnt);
+  if (m_action) {
+    connect(m_action, &QAction::changed, this, &OutputPaneToggleButton::updateToolTip);
+  }
+  m_flashTimer->setDirection(QTimeLine::Forward);
+  m_flashTimer->setCurveShape(QTimeLine::SineCurve);
+  m_flashTimer->setFrameRange(0, 92);
+  auto updateSlot = static_cast<void (QWidget::*)()>(&QWidget::update);
+  connect(m_flashTimer, &QTimeLine::valueChanged, this, updateSlot);
+  connect(m_flashTimer, &QTimeLine::finished, this, [=] () {
+    if (!isChecked()) m_unseen = true;
+    update();
+  });
+  updateToolTip();
 }
 
 void OutputPaneToggleButton::updateToolTip()
 {
-    setToolTip(m_action->toolTip());
+  setToolTip(m_action->toolTip());
 }
 
 
@@ -385,53 +400,64 @@ QSize OutputPaneToggleButton::sizeHint() const
 
 void OutputPaneToggleButton::paintEvent(QPaintEvent*)
 {
-    const QFontMetrics fm = fontMetrics();
-    const int baseLine = (height() - fm.height() + 1) / 2 + fm.ascent();
-    const int numberWidth = fm.width(m_number);
+  const QFontMetrics fm = fontMetrics();
+  const int baseLine = (height() - fm.height() + 1) / 2 + fm.ascent();
+  const int numberWidth = fm.width(m_number);
 
-    QPainter p(this);
+  QPainter p(this);
 
-    if (m_flashTimer->state() == QTimeLine::Running) {
-        QColor c(Qt::red);
-        c.setAlpha(m_flashTimer->currentFrame());
-        QRect r = rect().adjusted(numberAreaWidth, 1, -1, -1);
-        p.fillRect(r, c);
-    }
+  QRect r = rect().adjusted(numberAreaWidth, 1, -1, -1);
 
-    p.setFont(font());
-    p.setPen(palette().color(QPalette::Active, QPalette::Text));
-    p.drawText((numberAreaWidth - numberWidth) / 2, baseLine, m_number);
-    if (!isChecked())
-        p.setPen(palette().color(QPalette::Inactive, QPalette::Text));
-    int leftPart = numberAreaWidth + buttonBorderWidth;
-    int labelWidth = 0;
-    if (!m_badgeNumberLabel.text().isEmpty()) {
-        const QSize labelSize = m_badgeNumberLabel.sizeHint();
-        labelWidth = labelSize.width() + 3;
-        m_badgeNumberLabel.paint(&p, width() - labelWidth,
-                                 (height() - labelSize.height()) / 2,
-                                 isChecked(), palette());
-    }
-    p.drawText(leftPart, baseLine, fm.elidedText(m_text, Qt::ElideRight, width() - leftPart - 1 - labelWidth));
+  if (isChecked()) {
+    p.fillRect(r, palette().color(QPalette::Active, QPalette::Background));
+  }
+
+  if (m_flashTimer->state() == QTimeLine::Running) {
+    m_flashColor.setAlpha(m_flashTimer->currentFrame());
+    p.fillRect(r, m_flashColor);
+  } else if (m_unseen) {
+    m_flashColor.setAlpha(92);
+    p.fillRect(r, m_flashColor);
+  }
+
+
+  p.setFont(font());
+  p.setPen(palette().color(QPalette::Active, QPalette::Text));
+  p.drawText((numberAreaWidth - numberWidth) / 2, baseLine, m_number);
+  if (!isChecked()) {
+    p.setPen(palette().color(QPalette::Inactive, QPalette::Text));
+  }
+  int leftPart = numberAreaWidth + buttonBorderWidth;
+  int labelWidth = 0;
+  if (!m_badgeNumberLabel.text().isEmpty()) {
+    const QSize labelSize = m_badgeNumberLabel.sizeHint();
+    labelWidth = labelSize.width() + 3;
+    m_badgeNumberLabel.paint(&p, width() - labelWidth,
+                             (height() - labelSize.height()) / 2,
+                             isChecked(), palette());
+  }
+  p.drawText(leftPart, baseLine, fm.elidedText(m_text, Qt::ElideRight, width() - leftPart - 1 - labelWidth));
 }
 
 void OutputPaneToggleButton::checkStateSet()
 {
-    // Stop flashing when button is checked
-    QToolButton::checkStateSet();
-    m_flashTimer->stop();
+  // Stop flashing when button is checked
+  m_flashTimer->stop();
+  m_unseen = false;
+  QToolButton::checkStateSet();
 }
 
 void OutputPaneToggleButton::flash(int count)
 {
-    setVisible(true);
-    // Start flashing if button is not checked
-    if (!isChecked()) {
-        m_flashTimer->setLoopCount(count);
-        if (m_flashTimer->state() != QTimeLine::Running)
-            m_flashTimer->start();
-        update();
+  // Start flashing if button is not checked
+  if (!isChecked()) {
+    m_flashTimer->setLoopCount(count);
+    if (m_flashTimer->state() != QTimeLine::Running) {
+      m_flashColor = QColor(Qt::red);
+      m_flashTimer->start();
     }
+    update();
+  }
 }
 
 void OutputPaneToggleButton::setIconBadgeNumber(int number)
@@ -441,37 +467,31 @@ void OutputPaneToggleButton::setIconBadgeNumber(int number)
     updateGeometry();
 }
 
-
-///////////////////////////////////////////////////////////////////////
-//
-// OutputPaneManageButton
-//
-///////////////////////////////////////////////////////////////////////
-
-OutputPaneManageButton::OutputPaneManageButton()
+OutputPaneManageButton::OutputPaneManageButton(QWidget *p)
+  : QToolButton(p)
 {
-    setFocusPolicy(Qt::NoFocus);
-    setCheckable(true);
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+  setFocusPolicy(Qt::NoFocus);
+  setCheckable(true);
+  setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
 
 QSize OutputPaneManageButton::sizeHint() const
 {
-    ensurePolished();
-    return QSize(numberAreaWidth, QApplication::globalStrut().height());
+  ensurePolished();
+  return QSize(numberAreaWidth, QApplication::globalStrut().height());
 }
 
 void OutputPaneManageButton::paintEvent(QPaintEvent*)
 {
-    QPainter p(this);
-    QStyle *s = style();
-    QStyleOption arrowOpt;
-    arrowOpt.initFrom(this);
-    arrowOpt.rect = QRect(6, rect().center().y() - 3, 8, 8);
-    arrowOpt.rect.translate(0, -3);
-    s->drawPrimitive(QStyle::PE_IndicatorArrowUp, &arrowOpt, &p, this);
-    arrowOpt.rect.translate(0, 6);
-    s->drawPrimitive(QStyle::PE_IndicatorArrowDown, &arrowOpt, &p, this);
+  QPainter p(this);
+  QStyle *s = style();
+  QStyleOption arrowOpt;
+  arrowOpt.initFrom(this);
+  arrowOpt.rect = QRect(6, rect().center().y() - 3, 8, 8);
+  arrowOpt.rect.translate(0, -3);
+  s->drawPrimitive(QStyle::PE_IndicatorArrowUp, &arrowOpt, &p, this);
+  arrowOpt.rect.translate(0, 6);
+  s->drawPrimitive(QStyle::PE_IndicatorArrowDown, &arrowOpt, &p, this);
 }
 
 BadgeLabel::BadgeLabel()
@@ -524,12 +544,6 @@ void BadgeLabel::calculateSize()
     m_size.setHeight(2 * m_padding + 1); // Needs to be uneven for pixel perfect vertical centering in the button
 }
 
-// Separator
-OuputPaneSeparator::OuputPaneSeparator(QWidget *parent)
-  : QFrame(parent)
-{
-  setFrameStyle(QFrame::Plain | QFrame::VLine);
-}
 
 OutputPaneResizeButton::OutputPaneResizeButton(QWidget *target, QWidget* parent)
   : QToolButton(parent)
@@ -554,8 +568,13 @@ void OutputPaneResizeButton::mouseMoveEvent(QMouseEvent *event) {
   if (!m_resizing) return;
   QPoint d = event->globalPos() - m_anchor;
   QPoint n;
-  n.setX(qMax(5, d.x() + m_anchorSize.width()));
-  n.setY(qMax(5, -d.y() + m_anchorSize.height()));
+  n.setX(d.x() + m_anchorSize.width());
+  n.setY(-d.y() + m_anchorSize.height());
+  if (n.x() < m_target->minimumWidth()) return;
+  if (n.y() < m_target->minimumHeight()) return;
+  if (n.x() > m_target->parentWidget()->width() * 0.75) return;
+  if (n.y() > m_target->parentWidget()->height() * 0.75) return;
+
   m_target->move(m_anchorPos.x(), m_anchorPos.y() + d.y());
   m_target->resize(n.x(), n.y());
 }

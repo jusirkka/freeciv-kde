@@ -70,7 +70,10 @@ SOURCES += \
     governordialog.cpp \
     workmodel.cpp \
     playerdialog.cpp \
-    playerwidget.cpp
+    playerwidget.cpp \
+    sciencedialog.cpp \
+    researchtreewidget.cpp \
+    actionselector.cpp
 
 
 HEADERS += \
@@ -116,7 +119,10 @@ HEADERS += \
     governordialog.h \
     workmodel.h \
     playerdialog.h \
-    playerwidget.h
+    playerwidget.h \
+    sciencedialog.h \
+    researchtreewidget.h \
+    actionselector.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \
@@ -148,4 +154,8 @@ FORMS += \
     cityview.ui \
     productiondialog.ui \
     governordialog.ui \
-    playerwidget.ui
+    playerwidget.ui \
+    sciencedialog.ui
+
+DISTFILES += \
+    BUGS

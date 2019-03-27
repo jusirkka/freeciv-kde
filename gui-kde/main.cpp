@@ -18,6 +18,7 @@ extern "C" {
 
 #include <QPainter>
 #include <QFontMetrics>
+#include <QApplication>
 
 #pragma GCC diagnostic pop
 
@@ -374,5 +375,10 @@ static void setup_gui_funcs() {
 int main(int argc, char **argv)
 {
   setup_gui_funcs();
+
+//  QApplication app(argc, argv);
+//  app.setOrganizationName("Kvanttiapina");
+//  app.setApplicationName("freeciv-kde");
+
   return client_main(argc, argv);
 }

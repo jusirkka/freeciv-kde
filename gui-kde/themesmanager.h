@@ -38,7 +38,7 @@ private:
     QString m_path;
     QString m_Default;
     QString m_Template;
-    QFileSystemWatcher* m_styleWatcher;
+    QFileSystemWatcher* m_styleWatcher = nullptr;
 
 };
 

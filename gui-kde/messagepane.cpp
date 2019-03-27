@@ -1,5 +1,6 @@
 #include "messagepane.h"
 #include "application.h"
+#include "logging.h"
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -8,9 +9,11 @@
 
 using namespace KV;
 
-ErrorWidget::ErrorWidget(const QString& e)
-  : QLabel(e)
+ErrorWidget::ErrorWidget(const QString& e, QWidget* p)
+  : QLabel(e, p)
 {
+  setWindowFlags(Qt::X11BypassWindowManagerHint |
+                 Qt::FramelessWindowHint);
   auto fm = fontMetrics();
   setFixedHeight(fm.height() + 6);
   setFixedWidth(fm.width(e) + 6);
@@ -35,8 +38,8 @@ void BrowserWidget::handleError(const QString &msg) {
   QPoint p = mapFromGlobal(QCursor::pos());
   m_errorWidget->move(p.x(), p.y() - m_errorWidget->height());
   m_errorWidget->show();
-  QTimer::singleShot(2000, [this] () {
-    this->m_errorWidget->hide();
+  QTimer::singleShot(2000, [=] () {
+    m_errorWidget->hide();
   });
 }
 
@@ -53,7 +56,8 @@ void BrowserWidget::updateMessages() {
 
 
 MessagePane::MessagePane()
-  : m_mainWidget(new QWidget)
+  : IOutputPane()
+  , m_mainWidget(new QWidget)
   , m_browser(new BrowserWidget)
 {
   auto *layout = new QVBoxLayout;
@@ -85,11 +89,11 @@ void MessagePane::clearContents() {
 }
 
 void MessagePane::refreshContents() {
-  // noop
+  m_browser->updateMessages();
 }
 
 void MessagePane::configureOutput() {
-  // noop
+  // TODO: select which messages to display
 }
 
 void MessagePane::visibilityChanged(bool /*visible*/) {
@@ -97,24 +101,9 @@ void MessagePane::visibilityChanged(bool /*visible*/) {
 }
 
 bool MessagePane::canConfigure() const {
-  return false;
+  return true;
 }
 
 bool MessagePane::canRefresh() const {
-  return false;
+  return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

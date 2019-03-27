@@ -26,6 +26,8 @@ extern "C" {
 #include "playerdialog.h"
 #include "cityview.h"
 #include "citydialog.h"
+#include <QCloseEvent>
+#include "sciencedialog.h"
 
 using namespace KV;
 
@@ -50,13 +52,17 @@ MainWindow::MainWindow()
                                     chatPane}, this);
 
   m_players = new PlayerDialog(this);
-  connect(Application::instance(), &Application::popupPlayers,
-          this, &MainWindow::on_actionPlayers_triggered);
+  connect(Application::instance(), &Application::popupPlayers, this, [=] () {
+    m_players->show();
+    m_players->raise();
+  });
 
 
   m_cityReport = new CityView(this);
-  connect(Application::instance(), &Application::popupCityReport,
-          this, &MainWindow::on_actionCities_triggered);
+  connect(Application::instance(), &Application::popupCityReport, this, [=] () {
+    m_cityReport->show();
+    m_cityReport->raise();
+  });
 
   m_cityManager = new CityDialog(m_cityReport, this);
   connect(Application::instance(), &Application::refreshCityDialog,
@@ -80,6 +86,13 @@ MainWindow::MainWindow()
     m_cityManager->show();
     m_cityManager->raise();
   });
+
+  m_scienceReport = new ScienceDialog(this);
+  connect(Application::instance(), &Application::popupScienceReport, this, [=] () {
+    m_scienceReport->show();
+    m_scienceReport->raise();
+  });
+
 
 
 
@@ -252,20 +265,7 @@ MainWindow::~MainWindow() {
   delete m_ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent */*event*/) {
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event) {
-  auto p = statusBar()->pos();
-  m_panes->move(p.x(), p.y() - m_panes->height());
-  QMainWindow::resizeEvent(event);
-}
-
-void MainWindow::on_actionSaveGameAs_triggered() {}
-void MainWindow::on_actionLoadScenario_triggered() {}
-void MainWindow::on_actionLoadGame_triggered() {}
-
-void MainWindow::on_actionQuit_triggered() {
+void MainWindow::closeEvent(QCloseEvent *event) {
   bool ok = true;
   if (!m_currentState || m_currentState->id() != PAGE_MAIN) {
     KV::StandardMessageBox ask(centralWidget(),
@@ -279,8 +279,24 @@ void MainWindow::on_actionQuit_triggered() {
       disconnect_from_server();
     }
     writeSettings();
-    qApp->quit();
+    event->accept();
+  } else {
+    event->ignore();
   }
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event) {
+  auto p = statusBar()->pos();
+  m_panes->move(p.x(), p.y() - m_panes->height());
+  QMainWindow::resizeEvent(event);
+}
+
+void MainWindow::on_actionSaveGameAs_triggered() {}
+void MainWindow::on_actionLoadScenario_triggered() {}
+void MainWindow::on_actionLoadGame_triggered() {}
+
+void MainWindow::on_actionQuit_triggered() {
+  close();
 }
 
 void MainWindow::writeSettings() {}
@@ -581,7 +597,16 @@ void MainWindow::on_actionCities_triggered() {
 }
 
 void MainWindow::on_actionEconomy_triggered() {}
-void MainWindow::on_actionResearch_triggered() {}
+
+void MainWindow::on_actionResearch_triggered() {
+  if (m_scienceReport->isVisible()) {
+      m_scienceReport->hide();
+  } else {
+    m_scienceReport->show();
+    m_scienceReport->raise();
+  }
+}
+
 void MainWindow::on_actionSpaceship_triggered() {}
 void MainWindow::on_actionAbout_triggered() {}
 void MainWindow::on_actionHandbook_triggered() {}
@@ -589,10 +614,3 @@ void MainWindow::on_actionConfigureShortcuts_triggered() {}
 void MainWindow::on_actionConfigureToolbar_triggered() {}
 void MainWindow::on_actionOptions_triggered() {}
 
-void MainWindow::on_actionShowMenubar_toggled(bool on) {
-  menuBar()->setVisible(on);
-}
-
-void MainWindow::on_actionShowToolbar_toggled(bool on) {
-  m_ui->toolBar->setVisible(on);
-}

@@ -1,0 +1,16 @@
+TODO
+- settings manager
+- action manager
+- tidyup gui funcs in main.cpp
+- economy report
+- units report
+- help dialog
+- font manager
+BUGS
+- unitinfo does not display info for first item in the list
+- error handling in messages pane does not work
+- research combo does not select target
+- sporadic freezes when starting new game
+- fix minimap: zoom does not work
+- hex tiles take too much space
+- occasional segfaults when selecting unit in citydialog (maybe single unit only?)

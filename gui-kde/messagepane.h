@@ -10,11 +10,15 @@ namespace KV {
 class ErrorWidget: public QLabel {
   Q_OBJECT
 public:
-  ErrorWidget(const QString& e);
+  ErrorWidget(const QString& e, QWidget* parent = nullptr);
 };
 
 class BrowserWidget: public TextBrowser {
+
   Q_OBJECT
+
+  friend class MessagePane;
+
 public:
   BrowserWidget();
 protected:

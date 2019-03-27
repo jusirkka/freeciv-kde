@@ -18,11 +18,7 @@ ThemesManager::ThemesManager(QObject* parent)
   : QObject(parent)
   , m_Default("System")
   , m_Template("%1/themes/gui-kde")
-  , m_styleWatcher(new QFileSystemWatcher(this))
-{
-  connect(m_styleWatcher, &QFileSystemWatcher::fileChanged,
-          this, &ThemesManager::reloadStyle);
-}
+{}
 
 void ThemesManager::reloadStyle(const QString& path) {
   QFile res(path);
@@ -50,6 +46,13 @@ void ThemesManager::loadTheme(const QString& theme_name, const QString& theme_pa
                << ", not changing the current theme" << m_Current;
     return;
   }
+
+  if (m_styleWatcher == nullptr) {
+    m_styleWatcher = new QFileSystemWatcher(this);
+    connect(m_styleWatcher, &QFileSystemWatcher::fileChanged,
+            this, &ThemesManager::reloadStyle);
+  }
+
 
   if (!m_path.isEmpty()) {
     m_styleWatcher->removePath(m_path);

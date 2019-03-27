@@ -9,6 +9,9 @@
 #include "game.h"
 #include "text.h"
 #include "research.h"
+extern "C" {
+#include "repodlgs_g.h"
+}
 
 using namespace KV;
 
@@ -62,6 +65,8 @@ GameInfo::GameInfo(QWidget *parent)
           this, &GameInfo::updateInfo);
   connect(Application::instance(), &Application::updateTurnTimeout,
           this, &GameInfo::updateTurnTime);
+  connect(Application::instance(), &Application::updateScienceReport,
+          this, &GameInfo::updateResearch);
 }
 
 void GameInfo::updateInfo() {
@@ -93,12 +98,18 @@ void GameInfo::updateInfo() {
     m_gold->setText(s);
   }
 
-  s = get_bulb_tooltip();
+  updateResearch();
+
+  resize(sizeHint());
+}
+
+void GameInfo::updateResearch() {
+  QString s = get_bulb_tooltip();
   s.remove(0, s.indexOf('\n') + 1);
   s.remove(s.indexOf('('), s.count());
   m_research->setText(s);
 
-  if (nullptr != client.conn.playing) {
+  if (client_has_player()) {
     research *r = research_get(client_player());
     if (r->researching == A_UNSET && r->tech_goal == A_UNSET
         && r->techs_researched < game.control.num_tech_types
@@ -107,8 +118,6 @@ void GameInfo::updateInfo() {
       m_blinkState = true;
     }
   }
-
-  resize(sizeHint());
 }
 
 void GameInfo::updateTurnTime() {
@@ -144,4 +153,8 @@ void GameInfo::blink() {
       m_blinkState = !m_blinkState;
     }
   }
+}
+
+void GameInfo::mousePressEvent(QMouseEvent */*event*/) {
+  science_report_dialog_popup(true);
 }

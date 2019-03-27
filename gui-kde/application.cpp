@@ -45,13 +45,14 @@ const char *client_string = "gui-kde";
 
 using namespace KV;
 
-void Application::Init() {/*noop*/}
+void Application::Init() {}
 
-void Application::Main(int argc, char *argv[]) {
+void Application::Main(int argc, char **argv) {
 
   QApplication app(argc, argv);
   app.setOrganizationName("Kvanttiapina");
   app.setApplicationName("freeciv-kde");
+//  QApplication& app = *qApp;
 
   QCommandLineParser parser;
   parser.setApplicationDescription("Freeciv KDE Client");
@@ -72,11 +73,12 @@ void Application::Main(int argc, char *argv[]) {
                      "[%{file}:%{line}] - %{message}");
   QLoggingCategory::setFilterRules(QStringLiteral("Freeciv.debug=true"));
 
+  qCDebug(FC) << "Application::Main";
 
   // set application icon
   tileset_init(tileset);
   tileset_load_tiles(tileset);
-  app.setWindowIcon(QIcon(get_icon_sprite(tileset, ICON_FREECIV)->pm));
+  qApp->setWindowIcon(QIcon(get_icon_sprite(tileset, ICON_FREECIV)->pm));
 
   // set system theme
   ThemesManager::ClearTheme();
@@ -87,12 +89,11 @@ void Application::Main(int argc, char *argv[]) {
   init_mapcanvas_and_overview();
   calculate_overview_dimensions();
 
-  // mainwindow ctor refers to application instance:
-  // create it first
-  auto mw = new MainWindow;
-  instance()->m_mainWindow = mw;
-  mw->show();
+  // mainwindow ctor refers to application instance: create it first
+  instance()->m_mainWindow = new MainWindow;
+  instance()->m_mainWindow->show();
   app.exec();
+  qCDebug(FC) << "Mainwindow closed";
 }
 
 void Application::Exit() {
@@ -206,6 +207,7 @@ QString Application::ApplyTags(const char *s, const text_tag_list *tags) {
   }
 
   // qCDebug(FC) << res;
+  if (res.isEmpty()) return s;
   return QString(res);
 }
 
@@ -403,6 +405,15 @@ void Application::UpdateOverview() {
   instance()->updateOverview();
 }
 
+void Application::PopupScienceReport() {
+  instance()->popupScienceReport();
+}
+
+void Application::UpdateScienceReport() {
+  instance()->updateScienceReport();
+}
+
+
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";
   instance()->addIdleCallback(callback, data);
@@ -419,8 +430,8 @@ client_pages Application::CurrentState() {
 }
 
 Application* Application::instance() {
-    static Application* app = new Application();
-    return app;
+  static Application* app = new Application();
+  return app;
 }
 
 void Application::addIdleCallback(void callback(void *), void *data) {
@@ -454,6 +465,7 @@ void Application::timerRestart() {
 
 void Application::addServerSource(int sock) {
   if (m_notifier) removeServerSource();
+  if (QCoreApplication::instance() == nullptr) return;
   m_notifier = new QSocketNotifier(sock, QSocketNotifier::Read, this);
   connect(m_notifier, &QSocketNotifier::activated, this, &Application::serverInput);
 }

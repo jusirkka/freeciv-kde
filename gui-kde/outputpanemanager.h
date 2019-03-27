@@ -62,6 +62,8 @@ public:
 
   void updateStatusButtons(bool visible);
 
+  void paintEvent(QPaintEvent *event) override;
+
 private:
 
   using Panes = QVector<IOutputPane*>;
@@ -113,26 +115,19 @@ private:
 class BadgeLabel
 {
 public:
-    BadgeLabel();
-    void paint(QPainter *p, int x, int y, bool isChecked, const QPalette& pal);
-    void setText(const QString &text);
-    QString text() const;
-    QSize sizeHint() const;
+  BadgeLabel();
+  void paint(QPainter *p, int x, int y, bool isChecked, const QPalette& pal);
+  void setText(const QString &text);
+  QString text() const;
+  QSize sizeHint() const;
 
 private:
-    void calculateSize();
+  void calculateSize();
 
-    QSize m_size;
-    QString m_text;
-    QFont m_font;
-    static const int m_padding = 6;
-};
-
-class OuputPaneSeparator: public QFrame
-{
-  Q_OBJECT
-public:
-  OuputPaneSeparator(QWidget* parent = nullptr);
+  QSize m_size;
+  QString m_text;
+  QFont m_font;
+  static const int m_padding = 6;
 };
 
 class OutputPaneToggleButton : public QToolButton
@@ -155,13 +150,15 @@ private:
     QAction *m_action;
     QTimeLine *m_flashTimer;
     BadgeLabel m_badgeNumberLabel;
+    bool m_unseen = false;
+    QColor m_flashColor;
 };
 
 class OutputPaneManageButton : public QToolButton
 {
     Q_OBJECT
 public:
-    OutputPaneManageButton();
+    OutputPaneManageButton(QWidget* p = nullptr);
     QSize sizeHint() const override;
     void paintEvent(QPaintEvent*) override;
 };

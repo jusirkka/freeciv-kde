@@ -23,6 +23,7 @@ class MapView;
 class PlayerDialog;
 class CityView;
 class CityDialog;
+class ScienceDialog;
 
 class MainWindow: public QMainWindow
 {
@@ -115,8 +116,6 @@ private slots:
   void on_actionConfigureShortcuts_triggered();
   void on_actionConfigureToolbar_triggered();
   void on_actionOptions_triggered();
-  void on_actionShowMenubar_toggled(bool on);
-  void on_actionShowToolbar_toggled(bool on);
 
   void setCurrentState(bool active);
   void stateChange(client_pages page);
@@ -143,6 +142,7 @@ private:
   PlayerDialog* m_players;
   CityView* m_cityReport;
   CityDialog* m_cityManager;
+  ScienceDialog* m_scienceReport;
 
 };
 

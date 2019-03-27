@@ -81,7 +81,7 @@ QString ReportPane::displayName() const {
 
 
 void ReportPane::clearContents() {
-  // noop
+  m_report->clear();
 }
 
 void ReportPane::refreshContents() {

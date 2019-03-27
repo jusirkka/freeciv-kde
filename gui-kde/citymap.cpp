@@ -19,14 +19,18 @@ CityMap::CityMap(QWidget *parent)
 CityMap::~CityMap()
 {}
 
-void CityMap::paintEvent(QPaintEvent */*event*/) {
+void CityMap::paintEvent(QPaintEvent *event) {
 
   if (m_city == nullptr) return;
-
   QPainter painter;
 
   painter.begin(this);
-  painter.drawPixmap(0, 0, m_rect.x(), m_rect.y(), m_pixmap);
+
+  painter.fillRect(event->rect(), QColor(Qt::black));
+
+  int x = (event->rect().width() - m_rect.x()) / 2;
+  int y = (event->rect().height() - m_rect.y()) / 2;
+  painter.drawPixmap(x, y, m_rect.x(), m_rect.y(), m_pixmap);
 
   if (cma_is_city_under_agent(m_city, NULL)) {
     painter.fillRect(0, 0, m_pixmap.width(), m_pixmap.height(),

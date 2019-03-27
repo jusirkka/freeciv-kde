@@ -19,6 +19,11 @@ private slots:
   void updateInfo();
   void updateTurnTime();
   void blink();
+  void updateResearch();
+
+private:
+
+  void mousePressEvent(QMouseEvent *event) override;
 
 private:
 

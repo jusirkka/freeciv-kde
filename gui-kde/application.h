@@ -44,6 +44,7 @@ class Application: public QObject {
   friend class PlayerDialog;
   friend class CityModel;
   friend class UnitSelector;
+  friend class ScienceDialog;
 
 public:
 
@@ -112,6 +113,8 @@ public:
   static void RefreshCityDialog(city*, bool popup);
   static void PopdownCityDialog(city*);
   static void UpdateOverview();
+  static void PopupScienceReport();
+  static void UpdateScienceReport();
 
 
 
@@ -152,6 +155,8 @@ signals:
   void popdownCityDialog(city*);
   void updateUnitSelector();
   void updateOverview();
+  void popupScienceReport();
+  void updateScienceReport();
 
 
 
