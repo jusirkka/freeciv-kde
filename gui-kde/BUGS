@@ -8,9 +8,8 @@ TODO
 - font manager
 BUGS
 - unitinfo does not display info for first item in the list
-- error handling in messages pane does not work
-- research combo does not select target
+- error handling in messages pane: popup placement
 - sporadic freezes when starting new game
 - fix minimap: zoom does not work
 - hex tiles take too much space
-- occasional segfaults when selecting unit in citydialog (maybe single unit only?)
+- segfault when selecting unit in citydialog.

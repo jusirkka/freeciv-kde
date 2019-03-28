@@ -10,7 +10,7 @@ void city_report_dialog_popup(bool /*raise*/) {
 }
 
 void real_city_report_dialog_update(void */*unused*/) {
-  qCDebug(FC) << "real_city_report_dialog_update";
+  // qCDebug(FC) << "real_city_report_dialog_update";
   KV::Application::UpdateCityReport();
 }
 

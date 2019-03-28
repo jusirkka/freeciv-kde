@@ -243,7 +243,7 @@ void ActionSelector::refreshDialog(unit *actor,
     }
   } action_iterate_end;
 
-  m_dialog->show();
+  m_dialog->raise();
 
 }
 

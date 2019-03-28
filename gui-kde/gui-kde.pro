@@ -73,7 +73,8 @@ SOURCES += \
     playerwidget.cpp \
     sciencedialog.cpp \
     researchtreewidget.cpp \
-    actionselector.cpp
+    actionselector.cpp \
+    settingsmanager.cpp
 
 
 HEADERS += \
@@ -122,7 +123,8 @@ HEADERS += \
     playerwidget.h \
     sciencedialog.h \
     researchtreewidget.h \
-    actionselector.h
+    actionselector.h \
+    settingsmanager.h
 
 INCLUDEPATH += ../freeciv/common \
     ../freeciv/common/networking \

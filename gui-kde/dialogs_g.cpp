@@ -66,7 +66,7 @@ void popup_action_selection(unit *actor,
 }
 
 int action_selection_actor_unit() {
-  qCDebug(FC) << "action_selection_actor_unit";
+  // qCDebug(FC) << "action_selection_actor_unit";
   return KV::ActionSelector::ActorId();
 }
 

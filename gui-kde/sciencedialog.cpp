@@ -123,7 +123,7 @@ void ScienceDialog::on_goalCombo_currentIndexChanged(int idx) {
   dsend_packet_player_tech_goal(&client.conn, id);
 }
 
-void ScienceDialog::on_reasearchingCombo_currentIndexChanged(int idx) {
+void ScienceDialog::on_researchingCombo_currentIndexChanged(int idx) {
   if (!can_client_issue_orders()) return;
 
   int id = m_ui->researchingCombo->itemData(idx).toInt();

@@ -28,6 +28,7 @@ extern "C" {
 #include "citydialog.h"
 #include <QCloseEvent>
 #include "sciencedialog.h"
+#include "settingsmanager.h"
 
 using namespace KV;
 
@@ -93,9 +94,6 @@ MainWindow::MainWindow()
     m_scienceReport->raise();
   });
 
-
-
-
   auto intro = new State::Intro(this);
   connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);
   m_states.addState(intro);
@@ -156,6 +154,10 @@ MainWindow::MainWindow()
   m_ui->actionCityProductionLevels->setChecked(gui_options.draw_city_productions);
   m_ui->actionCityBuyCost->setChecked(gui_options.draw_city_buycost);
   m_ui->actionCityTradeRoutes->setChecked(gui_options.draw_city_trade_routes);
+
+  SettingsManager::Register(this);
+
+  SettingsManager::Read();
 }
 
 void MainWindow::enableGameMenus(bool ok) {
@@ -278,7 +280,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     if (client.conn.used) {
       disconnect_from_server();
     }
-    writeSettings();
+    SettingsManager::Write();
     event->accept();
   } else {
     event->ignore();

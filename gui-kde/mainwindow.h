@@ -121,14 +121,12 @@ private slots:
   void stateChange(client_pages page);
   void restartStateMachine();
 
+  void writeSettings();
+  void readSettings();
+
 signals:
 
   void resetStateMachine();
-
-private:
-
-  void writeSettings();
-  void readSettings();
 
 private:
 

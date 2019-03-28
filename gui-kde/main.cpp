@@ -336,7 +336,7 @@ static void setup_gui_funcs() {
     KV::Application::RefreshCityDialog(pcity, true);
   };
   funcs->real_city_dialog_refresh = [] (struct city* pcity) {
-    qCDebug(FC) << "real_city_dialog_refresh";
+    // qCDebug(FC) << "real_city_dialog_refresh";
     KV::Application::RefreshCityDialog(pcity, false);
   };
   funcs->popdown_city_dialog = [] (struct city* pcity) {
@@ -358,7 +358,7 @@ static void setup_gui_funcs() {
   funcs->city_dialog_is_open = [] (struct city* /*pcity*/) {
     qCDebug(FC) << "TODO: city_dialog_is_open";
     return false;
-  };;
+  };
 
   funcs->request_transport = [] (struct unit* /*pcargo*/, struct tile* /*ptile*/) {
     qCDebug(FC) << "TODO: request_transport";
@@ -375,10 +375,5 @@ static void setup_gui_funcs() {
 int main(int argc, char **argv)
 {
   setup_gui_funcs();
-
-//  QApplication app(argc, argv);
-//  app.setOrganizationName("Kvanttiapina");
-//  app.setApplicationName("freeciv-kde");
-
   return client_main(argc, argv);
 }

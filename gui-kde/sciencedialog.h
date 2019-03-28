@@ -25,7 +25,7 @@ public slots:
 
 private slots:
 
-  void on_reasearchingCombo_currentIndexChanged(int idx);
+  void on_researchingCombo_currentIndexChanged(int idx);
   void on_goalCombo_currentIndexChanged(int idx);
 
 private:
