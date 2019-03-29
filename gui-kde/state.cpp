@@ -1,5 +1,4 @@
 #include "state.h"
-#include "ui_mainwindow.h"
 #include "mainwindow.h"
 #include "logging.h"
 #include "networkdialog.h"
@@ -125,10 +124,10 @@ Network::~Network() {
 void Network::onEntry(QEvent* event) {
   if (event->type() == QEvent::StateMachineSignal) {
     auto signalEvent = static_cast<QStateMachine::SignalEvent*>(event);
-    if (signalEvent->sender() == m_parent->m_ui->actionConnectToGame) {
+    if (signalEvent->sender() == m_parent->action("actionConnectToGame")) {
       m_networkDialog->init();
       m_networkDialog->show();
-    } else if (signalEvent->sender() == m_parent->m_ui->actionNewGame) {
+    } else if (signalEvent->sender() == m_parent->action("actionNewGame")) {
       if (!is_server_running()) {
         client_start_server();
       }

@@ -20,6 +20,7 @@ namespace KV {
 class HelpData {
 public:
   HelpData(QRect r): rect(r) {}
+  virtual ~HelpData() = default;
   QRect rect;
   virtual void popup() const = 0;
 };
@@ -110,7 +111,9 @@ void ResearchTreeWidget::paintEvent(QPaintEvent */*event*/) {
 
 
 ResearchTreeWidget::~ResearchTreeWidget() {
-  destroy_reqtree(m_reqTree);
+  if (m_reqTree != nullptr) {
+    destroy_reqtree(m_reqTree);
+  }
   qDeleteAll(m_helpData);
 }
 

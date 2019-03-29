@@ -1,14 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include <KXmlGuiWindow>
 #include <QStateMachine>
 
 extern "C" {
 #include "pages_g.h"
 }
 
-namespace Ui {class MainWindow;}
 
 namespace KV {
 
@@ -25,7 +24,7 @@ class CityView;
 class CityDialog;
 class ScienceDialog;
 
-class MainWindow: public QMainWindow
+class MainWindow: public KXmlGuiWindow
 {
 
   Q_OBJECT
@@ -111,18 +110,11 @@ private slots:
   void on_actionEconomy_triggered();
   void on_actionResearch_triggered();
   void on_actionSpaceship_triggered();
-  void on_actionAbout_triggered();
-  void on_actionHandbook_triggered();
-  void on_actionConfigureShortcuts_triggered();
-  void on_actionConfigureToolbar_triggered();
   void on_actionOptions_triggered();
 
   void setCurrentState(bool active);
   void stateChange(client_pages page);
   void restartStateMachine();
-
-  void writeSettings();
-  void readSettings();
 
 signals:
 
@@ -130,7 +122,13 @@ signals:
 
 private:
 
-  Ui::MainWindow* m_ui;
+  void writeSettings();
+  void readSettings();
+  void addActions();
+  void createStateMachine();
+
+private:
+
   QStateMachine m_states;
   State::Base* m_currentState;
   QVector<State::Base*> m_stateList;

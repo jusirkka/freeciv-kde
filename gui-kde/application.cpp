@@ -28,6 +28,9 @@
 #include <QTimer>
 #include <QSocketNotifier>
 #include <QIcon>
+#include <KAboutData>
+#include <KLocalizedString>
+
 
 #include "application.h"
 #include "logging.h"
@@ -52,32 +55,48 @@ void Application::Main(int argc, char **argv) {
   QApplication app(argc, argv);
   app.setOrganizationName("Kvanttiapina");
   app.setApplicationName("freeciv-kde");
-//  QApplication& app = *qApp;
+
+  KLocalizedString::setApplicationDomain("freeciv");
+
+  KAboutData aboutData(
+        // The program name used internally. (componentName)
+        qAppName(),
+        // A displayable program name string. (displayName)
+        qAppName(),
+        // The program version string. (version)
+        QStringLiteral("0.0.1"),
+        // Short description of what the app does. (shortDescription)
+        i18n("KDE Freeciv client"),
+        // The license this code is released under
+        KAboutLicense::GPL,
+        // Copyright Statement (copyrightStatement = QString())
+        i18n("(c) 2019"),
+        // Optional text shown in the About box.
+        // Can contain any information desired. (otherText)
+        i18n("Now... Go Give 'em Hell!"),
+        // The program homepage string. (homePageAddress = QString())
+        QStringLiteral("https://github.com/jusirkka/freeciv-kde"),
+        // The bug report email address
+        // (bugsEmailAddress = QLatin1String("submit@bugs.kde.org")
+        QStringLiteral("https://github.com/jusirkka/freeciv-kde/issues"));
+
+  aboutData.addAuthor(i18n("Jukka Sirkka"),
+                      i18n("Codemonkey"),
+                      QStringLiteral("jukka.sirkka@iki.fi"),
+                      QStringLiteral("https://github.com/jusirkka"));
+
+  KAboutData::setApplicationData(aboutData);
 
   QCommandLineParser parser;
-  parser.setApplicationDescription("Freeciv KDE Client");
-  parser.addHelpOption();
-  parser.addVersionOption();
-
+  aboutData.setupCommandLine(&parser);
   parser.process(app);
-
-  qRegisterMetaType<QTextCursor>("QTextCursor");
-  qRegisterMetaType<QTextBlock>("QTextBlock");
-
-  qSetMessagePattern("[%{category} "
-                     "%{if-debug}D%{endif}"
-                     "%{if-info}I%{endif}"
-                     "%{if-warning}W%{endif}"
-                     "%{if-critical}C%{endif}"
-                     "%{if-fatal}F%{endif}]"
-                     "[%{file}:%{line}] - %{message}");
-  QLoggingCategory::setFilterRules(QStringLiteral("Freeciv.debug=true"));
+  aboutData.processCommandLine(&parser);
 
   qCDebug(FC) << "Application::Main";
 
   // set application icon
-  tileset_init(tileset);
-  tileset_load_tiles(tileset);
+  tileset_init(get_tileset());
+  tileset_load_tiles(get_tileset());
   qApp->setWindowIcon(QIcon(get_icon_sprite(tileset, ICON_FREECIV)->pm));
 
   // set system theme
@@ -85,11 +104,11 @@ void Application::Main(int argc, char **argv) {
 
 
   set_client_state(C_S_DISCONNECTED);
-
   init_mapcanvas_and_overview();
   calculate_overview_dimensions();
 
-  // mainwindow ctor refers to application instance: create it first
+  // mainwindow ctor refers to application instance:
+  // cannot be created in in the instance ctor, so created here instead
   instance()->m_mainWindow = new MainWindow;
   instance()->m_mainWindow->show();
   app.exec();
@@ -109,7 +128,7 @@ void Application::Beep()
 }
 
 void Application::VersionMessage(const char *version) {
-  qCDebug(FC) << "TODO: Application::VersionMessage";
+  qCDebug(FC) << "TODO: Application::VersionMessage: not connected";
   instance()->versionMessage(QString(version));
 }
 

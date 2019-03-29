@@ -112,7 +112,7 @@ SpriteFactory::SpriteFactory() {
   for (int j = 0; j < formats.size(); j++) {
     auto fmt = formats[j];
     auto bytes = new char[sizeof(fmt.data())];
-    strncpy(bytes, fmt.data(), sizeof(fmt.data()));
+    strncpy(bytes, fmt.data(), sizeof(char) * fmt.size());
     m_formats[j] = bytes;
   }
 }

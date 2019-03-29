@@ -10,7 +10,6 @@ extern "C" {
 #include "control.h"
 
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "messagebox.h"
 #include "state.h"
 #include "logging.h"
@@ -28,18 +27,19 @@ extern "C" {
 #include "citydialog.h"
 #include <QCloseEvent>
 #include "sciencedialog.h"
-#include "settingsmanager.h"
+#include <KStandardAction>
+#include <QApplication>
+#include <KActionCollection>
+#include <QStatusBar>
 
 using namespace KV;
 
 MainWindow::MainWindow()
-  : QMainWindow()
-  , m_ui(new Ui::MainWindow)
+  : KXmlGuiWindow()
   , m_currentState(nullptr)
   , m_stateList()
   , m_mapView(nullptr)
 {
-  m_ui->setupUi(this);
   setWindowTitle(qAppName());
 
   auto chatPane = new ChatPane;
@@ -94,6 +94,13 @@ MainWindow::MainWindow()
     m_scienceReport->raise();
   });
 
+  addActions();
+  createStateMachine();
+  readSettings();
+}
+
+void MainWindow::createStateMachine() {
+
   auto intro = new State::Intro(this);
   connect(intro, &QState::activeChanged, this, &MainWindow::setCurrentState);
   m_states.addState(intro);
@@ -117,8 +124,8 @@ MainWindow::MainWindow()
   auto final = new QFinalState;
   m_states.addState(final);
 
-  intro->addTransition(m_ui->actionConnectToGame, &QAction::triggered, nw);
-  intro->addTransition(m_ui->actionNewGame, &QAction::triggered, nw);
+  intro->addTransition(action("actionConnectToGame"), &QAction::triggered, nw);
+  intro->addTransition(action("actionNewGame"), &QAction::triggered, nw);
   intro->addTransition(intro, &State::Intro::playing, game);
   intro->addTransition(this, &MainWindow::resetStateMachine, final);
 
@@ -130,8 +137,8 @@ MainWindow::MainWindow()
   start->addTransition(start, &State::Start::rejected, intro);
   start->addTransition(this, &MainWindow::resetStateMachine, final);
 
-  game->addTransition(m_ui->actionConnectToGame, &QAction::triggered, nw);
-  game->addTransition(m_ui->actionNewGame, &QAction::triggered, nw);
+  game->addTransition(action("actionConnectToGame"), &QAction::triggered, nw);
+  game->addTransition(action("actionNewGame"), &QAction::triggered, nw);
   game->addTransition(this, &MainWindow::resetStateMachine, final);
 
   connect(&m_states, &QStateMachine::finished,
@@ -142,83 +149,67 @@ MainWindow::MainWindow()
 
   m_states.setInitialState(intro);
   m_states.start();
-
-  m_ui->actionCityOutlines->setChecked(gui_options.draw_city_outlines);
-  m_ui->actionCityOutput->setChecked(gui_options.draw_city_output);
-  m_ui->actionMapGrid->setChecked(gui_options.draw_map_grid);
-  m_ui->actionNationalBorders->setChecked(gui_options.draw_borders);
-  m_ui->actionNativeTiles->setChecked(gui_options.draw_native);
-  m_ui->actionCityFullBar->setChecked(gui_options.draw_full_citybar);
-  m_ui->actionCityNames->setChecked(gui_options.draw_city_names);
-  m_ui->actionCityGrowth->setChecked(gui_options.draw_city_growth);
-  m_ui->actionCityProductionLevels->setChecked(gui_options.draw_city_productions);
-  m_ui->actionCityBuyCost->setChecked(gui_options.draw_city_buycost);
-  m_ui->actionCityTradeRoutes->setChecked(gui_options.draw_city_trade_routes);
-
-  SettingsManager::Register(this);
-
-  SettingsManager::Read();
 }
 
 void MainWindow::enableGameMenus(bool ok) {
-  m_ui->actionSaveGameAs->setEnabled(ok);
-  m_ui->actionFullscreen->setEnabled(ok);
-  m_ui->actionMinimap->setEnabled(ok);
-  m_ui->actionCityOutlines->setEnabled(ok);
-  m_ui->actionCityOutput->setEnabled(ok);
-  m_ui->actionMapGrid->setEnabled(ok);
-  m_ui->actionNationalBorders->setEnabled(ok);
-  m_ui->actionNativeTiles->setEnabled(ok);
-  m_ui->actionCityFullBar->setEnabled(ok);
-  m_ui->actionCityNames->setEnabled(ok);
-  m_ui->actionCityGrowth->setEnabled(ok);
-  m_ui->actionCityProductionLevels->setEnabled(ok);
-  m_ui->actionCityBuyCost->setEnabled(ok);
-  m_ui->actionCityTradeRoutes->setEnabled(ok);
-  m_ui->actionCenterView->setEnabled(ok);
-  m_ui->actionZoomIn->setEnabled(ok);
-  m_ui->actionZoomOut->setEnabled(ok);
-  m_ui->actionScaleFonts->setEnabled(ok);
-  m_ui->actionGotoTile->setEnabled(ok);
-  m_ui->actionGotoNearestCity->setEnabled(ok);
-  m_ui->actionGoAirlifttoCity->setEnabled(ok);
-  m_ui->actionAutoExplore->setEnabled(ok);
-  m_ui->actionPatrol->setEnabled(ok);
-  m_ui->actionSentry->setEnabled(ok);
-  m_ui->actionUnsentryAllOnTile->setEnabled(ok);
-  m_ui->actionLoad->setEnabled(ok);
-  m_ui->actionUnload->setEnabled(ok);
-  m_ui->actionUnloadAllFromTransporter->setEnabled(ok);
-  m_ui->actionSetHomeCity->setEnabled(ok);
-  m_ui->actionUpgrade->setEnabled(ok);
-  m_ui->actionConvert->setEnabled(ok);
-  m_ui->actionDisband->setEnabled(ok);
-  m_ui->actionWait->setEnabled(ok);
-  m_ui->actionDone->setEnabled(ok);
-  m_ui->actionFortifyUnit->setEnabled(ok);
-  m_ui->actionBuildFortFortressBuoy->setEnabled(ok);
-  m_ui->actionBuildAirstripAirbase->setEnabled(ok);
-  m_ui->actionPillage->setEnabled(ok);
-  m_ui->actionBuildCity->setEnabled(ok);
-  m_ui->actionAutoWorker->setEnabled(ok);
-  m_ui->actionBuildRoad->setEnabled(ok);
-  m_ui->actionIrrigate->setEnabled(ok);
-  m_ui->actionMine->setEnabled(ok);
-  m_ui->actionConnectWithRoad->setEnabled(ok);
-  m_ui->actionConnectWithRailway->setEnabled(ok);
-  m_ui->actionConnectWithIrrigation->setEnabled(ok);
-  m_ui->actionTransform->setEnabled(ok);
-  m_ui->actionCleanPollution->setEnabled(ok);
-  m_ui->actionCleanNuclearFallout->setEnabled(ok);
-  m_ui->actionHelpBuildWonder->setEnabled(ok);
-  m_ui->actionEstablishTraderoute->setEnabled(ok);
-  m_ui->actionUnits->setEnabled(ok);
-  m_ui->actionPlayers->setEnabled(ok);
-  m_ui->actionCities->setEnabled(ok);
-  m_ui->actionEconomy->setEnabled(ok);
-  m_ui->actionResearch->setEnabled(ok);
-  m_ui->actionSpaceship->setEnabled(ok);
-  m_ui->actionOptions->setEnabled(ok);
+  action("actionSaveGameAs")->setEnabled(ok);
+  action("actionFullscreen")->setEnabled(ok);
+  action("actionMinimap")->setEnabled(ok);
+  action("actionCityOutlines")->setEnabled(ok);
+  action("actionCityOutput")->setEnabled(ok);
+  action("actionMapGrid")->setEnabled(ok);
+  action("actionNationalBorders")->setEnabled(ok);
+  action("actionNativeTiles")->setEnabled(ok);
+  action("actionCityFullBar")->setEnabled(ok);
+  action("actionCityNames")->setEnabled(ok);
+  action("actionCityGrowth")->setEnabled(ok);
+  action("actionCityProductionLevels")->setEnabled(ok);
+  action("actionCityBuyCost")->setEnabled(ok);
+  action("actionCityTradeRoutes")->setEnabled(ok);
+  action("actionCenterView")->setEnabled(ok);
+  action("actionZoomIn")->setEnabled(ok);
+  action("actionZoomOut")->setEnabled(ok);
+  action("actionScaleFonts")->setEnabled(ok);
+  action("actionGotoTile")->setEnabled(ok);
+  action("actionGotoNearestCity")->setEnabled(ok);
+  action("actionGoAirlifttoCity")->setEnabled(ok);
+  action("actionAutoExplore")->setEnabled(ok);
+  action("actionPatrol")->setEnabled(ok);
+  action("actionSentry")->setEnabled(ok);
+  action("actionUnsentryAllOnTile")->setEnabled(ok);
+  action("actionLoad")->setEnabled(ok);
+  action("actionUnload")->setEnabled(ok);
+  action("actionUnloadAllFromTransporter")->setEnabled(ok);
+  action("actionSetHomeCity")->setEnabled(ok);
+  action("actionUpgrade")->setEnabled(ok);
+  action("actionConvert")->setEnabled(ok);
+  action("actionDisband")->setEnabled(ok);
+  action("actionWait")->setEnabled(ok);
+  action("actionDone")->setEnabled(ok);
+  action("actionFortifyUnit")->setEnabled(ok);
+  action("actionBuildFortFortressBuoy")->setEnabled(ok);
+  action("actionBuildAirstripAirbase")->setEnabled(ok);
+  action("actionPillage")->setEnabled(ok);
+  action("actionBuildCity")->setEnabled(ok);
+  action("actionAutoWorker")->setEnabled(ok);
+  action("actionBuildRoad")->setEnabled(ok);
+  action("actionIrrigate")->setEnabled(ok);
+  action("actionMine")->setEnabled(ok);
+  action("actionConnectWithRoad")->setEnabled(ok);
+  action("actionConnectWithRailway")->setEnabled(ok);
+  action("actionConnectWithIrrigation")->setEnabled(ok);
+  action("actionTransform")->setEnabled(ok);
+  action("actionCleanPollution")->setEnabled(ok);
+  action("actionCleanNuclearFallout")->setEnabled(ok);
+  action("actionHelpBuildWonder")->setEnabled(ok);
+  action("actionEstablishTraderoute")->setEnabled(ok);
+  action("actionUnits")->setEnabled(ok);
+  action("actionPlayers")->setEnabled(ok);
+  action("actionCities")->setEnabled(ok);
+  action("actionEconomy")->setEnabled(ok);
+  action("actionResearch")->setEnabled(ok);
+  action("actionSpaceship")->setEnabled(ok);
+  action("actionOptions")->setEnabled(ok);
 }
 
 void MainWindow::setMapView(MapView *map) {
@@ -264,7 +255,7 @@ void MainWindow::restartStateMachine() {
 }
 
 MainWindow::~MainWindow() {
-  delete m_ui;
+  writeSettings();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -280,7 +271,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     if (client.conn.used) {
       disconnect_from_server();
     }
-    SettingsManager::Write();
     event->accept();
   } else {
     event->ignore();
@@ -302,7 +292,20 @@ void MainWindow::on_actionQuit_triggered() {
 }
 
 void MainWindow::writeSettings() {}
-void MainWindow::readSettings() {}
+
+void MainWindow::readSettings() {
+  action("actionCityOutlines")->setChecked(gui_options.draw_city_outlines);
+  action("actionCityOutput")->setChecked(gui_options.draw_city_output);
+  action("actionMapGrid")->setChecked(gui_options.draw_map_grid);
+  action("actionNationalBorders")->setChecked(gui_options.draw_borders);
+  action("actionNativeTiles")->setChecked(gui_options.draw_native);
+  action("actionCityFullBar")->setChecked(gui_options.draw_full_citybar);
+  action("actionCityNames")->setChecked(gui_options.draw_city_names);
+  action("actionCityGrowth")->setChecked(gui_options.draw_city_growth);
+  action("actionCityProductionLevels")->setChecked(gui_options.draw_city_productions);
+  action("actionCityBuyCost")->setChecked(gui_options.draw_city_buycost);
+  action("actionCityTradeRoutes")->setChecked(gui_options.draw_city_trade_routes);
+}
 
 void MainWindow::on_actionFullscreen_toggled(bool on) {
   if (on) {
@@ -610,9 +613,107 @@ void MainWindow::on_actionResearch_triggered() {
 }
 
 void MainWindow::on_actionSpaceship_triggered() {}
-void MainWindow::on_actionAbout_triggered() {}
-void MainWindow::on_actionHandbook_triggered() {}
-void MainWindow::on_actionConfigureShortcuts_triggered() {}
-void MainWindow::on_actionConfigureToolbar_triggered() {}
 void MainWindow::on_actionOptions_triggered() {}
 
+
+void MainWindow::addActions() {
+  struct Data {
+    QString name;
+    QString text;
+    QString shortcut;
+    QString theme;
+    QString tooltip;
+    bool enabled;
+    bool checkable;
+    bool checked;
+  };
+
+  QVector<Data> actionData{
+    {"actionSaveGameAs", "Save Game As...", "Ctrl+Shift+S", "document-save", "Save game as", false, false, false},
+    {"actionNewGame", "New Game...", "Ctrl+N", "document-new", "New game", true, false, false},
+    {"actionLoadScenario", "Load Scenario...", "", "", "Load scenario game", true, false, false},
+    {"actionLoadGame", "Load Game...", "", "", "Load saved game", true, false, false},
+    {"actionConnectToGame", "Connect to Game...", "", "", "Connect to game server", true, false, false},
+    {"actionQuit", "Quit", "Ctrl+Q", "application-exit", "Quit", true, false, false},
+    {"actionFullscreen", "Fullscreen", "Alt+Return", "", "", false, true, false},
+    {"actionMinimap", "Minimap", "Ctrl+M", "", "", false, true, true},
+    {"actionCityOutlines", "City Outlines", "Ctrl+Y", "", "", false, true, false},
+    {"actionCityOutput", "City Output", "Alt+W", "", "", false, true, false},
+    {"actionMapGrid", "Map Grid", "Ctrl+G", "", "", false, true, false},
+    {"actionNationalBorders", "National Borders", "Ctrl+B", "", "", false, true, false},
+    {"actionNativeTiles", "Native Tiles", "Alt+Shift+N", "", "", false, true, false},
+    {"actionCityFullBar", "City Full Bar", "Alt+F", "", "City Full Bar", false, true, false},
+    {"actionCityNames", "City Names", "Alt+N", "", "", false, true, false},
+    {"actionCityGrowth", "City Growth", "Ctrl+R", "", "City Growth", false, true, false},
+    {"actionCityProductionLevels", "City Production Levels", "Ctrl+P", "", "City Production Levels", false, true, false},
+    {"actionCityBuyCost", "City Buy Cost", "Alt+B", "", "", false, true, false},
+    {"actionCityTradeRoutes", "City Traderoutes", "Alt+D", "", "City Traderoutes", false, true, false},
+    {"actionCenterView", "Center View", "C", "", "", false, false, false},
+    {"actionZoomIn", "Zoom In", "Ctrl++", "zoom-in", "", false, false, false},
+    {"actionZoomOut", "Zoom Out", "Ctrl+-", "zoom-out", "", false, false, false},
+    {"actionScaleFonts", "Scale Fonts", "", "", "", false, true, false},
+    {"actionGotoTile", "Go to Tile", "G", "", "", false, false, false},
+    {"actionGotoNearestCity", "Go to Nearest City", "Shift+G", "", "", false, false, false},
+    {"actionGoAirlifttoCity", "Go / Airlift to City...", "T", "", "Go / Airlift to City", false, false, false},
+    {"actionAutoExplore", "Auto Explore", "X", "", "Auto Explore", false, false, false},
+    {"actionPatrol", "Patrol", "Q", "", "", false, false, false},
+    {"actionSentry", "Sentry", "S", "", "", false, false, false},
+    {"actionUnsentryAllOnTile", "Unsentry all on Tile", "Shift+S", "", "", false, false, false},
+    {"actionLoad", "Load", "L", "", "", false, false, false},
+    {"actionUnload", "Unload", "U", "", "", false, false, false},
+    {"actionUnloadAllFromTransporter", "Unload all from Transporter", "Shift+U", "", "", false, false, false},
+    {"actionSetHomeCity", "Set Home City", "H", "", "", false, false, false},
+    {"actionUpgrade", "Upgrade", "Shift+U", "", "", false, false, false},
+    {"actionConvert", "Convert", "Ctrl+O", "", "", false, false, false},
+    {"actionDisband", "Disband", "Shift+D", "", "", false, false, false},
+    {"actionWait", "Wait", "W", "", "", false, false, false},
+    {"actionDone", "Done", "Space", "", "", false, false, false},
+    {"actionFortifyUnit", "Fortify Unit", "F", "", "", false, false, false},
+    {"actionBuildFortFortressBuoy", "Build Fort/Fortress/Buoy", "Shift+F", "", "Build Fort/Fortress/Buoy", false, false, false},
+    {"actionBuildAirstripAirbase", "Build Airstrip/Airbase", "Shift+E", "", "", false, false, false},
+    {"actionPillage", "Pillage...", "Shift+P", "", "", false, false, false},
+    {"actionBuildCity", "Build City", "B", "", "", false, false, false},
+    {"actionAutoWorker", "Auto Worker", "A", "", "Auto Worker", false, false, false},
+    {"actionBuildRoad", "Build Road", "R", "", "", false, false, false},
+    {"actionIrrigate", "Irrigate", "I", "", "Irrigate", false, false, false},
+    {"actionMine", "Mine", "M", "", "Mine", false, false, false},
+    {"actionConnectWithRoad", "Connect with Road", "Shift+R", "", "", false, false, false},
+    {"actionConnectWithRailway", "Connect with Railway", "Shift+L", "", "", false, false, false},
+    {"actionConnectWithIrrigation", "Connect with Irrigation", "Shift+L", "", "", false, false, false},
+    {"actionTransform", "Transform", "O", "", "Transform", false, false, false},
+    {"actionCleanPollution", "Clean Pollution", "P", "", "", false, false, false},
+    {"actionCleanNuclearFallout", "Clean Nuclear Fallout", "N", "", "", false, false, false},
+    {"actionHelpBuildWonder", "Help Build Wonder", "B", "", "", false, false, false},
+    {"actionEstablishTraderoute", "Establish Traderoute", "R", "", "", false, false, false},
+    {"actionUnits", "Units", "F2", "", "", false, false, false},
+    {"actionPlayers", "Players", "F3", "", "", false, false, false},
+    {"actionCities", "Cities", "F4", "", "", false, false, false},
+    {"actionEconomy", "Economy", "F5", "", "", false, false, false},
+    {"actionResearch", "Research", "F6", "", "", false, false, false},
+    {"actionSpaceship", "Spaceship", "F12", "", "", false, false, false},
+    {"actionOptions", "Options...", "", "configure", "", true, false, false},
+  };
+
+  for (auto d: actionData) {
+    auto a = new QAction(this);
+    actionCollection()->addAction(d.name, a);
+    a->setText(d.text);
+    a->setCheckable(d.checkable);
+    if (d.checkable) {
+      a->setChecked(d.checked);
+    }
+    if (!d.theme.isEmpty()) {
+      a->setIcon(QIcon::fromTheme(d.theme));
+    }
+    if (!d.shortcut.isEmpty()) {
+      actionCollection()->setDefaultShortcut(a, d.shortcut);
+    }
+    if (!d.tooltip.isEmpty()) {
+      a->setToolTip(d.tooltip);
+    }
+    a->setEnabled(d.enabled);
+  }
+
+  setupGUI();
+  QMetaObject::connectSlotsByName(this);
+}

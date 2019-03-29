@@ -14,7 +14,7 @@ class ResearchTreeWidget : public QWidget
   Q_OBJECT
 public:
   explicit ResearchTreeWidget(QWidget *parent = nullptr);
-  ~ResearchTreeWidget();
+  ~ResearchTreeWidget() override;
 
 signals:
 
@@ -24,8 +24,8 @@ public slots:
 
 private:
 
-  void mousePressEvent(QMouseEvent *event);
-  void paintEvent(QPaintEvent *event);
+  void mousePressEvent(QMouseEvent *event) override;
+  void paintEvent(QPaintEvent *event) override;
 
   void updateHelp();
 
