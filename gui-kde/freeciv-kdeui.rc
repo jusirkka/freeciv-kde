@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gui name="freeciv-kde"
+     version="4"
+     xmlns="http://www.kde.org/standards/kxmlgui/1.0"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.kde.org/standards/kxmlgui/1.0
+                         http://www.kde.org/standards/kxmlgui/1.0/kxmlgui.xsd" >
+
+  <MenuBar>
+    <Menu name="game">
+      <Action name="actionNewGame"/>
+      <Action name="actionLoadGame"/>
+      <Action name="actionLoadScenario"/>
+      <Action name="actionConnectToGame"/>
+      <Separator/>
+      <Action name="actionSaveGameAs"/>
+      <Action name="separator"/>
+      <Action name="actionQuit"/>
+    </Menu>
+    <Menu name="view">
+      <Action name="actionFullscreen"/>
+      <Separator/>
+      <Action name="actionMinimap"/>
+      <Separator/>
+      <Action name="actionCityOutlines"/>
+      <Action name="actionCityOutput"/>
+      <Action name="actionMapGrid"/>
+      <Action name="actionNationalBorders"/>
+      <Action name="actionNativeTiles"/>
+      <Action name="actionCityFullBar"/>
+      <Action name="actionCityNames"/>
+      <Action name="actionCityGrowth"/>
+      <Action name="actionCityProductionLevels"/>
+      <Action name="actionCityBuyCost"/>
+      <Action name="actionCityTradeRoutes"/>
+    </Menu>
+    <Menu name="camera">
+      <text>Camera</text>
+      <Action name="actionCenterView"/>
+      <Separator/>
+      <Action name="actionZoomIn"/>
+      <Action name="actionZoomOut"/>
+      <Action name="actionScaleFonts"/>
+    </Menu>
+    <Menu name="unit">
+      <text>Unit</text>
+      <Action name="actionGotoTile"/>
+      <Action name="actionGotoNearestCity"/>
+      <Action name="actionGoAirlifttoCity"/>
+      <Separator/>
+      <Action name="actionAutoExplore"/>
+      <Action name="actionPatrol"/>
+      <Action name="actionSentry"/>
+      <Action name="actionUnsentryAllOnTile"/>
+      <Separator/>
+      <Action name="actionLoad"/>
+      <Action name="actionUnload"/>
+      <Action name="actionUnloadAllFromTransporter"/>
+      <Separator/>
+      <Action name="actionSetHomeCity"/>
+      <Action name="actionUpgrade"/>
+      <Action name="actionConvert"/>
+      <Action name="actionDisband"/>
+      <Separator/>
+      <Action name="actionWait"/>
+      <Action name="actionDone"/>
+    </Menu>
+    <Menu name="combat">
+      <text>Combat</text>
+      <Action name="actionFortifyUnit"/>
+      <Action name="actionBuildFortFortressBuoy"/>
+      <Action name="actionBuildAirstripAirbase"/>
+      <Action name="menuBuildBase"/>
+      <Separator/>
+      <Action name="actionPillage"/>
+    </Menu>
+    <Menu name="work">
+      <text>Work</text>
+      <Action name="actionBuildCity"/>
+      <Action name="actionAutoWorker"/>
+      <Action name="separator"/>
+      <Action name="actionBuildRoad"/>
+      <Action name="menuBuildPath"/>
+      <Action name="actionIrrigate"/>
+      <Action name="actionMine"/>
+      <Separator/>
+      <Action name="actionConnectWithRoad"/>
+      <Action name="actionConnectWithRailway"/>
+      <Action name="actionConnectWithIrrigation"/>
+      <Separator/>
+      <Action name="actionTransform"/>
+      <Action name="actionCleanPollution"/>
+      <Action name="actionCleanNuclearFallout"/>
+      <Action name="actionHelpBuildWonder"/>
+      <Action name="actionEstablishTraderoute"/>
+    </Menu>
+    <Menu name="civilisation">
+      <text>Civilisation</text>
+      <Action name="actionUnits"/>
+      <Action name="actionPlayers"/>
+      <Action name="actionCities"/>
+      <Action name="actionEconomy"/>
+      <Action name="actionResearch"/>
+      <Action name="actionSpaceship"/>
+    </Menu>
+    <Menu name="settings">
+      <Action name="actionOptions"/>
+    </Menu>
+  </MenuBar>
+
+  <ToolBar name="mainToolBar" >
+    <text>Main Toolbar</text>
+    <Action name="actionNewGame"/>
+    <Action name="actionSaveGameAs"/>
+    <Action name="actionCenterView"/>
+    <Action name="actionZoomIn"/>
+    <Action name="actionZoomOut"/>
+  </ToolBar>
+
+</gui>
