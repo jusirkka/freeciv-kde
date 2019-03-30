@@ -4,10 +4,23 @@
       xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
       http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
   <kcfgfile name="freeciv-kderc"/>
-  <group name="General">
-    <entry name="Clear" type="Bool" key="clear">
-      <label>Whether the "unsure" marker may be used.</label>
+  <include>QRect</include>
+  <group name="Mainwindow">
+    <entry name="FullScreen" key="full_screen" type="Bool">
+      <label>Starts the game in full screen mode.</label>
       <default>false</default>
+    </entry>
+    <entry name="LastGeom" key="last_geom" type="Rect">
+      <label>Fallback geometry in case the game was left in full screen.</label>
+      <default code="true">QRect(50, 50, 800, 600)</default>
+    </entry>
+    <entry name="ScaleFonts" key="scale_fonts" type="Bool">
+      <label>Scale fonts when zooming.</label>
+      <default>false</default>
+    </entry>
+    <entry name="Minimap" key="minimap" type="Bool">
+      <label>Show/hide overview map.</label>
+      <default>true</default>
     </entry>
   </group>
 </kcfg>

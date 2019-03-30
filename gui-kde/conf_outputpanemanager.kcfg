@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name="freeciv-kderc"/>
+  <include>QList</include>
+  <include>QSize</include>
+  <group name="OutputPaneManager">
+    <entry name="VisiblePanes" key="visible_panes" type="IntList">
+      <label>Lists visible panes. Value is ordering number of the pane in the bar.</label>
+      <default code="true">QList&lt;int&gt;{0, 1, 2, 3, 4, 5}</default>
+    </entry>
+    <entry name="PaneSize" key="pane_size" type="Size">
+      <label>Panel size.</label>
+      <default code="true">QSize(100, 100)</default>
+    </entry>
+  </group>
+</kcfg>

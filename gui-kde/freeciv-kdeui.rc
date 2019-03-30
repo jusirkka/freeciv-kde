@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gui name="freeciv-kde"
-     version="4"
+     version="5"
      xmlns="http://www.kde.org/standards/kxmlgui/1.0"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.kde.org/standards/kxmlgui/1.0
@@ -8,113 +8,117 @@
 
   <MenuBar>
     <Menu name="game">
-      <Action name="actionNewGame"/>
-      <Action name="actionLoadGame"/>
-      <Action name="actionLoadScenario"/>
-      <Action name="actionConnectToGame"/>
+      <text>Game</text>
+      <Action name="newGame"/>
+      <Action name="loadGame"/>
+      <Action name="loadScenario"/>
+      <Action name="connectToGame"/>
       <Separator/>
-      <Action name="actionSaveGameAs"/>
-      <Action name="separator"/>
-      <Action name="actionQuit"/>
+      <Action name="saveGameAs"/>
+      <Separator/>
+      <Action name="quit"/>
     </Menu>
     <Menu name="view">
-      <Action name="actionFullscreen"/>
+      <text>View</text>
+      <Action name="fullScreen"/>
       <Separator/>
-      <Action name="actionMinimap"/>
+      <Action name="minimap"/>
       <Separator/>
-      <Action name="actionCityOutlines"/>
-      <Action name="actionCityOutput"/>
-      <Action name="actionMapGrid"/>
-      <Action name="actionNationalBorders"/>
-      <Action name="actionNativeTiles"/>
-      <Action name="actionCityFullBar"/>
-      <Action name="actionCityNames"/>
-      <Action name="actionCityGrowth"/>
-      <Action name="actionCityProductionLevels"/>
-      <Action name="actionCityBuyCost"/>
-      <Action name="actionCityTradeRoutes"/>
+      <Action name="cityOutlines"/>
+      <Action name="cityOutput"/>
+      <Action name="mapGrid"/>
+      <Action name="nationalBorders"/>
+      <Action name="nativeTiles"/>
+      <Action name="cityFullBar"/>
+      <Action name="cityNames"/>
+      <Action name="cityGrowth"/>
+      <Action name="cityProductionLevels"/>
+      <Action name="cityBuyCost"/>
+      <Action name="cityTradeRoutes"/>
     </Menu>
     <Menu name="camera">
       <text>Camera</text>
-      <Action name="actionCenterView"/>
+      <Action name="centerView"/>
       <Separator/>
-      <Action name="actionZoomIn"/>
-      <Action name="actionZoomOut"/>
-      <Action name="actionScaleFonts"/>
+      <Action name="zoomIn"/>
+      <Action name="zoomOut"/>
+      <Action name="scaleFonts"/>
     </Menu>
     <Menu name="unit">
       <text>Unit</text>
-      <Action name="actionGotoTile"/>
-      <Action name="actionGotoNearestCity"/>
-      <Action name="actionGoAirlifttoCity"/>
+      <Action name="gotoTile"/>
+      <Action name="gotoNearestCity"/>
+      <Action name="goAirlifttoCity"/>
       <Separator/>
-      <Action name="actionAutoExplore"/>
-      <Action name="actionPatrol"/>
-      <Action name="actionSentry"/>
-      <Action name="actionUnsentryAllOnTile"/>
+      <Action name="autoExplore"/>
+      <Action name="patrol"/>
+      <Action name="sentry"/>
+      <Action name="unsentryAllOnTile"/>
       <Separator/>
-      <Action name="actionLoad"/>
-      <Action name="actionUnload"/>
-      <Action name="actionUnloadAllFromTransporter"/>
+      <Action name="load"/>
+      <Action name="unload"/>
+      <Action name="unloadAllFromTransporter"/>
       <Separator/>
-      <Action name="actionSetHomeCity"/>
-      <Action name="actionUpgrade"/>
-      <Action name="actionConvert"/>
-      <Action name="actionDisband"/>
+      <Action name="setHomeCity"/>
+      <Action name="upgrade"/>
+      <Action name="convert"/>
+      <Action name="disband"/>
       <Separator/>
-      <Action name="actionWait"/>
-      <Action name="actionDone"/>
+      <Action name="wait"/>
+      <Action name="done"/>
     </Menu>
     <Menu name="combat">
       <text>Combat</text>
-      <Action name="actionFortifyUnit"/>
-      <Action name="actionBuildFortFortressBuoy"/>
-      <Action name="actionBuildAirstripAirbase"/>
+      <Action name="fortifyUnit"/>
+      <Action name="buildFortFortressBuoy"/>
+      <Action name="buildAirstripAirbase"/>
       <Action name="menuBuildBase"/>
       <Separator/>
-      <Action name="actionPillage"/>
+      <Action name="pillage"/>
     </Menu>
     <Menu name="work">
       <text>Work</text>
-      <Action name="actionBuildCity"/>
-      <Action name="actionAutoWorker"/>
-      <Action name="separator"/>
-      <Action name="actionBuildRoad"/>
+      <Action name="buildCity"/>
+      <Action name="autoWorker"/>
+      <Separator/>
+      <Action name="buildRoad"/>
       <Action name="menuBuildPath"/>
-      <Action name="actionIrrigate"/>
-      <Action name="actionMine"/>
+      <Action name="irrigate"/>
+      <Action name="mine"/>
       <Separator/>
-      <Action name="actionConnectWithRoad"/>
-      <Action name="actionConnectWithRailway"/>
-      <Action name="actionConnectWithIrrigation"/>
+      <Action name="connectWithRoad"/>
+      <Action name="connectWithRailway"/>
+      <Action name="connectWithIrrigation"/>
       <Separator/>
-      <Action name="actionTransform"/>
-      <Action name="actionCleanPollution"/>
-      <Action name="actionCleanNuclearFallout"/>
-      <Action name="actionHelpBuildWonder"/>
-      <Action name="actionEstablishTraderoute"/>
+      <Action name="transform"/>
+      <Action name="cleanPollution"/>
+      <Action name="cleanNuclearFallout"/>
+      <Action name="helpBuildWonder"/>
+      <Action name="establishTraderoute"/>
     </Menu>
     <Menu name="civilisation">
       <text>Civilisation</text>
-      <Action name="actionUnits"/>
-      <Action name="actionPlayers"/>
-      <Action name="actionCities"/>
-      <Action name="actionEconomy"/>
-      <Action name="actionResearch"/>
-      <Action name="actionSpaceship"/>
+      <Action name="units"/>
+      <Action name="players"/>
+      <Action name="cities"/>
+      <Action name="economy"/>
+      <Action name="research"/>
+      <Action name="spaceship"/>
     </Menu>
+
     <Menu name="settings">
-      <Action name="actionOptions"/>
+      <Action name="options"/>
     </Menu>
+
   </MenuBar>
 
   <ToolBar name="mainToolBar" >
     <text>Main Toolbar</text>
-    <Action name="actionNewGame"/>
-    <Action name="actionSaveGameAs"/>
-    <Action name="actionCenterView"/>
-    <Action name="actionZoomIn"/>
-    <Action name="actionZoomOut"/>
+    <Action name="newGame"/>
+    <Action name="saveGameAs"/>
+    <Action name="centerView"/>
+    <Action name="zoomIn"/>
+    <Action name="zoomOut"/>
   </ToolBar>
 
 </gui>

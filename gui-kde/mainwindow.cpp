@@ -8,6 +8,7 @@ extern "C" {
 #include "client_main.h"
 #include "clinet.h"
 #include "control.h"
+#include "options.h"
 
 #include "mainwindow.h"
 #include "messagebox.h"
@@ -31,6 +32,7 @@ extern "C" {
 #include <QApplication>
 #include <KActionCollection>
 #include <QStatusBar>
+#include "conf_mainwindow.h"
 
 using namespace KV;
 
@@ -124,8 +126,8 @@ void MainWindow::createStateMachine() {
   auto final = new QFinalState;
   m_states.addState(final);
 
-  intro->addTransition(action("actionConnectToGame"), &QAction::triggered, nw);
-  intro->addTransition(action("actionNewGame"), &QAction::triggered, nw);
+  intro->addTransition(action("connectToGame"), &QAction::triggered, nw);
+  intro->addTransition(action("newGame"), &QAction::triggered, nw);
   intro->addTransition(intro, &State::Intro::playing, game);
   intro->addTransition(this, &MainWindow::resetStateMachine, final);
 
@@ -137,8 +139,8 @@ void MainWindow::createStateMachine() {
   start->addTransition(start, &State::Start::rejected, intro);
   start->addTransition(this, &MainWindow::resetStateMachine, final);
 
-  game->addTransition(action("actionConnectToGame"), &QAction::triggered, nw);
-  game->addTransition(action("actionNewGame"), &QAction::triggered, nw);
+  game->addTransition(action("connectToGame"), &QAction::triggered, nw);
+  game->addTransition(action("newGame"), &QAction::triggered, nw);
   game->addTransition(this, &MainWindow::resetStateMachine, final);
 
   connect(&m_states, &QStateMachine::finished,
@@ -152,64 +154,64 @@ void MainWindow::createStateMachine() {
 }
 
 void MainWindow::enableGameMenus(bool ok) {
-  action("actionSaveGameAs")->setEnabled(ok);
-  action("actionFullscreen")->setEnabled(ok);
-  action("actionMinimap")->setEnabled(ok);
-  action("actionCityOutlines")->setEnabled(ok);
-  action("actionCityOutput")->setEnabled(ok);
-  action("actionMapGrid")->setEnabled(ok);
-  action("actionNationalBorders")->setEnabled(ok);
-  action("actionNativeTiles")->setEnabled(ok);
-  action("actionCityFullBar")->setEnabled(ok);
-  action("actionCityNames")->setEnabled(ok);
-  action("actionCityGrowth")->setEnabled(ok);
-  action("actionCityProductionLevels")->setEnabled(ok);
-  action("actionCityBuyCost")->setEnabled(ok);
-  action("actionCityTradeRoutes")->setEnabled(ok);
-  action("actionCenterView")->setEnabled(ok);
-  action("actionZoomIn")->setEnabled(ok);
-  action("actionZoomOut")->setEnabled(ok);
-  action("actionScaleFonts")->setEnabled(ok);
-  action("actionGotoTile")->setEnabled(ok);
-  action("actionGotoNearestCity")->setEnabled(ok);
-  action("actionGoAirlifttoCity")->setEnabled(ok);
-  action("actionAutoExplore")->setEnabled(ok);
-  action("actionPatrol")->setEnabled(ok);
-  action("actionSentry")->setEnabled(ok);
-  action("actionUnsentryAllOnTile")->setEnabled(ok);
-  action("actionLoad")->setEnabled(ok);
-  action("actionUnload")->setEnabled(ok);
-  action("actionUnloadAllFromTransporter")->setEnabled(ok);
-  action("actionSetHomeCity")->setEnabled(ok);
-  action("actionUpgrade")->setEnabled(ok);
-  action("actionConvert")->setEnabled(ok);
-  action("actionDisband")->setEnabled(ok);
-  action("actionWait")->setEnabled(ok);
-  action("actionDone")->setEnabled(ok);
-  action("actionFortifyUnit")->setEnabled(ok);
-  action("actionBuildFortFortressBuoy")->setEnabled(ok);
-  action("actionBuildAirstripAirbase")->setEnabled(ok);
-  action("actionPillage")->setEnabled(ok);
-  action("actionBuildCity")->setEnabled(ok);
-  action("actionAutoWorker")->setEnabled(ok);
-  action("actionBuildRoad")->setEnabled(ok);
-  action("actionIrrigate")->setEnabled(ok);
-  action("actionMine")->setEnabled(ok);
-  action("actionConnectWithRoad")->setEnabled(ok);
-  action("actionConnectWithRailway")->setEnabled(ok);
-  action("actionConnectWithIrrigation")->setEnabled(ok);
-  action("actionTransform")->setEnabled(ok);
-  action("actionCleanPollution")->setEnabled(ok);
-  action("actionCleanNuclearFallout")->setEnabled(ok);
-  action("actionHelpBuildWonder")->setEnabled(ok);
-  action("actionEstablishTraderoute")->setEnabled(ok);
-  action("actionUnits")->setEnabled(ok);
-  action("actionPlayers")->setEnabled(ok);
-  action("actionCities")->setEnabled(ok);
-  action("actionEconomy")->setEnabled(ok);
-  action("actionResearch")->setEnabled(ok);
-  action("actionSpaceship")->setEnabled(ok);
-  action("actionOptions")->setEnabled(ok);
+  action("saveGameAs")->setEnabled(ok);
+  action("fullScreen")->setEnabled(ok);
+  action("minimap")->setEnabled(ok);
+  action("cityOutlines")->setEnabled(ok);
+  action("cityOutput")->setEnabled(ok);
+  action("mapGrid")->setEnabled(ok);
+  action("nationalBorders")->setEnabled(ok);
+  action("nativeTiles")->setEnabled(ok);
+  action("cityFullBar")->setEnabled(ok);
+  action("cityNames")->setEnabled(ok);
+  action("cityGrowth")->setEnabled(ok);
+  action("cityProductionLevels")->setEnabled(ok);
+  action("cityBuyCost")->setEnabled(ok);
+  action("cityTradeRoutes")->setEnabled(ok);
+  action("centerView")->setEnabled(ok);
+  action("zoomIn")->setEnabled(ok);
+  action("zoomOut")->setEnabled(ok);
+  action("scaleFonts")->setEnabled(ok);
+  action("gotoTile")->setEnabled(ok);
+  action("gotoNearestCity")->setEnabled(ok);
+  action("goAirlifttoCity")->setEnabled(ok);
+  action("autoExplore")->setEnabled(ok);
+  action("patrol")->setEnabled(ok);
+  action("sentry")->setEnabled(ok);
+  action("unsentryAllOnTile")->setEnabled(ok);
+  action("load")->setEnabled(ok);
+  action("unload")->setEnabled(ok);
+  action("unloadAllFromTransporter")->setEnabled(ok);
+  action("setHomeCity")->setEnabled(ok);
+  action("upgrade")->setEnabled(ok);
+  action("convert")->setEnabled(ok);
+  action("disband")->setEnabled(ok);
+  action("wait")->setEnabled(ok);
+  action("done")->setEnabled(ok);
+  action("fortifyUnit")->setEnabled(ok);
+  action("buildFortFortressBuoy")->setEnabled(ok);
+  action("buildAirstripAirbase")->setEnabled(ok);
+  action("pillage")->setEnabled(ok);
+  action("buildCity")->setEnabled(ok);
+  action("autoWorker")->setEnabled(ok);
+  action("buildRoad")->setEnabled(ok);
+  action("irrigate")->setEnabled(ok);
+  action("mine")->setEnabled(ok);
+  action("connectWithRoad")->setEnabled(ok);
+  action("connectWithRailway")->setEnabled(ok);
+  action("connectWithIrrigation")->setEnabled(ok);
+  action("transform")->setEnabled(ok);
+  action("cleanPollution")->setEnabled(ok);
+  action("cleanNuclearFallout")->setEnabled(ok);
+  action("helpBuildWonder")->setEnabled(ok);
+  action("establishTraderoute")->setEnabled(ok);
+  action("units")->setEnabled(ok);
+  action("players")->setEnabled(ok);
+  action("cities")->setEnabled(ok);
+  action("economy")->setEnabled(ok);
+  action("research")->setEnabled(ok);
+  action("spaceship")->setEnabled(ok);
+  action("options")->setEnabled(ok);
 }
 
 void MainWindow::setMapView(MapView *map) {
@@ -283,216 +285,226 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
 }
 
-void MainWindow::on_actionSaveGameAs_triggered() {}
-void MainWindow::on_actionLoadScenario_triggered() {}
-void MainWindow::on_actionLoadGame_triggered() {}
+void MainWindow::on_saveGameAs_triggered() {}
+void MainWindow::on_loadScenario_triggered() {}
+void MainWindow::on_loadGame_triggered() {}
 
-void MainWindow::on_actionQuit_triggered() {
+void MainWindow::on_quit_triggered() {
   close();
 }
 
-void MainWindow::writeSettings() {}
-
-void MainWindow::readSettings() {
-  action("actionCityOutlines")->setChecked(gui_options.draw_city_outlines);
-  action("actionCityOutput")->setChecked(gui_options.draw_city_output);
-  action("actionMapGrid")->setChecked(gui_options.draw_map_grid);
-  action("actionNationalBorders")->setChecked(gui_options.draw_borders);
-  action("actionNativeTiles")->setChecked(gui_options.draw_native);
-  action("actionCityFullBar")->setChecked(gui_options.draw_full_citybar);
-  action("actionCityNames")->setChecked(gui_options.draw_city_names);
-  action("actionCityGrowth")->setChecked(gui_options.draw_city_growth);
-  action("actionCityProductionLevels")->setChecked(gui_options.draw_city_productions);
-  action("actionCityBuyCost")->setChecked(gui_options.draw_city_buycost);
-  action("actionCityTradeRoutes")->setChecked(gui_options.draw_city_trade_routes);
+void MainWindow::writeSettings() {
+  qCDebug(FC) << "write settings";
+  Conf::Mainwindow::setMinimap(action("minimap")->isChecked());
+  Conf::Mainwindow::setScaleFonts(action("scaleFonts")->isChecked());
+  Conf::Mainwindow::setFullScreen(action("fullScreen")->isChecked());
+  if (m_fallbackGeom.isValid()) {
+    Conf::Mainwindow::setLastGeom(m_fallbackGeom);
+  }
+  Conf::Mainwindow::self()->save();
 }
 
-void MainWindow::on_actionFullscreen_toggled(bool on) {
+void MainWindow::readSettings() {
+  qCDebug(FC) << "read settings";
+  action("minimap")->setChecked(Conf::Mainwindow::minimap());
+  action("scaleFonts")->setChecked(Conf::Mainwindow::scaleFonts());
+  m_fallbackGeom = QRect();
+  if (Conf::Mainwindow::fullScreen()) {
+    m_fallbackGeom = Conf::Mainwindow::lastGeom();
+    // go fullscreen only when game commences
+    if (m_fallbackGeom.isValid()) {
+      setGeometry(m_fallbackGeom);
+    }
+  }
+}
+
+void MainWindow::on_fullScreen_toggled(bool on) {
   if (on) {
+    m_fallbackGeom = geometry();
     showFullScreen();
   } else {
     showNormal();
   }
 }
 
-void MainWindow::on_actionMinimap_toggled(bool on) {
+void MainWindow::on_minimap_toggled(bool on) {
   auto minis = findChildren<MinimapView*>();
   for (auto mini: minis) {
     mini->setVisible(on);
   }
 }
 
-void MainWindow::on_actionCityOutlines_toggled(bool on) {
+void MainWindow::on_cityOutlines_toggled(bool on) {
   if (gui_options.draw_city_outlines != on) {
     key_city_outlines_toggle();
   }
 }
 
-void MainWindow::on_actionCityOutput_toggled(bool on) {
+void MainWindow::on_cityOutput_toggled(bool on) {
   if (gui_options.draw_city_output != on) {
     key_city_output_toggle();
   }
 }
 
-void MainWindow::on_actionMapGrid_toggled(bool on) {
+void MainWindow::on_mapGrid_toggled(bool on) {
   if (gui_options.draw_map_grid != on) {
     key_map_grid_toggle();
   }
 }
 
-void MainWindow::on_actionNationalBorders_toggled(bool on) {
+void MainWindow::on_nationalBorders_toggled(bool on) {
   if (gui_options.draw_borders != on) {
     key_map_borders_toggle();
   }
 }
 
-void MainWindow::on_actionNativeTiles_toggled(bool on) {
+void MainWindow::on_nativeTiles_toggled(bool on) {
   if (gui_options.draw_native != on) {
     key_map_native_toggle();
   }
 }
 
-void MainWindow::on_actionCityFullBar_toggled(bool on) {
+void MainWindow::on_cityFullBar_toggled(bool on) {
   if (gui_options.draw_full_citybar != on) {
     key_city_full_bar_toggle();
   }
 }
 
 
-void MainWindow::on_actionCityNames_toggled(bool on) {
+void MainWindow::on_cityNames_toggled(bool on) {
   if (gui_options.draw_city_names != on) {
     key_city_names_toggle();
   }
 }
 
-void MainWindow::on_actionCityGrowth_toggled(bool on) {
+void MainWindow::on_cityGrowth_toggled(bool on) {
   if (gui_options.draw_city_growth != on) {
     key_city_growth_toggle();
   }
 }
 
-void MainWindow::on_actionCityProductionLevels_toggled(bool on) {
+void MainWindow::on_cityProductionLevels_toggled(bool on) {
   if (gui_options.draw_city_productions != on) {
     key_city_productions_toggle();
   }
 }
 
-void MainWindow::on_actionCityBuyCost_toggled(bool on) {
+void MainWindow::on_cityBuyCost_toggled(bool on) {
   if (gui_options.draw_city_buycost != on) {
     key_city_buycost_toggle();
   }
 }
 
-void MainWindow::on_actionCityTradeRoutes_toggled(bool on) {
+void MainWindow::on_cityTradeRoutes_toggled(bool on) {
   if (gui_options.draw_city_trade_routes != on) {
     key_city_trade_routes_toggle();
   }
 }
 
-void MainWindow::on_actionCenterView_triggered() {
+void MainWindow::on_centerView_triggered() {
   request_center_focus_unit();
 }
 
-void MainWindow::on_actionZoomIn_triggered() {
+void MainWindow::on_zoomIn_triggered() {
   m_mapView->zoomIn();
   tilespec_reread(tileset_basename(tileset), true, m_mapView->zoomLevel());
 }
 
-void MainWindow::on_actionZoomOut_triggered() {
+void MainWindow::on_zoomOut_triggered() {
   m_mapView->zoomOut();
   tilespec_reread(tileset_basename(tileset), true, m_mapView->zoomLevel());
 }
 
 
-void MainWindow::on_actionScaleFonts_toggled(bool on) {}
+void MainWindow::on_scaleFonts_toggled(bool on) {}
 
-void MainWindow::on_actionGotoTile_triggered() {
+void MainWindow::on_gotoTile_triggered() {
   key_unit_goto();
 }
 
-void MainWindow::on_actionGotoNearestCity_triggered() {
+void MainWindow::on_gotoNearestCity_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     request_unit_return(punit);
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionGoAirlifttoCity_triggered() {
+void MainWindow::on_goAirlifttoCity_triggered() {
   popup_goto_dialog();
 }
 
-void MainWindow::on_actionAutoExplore_triggered() {
+void MainWindow::on_autoExplore_triggered() {
   key_unit_auto_explore();
 }
 
-void MainWindow::on_actionPatrol_triggered() {
+void MainWindow::on_patrol_triggered() {
   key_unit_patrol();
 }
 
-void MainWindow::on_actionSentry_triggered() {
+void MainWindow::on_sentry_triggered() {
   key_unit_sentry();
 }
 
-void MainWindow::on_actionUnsentryAllOnTile_triggered() {
+void MainWindow::on_unsentryAllOnTile_triggered() {
   key_unit_wakeup_others();
 }
 
-void MainWindow::on_actionLoad_triggered() {
+void MainWindow::on_load_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     request_transport(punit, unit_tile(punit));
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionUnload_triggered() {
+void MainWindow::on_unload_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     request_unit_unload(punit);
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionUnloadAllFromTransporter_triggered() {
+void MainWindow::on_unloadAllFromTransporter_triggered() {
   key_unit_unload_all();
 }
 
-void MainWindow::on_actionSetHomeCity_triggered() {
+void MainWindow::on_setHomeCity_triggered() {
   key_unit_homecity();
 }
 
-void MainWindow::on_actionUpgrade_triggered() {
+void MainWindow::on_upgrade_triggered() {
   popup_upgrade_dialog(get_units_in_focus());
 }
 
-void MainWindow::on_actionConvert_triggered() {
+void MainWindow::on_convert_triggered() {
   key_unit_convert();
 }
 
-void MainWindow::on_actionDisband_triggered() {
+void MainWindow::on_disband_triggered() {
   popup_disband_dialog(get_units_in_focus());
 }
 
-void MainWindow::on_actionWait_triggered() {
+void MainWindow::on_wait_triggered() {
   key_unit_wait();
 }
 
-void MainWindow::on_actionDone_triggered() {
+void MainWindow::on_done_triggered() {
   key_unit_done();
 }
 
-void MainWindow::on_actionFortifyUnit_triggered() {
+void MainWindow::on_fortifyUnit_triggered() {
   key_unit_fortify();
 }
 
-void MainWindow::on_actionBuildFortFortressBuoy_triggered() {
+void MainWindow::on_buildFortFortressBuoy_triggered() {
   key_unit_fortress();
 }
 
-void MainWindow::on_actionBuildAirstripAirbase_triggered() {
+void MainWindow::on_buildAirstripAirbase_triggered() {
   key_unit_airbase();
 }
 
-void MainWindow::on_actionPillage_triggered() {
+void MainWindow::on_pillage_triggered() {
   key_unit_pillage();
 }
 
-void MainWindow::on_actionBuildCity_triggered() {
+void MainWindow::on_buildCity_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     if (unit_can_add_or_build_city(punit)) {
       request_unit_build_city(punit);
@@ -500,11 +512,11 @@ void MainWindow::on_actionBuildCity_triggered() {
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionAutoWorker_triggered() {
+void MainWindow::on_autoWorker_triggered() {
   key_unit_auto_settle();
 }
 
-void MainWindow::on_actionBuildRoad_triggered() {
+void MainWindow::on_buildRoad_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     auto t = next_extra_for_tile(unit_tile(punit),
                                  EC_ROAD,
@@ -516,29 +528,29 @@ void MainWindow::on_actionBuildRoad_triggered() {
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionIrrigate_triggered() {
+void MainWindow::on_irrigate_triggered() {
   key_unit_irrigate();
 }
 
-void MainWindow::on_actionMine_triggered() {
+void MainWindow::on_mine_triggered() {
   key_unit_mine();
 }
 
-void MainWindow::on_actionConnectWithRoad_triggered() {
+void MainWindow::on_connectWithRoad_triggered() {
   auto proad = road_by_compat_special(ROCO_ROAD);
   if (proad != nullptr) {
     key_unit_connect(ACTIVITY_GEN_ROAD, road_extra_get(proad));
   }
 }
 
-void MainWindow::on_actionConnectWithRailway_triggered() {
+void MainWindow::on_connectWithRailway_triggered() {
   auto proad = road_by_compat_special(ROCO_RAILROAD);
   if (proad != nullptr) {
     key_unit_connect(ACTIVITY_GEN_ROAD, road_extra_get(proad));
   }
 }
 
-void MainWindow::on_actionConnectWithIrrigation_triggered() {
+void MainWindow::on_connectWithIrrigation_triggered() {
   auto extras = extra_type_list_by_cause(EC_IRRIGATION);
   if (extra_type_list_size(extras) > 0) {
     auto pextra = extra_type_list_get(extra_type_list_by_cause(EC_IRRIGATION), 0);
@@ -546,11 +558,11 @@ void MainWindow::on_actionConnectWithIrrigation_triggered() {
   }
 }
 
-void MainWindow::on_actionTransform_triggered() {
+void MainWindow::on_transform_triggered() {
   key_unit_transform();
 }
 
-void MainWindow::on_actionCleanPollution_triggered() {
+void MainWindow::on_cleanPollution_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     auto pextra = prev_extra_in_tile(unit_tile(punit), ERM_CLEANPOLLUTION,
                                      unit_owner(punit), punit);
@@ -560,11 +572,11 @@ void MainWindow::on_actionCleanPollution_triggered() {
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionCleanNuclearFallout_triggered() {
+void MainWindow::on_cleanNuclearFallout_triggered() {
   key_unit_fallout();
 }
 
-void MainWindow::on_actionHelpBuildWonder_triggered() {
+void MainWindow::on_helpBuildWonder_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     if (utype_can_do_action(unit_type_get(punit), ACTION_HELP_WONDER)) {
       request_unit_caravan_action(punit, ACTION_HELP_WONDER);
@@ -573,7 +585,7 @@ void MainWindow::on_actionHelpBuildWonder_triggered() {
 }
 
 
-void MainWindow::on_actionEstablishTraderoute_triggered() {
+void MainWindow::on_establishTraderoute_triggered() {
   unit_list_iterate(get_units_in_focus(), punit) {
     if (unit_can_est_trade_route_here(punit)) {
       request_unit_caravan_action(punit, ACTION_TRADE_ROUTE);
@@ -581,9 +593,9 @@ void MainWindow::on_actionEstablishTraderoute_triggered() {
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_actionUnits_triggered() {}
+void MainWindow::on_units_triggered() {}
 
-void MainWindow::on_actionPlayers_triggered() {
+void MainWindow::on_players_triggered() {
   if (m_players->isVisible()) {
       m_players->hide();
   } else {
@@ -592,7 +604,7 @@ void MainWindow::on_actionPlayers_triggered() {
   }
 }
 
-void MainWindow::on_actionCities_triggered() {
+void MainWindow::on_cities_triggered() {
   if (m_cityReport->isVisible()) {
       m_cityReport->hide();
   } else {
@@ -601,9 +613,9 @@ void MainWindow::on_actionCities_triggered() {
   }
 }
 
-void MainWindow::on_actionEconomy_triggered() {}
+void MainWindow::on_economy_triggered() {}
 
-void MainWindow::on_actionResearch_triggered() {
+void MainWindow::on_research_triggered() {
   if (m_scienceReport->isVisible()) {
       m_scienceReport->hide();
   } else {
@@ -612,8 +624,8 @@ void MainWindow::on_actionResearch_triggered() {
   }
 }
 
-void MainWindow::on_actionSpaceship_triggered() {}
-void MainWindow::on_actionOptions_triggered() {}
+void MainWindow::on_spaceship_triggered() {}
+void MainWindow::on_options_triggered() {}
 
 
 void MainWindow::addActions() {
@@ -622,77 +634,81 @@ void MainWindow::addActions() {
     QString text;
     QString shortcut;
     QString theme;
-    QString tooltip;
+    QString tooltipOrKey;
     bool enabled;
     bool checkable;
     bool checked;
   };
 
+#define DRW(k) "draw_" #k
+
   QVector<Data> actionData{
-    {"actionSaveGameAs", "Save Game As...", "Ctrl+Shift+S", "document-save", "Save game as", false, false, false},
-    {"actionNewGame", "New Game...", "Ctrl+N", "document-new", "New game", true, false, false},
-    {"actionLoadScenario", "Load Scenario...", "", "", "Load scenario game", true, false, false},
-    {"actionLoadGame", "Load Game...", "", "", "Load saved game", true, false, false},
-    {"actionConnectToGame", "Connect to Game...", "", "", "Connect to game server", true, false, false},
-    {"actionQuit", "Quit", "Ctrl+Q", "application-exit", "Quit", true, false, false},
-    {"actionFullscreen", "Fullscreen", "Alt+Return", "", "", false, true, false},
-    {"actionMinimap", "Minimap", "Ctrl+M", "", "", false, true, true},
-    {"actionCityOutlines", "City Outlines", "Ctrl+Y", "", "", false, true, false},
-    {"actionCityOutput", "City Output", "Alt+W", "", "", false, true, false},
-    {"actionMapGrid", "Map Grid", "Ctrl+G", "", "", false, true, false},
-    {"actionNationalBorders", "National Borders", "Ctrl+B", "", "", false, true, false},
-    {"actionNativeTiles", "Native Tiles", "Alt+Shift+N", "", "", false, true, false},
-    {"actionCityFullBar", "City Full Bar", "Alt+F", "", "City Full Bar", false, true, false},
-    {"actionCityNames", "City Names", "Alt+N", "", "", false, true, false},
-    {"actionCityGrowth", "City Growth", "Ctrl+R", "", "City Growth", false, true, false},
-    {"actionCityProductionLevels", "City Production Levels", "Ctrl+P", "", "City Production Levels", false, true, false},
-    {"actionCityBuyCost", "City Buy Cost", "Alt+B", "", "", false, true, false},
-    {"actionCityTradeRoutes", "City Traderoutes", "Alt+D", "", "City Traderoutes", false, true, false},
-    {"actionCenterView", "Center View", "C", "", "", false, false, false},
-    {"actionZoomIn", "Zoom In", "Ctrl++", "zoom-in", "", false, false, false},
-    {"actionZoomOut", "Zoom Out", "Ctrl+-", "zoom-out", "", false, false, false},
-    {"actionScaleFonts", "Scale Fonts", "", "", "", false, true, false},
-    {"actionGotoTile", "Go to Tile", "G", "", "", false, false, false},
-    {"actionGotoNearestCity", "Go to Nearest City", "Shift+G", "", "", false, false, false},
-    {"actionGoAirlifttoCity", "Go / Airlift to City...", "T", "", "Go / Airlift to City", false, false, false},
-    {"actionAutoExplore", "Auto Explore", "X", "", "Auto Explore", false, false, false},
-    {"actionPatrol", "Patrol", "Q", "", "", false, false, false},
-    {"actionSentry", "Sentry", "S", "", "", false, false, false},
-    {"actionUnsentryAllOnTile", "Unsentry all on Tile", "Shift+S", "", "", false, false, false},
-    {"actionLoad", "Load", "L", "", "", false, false, false},
-    {"actionUnload", "Unload", "U", "", "", false, false, false},
-    {"actionUnloadAllFromTransporter", "Unload all from Transporter", "Shift+U", "", "", false, false, false},
-    {"actionSetHomeCity", "Set Home City", "H", "", "", false, false, false},
-    {"actionUpgrade", "Upgrade", "Shift+U", "", "", false, false, false},
-    {"actionConvert", "Convert", "Ctrl+O", "", "", false, false, false},
-    {"actionDisband", "Disband", "Shift+D", "", "", false, false, false},
-    {"actionWait", "Wait", "W", "", "", false, false, false},
-    {"actionDone", "Done", "Space", "", "", false, false, false},
-    {"actionFortifyUnit", "Fortify Unit", "F", "", "", false, false, false},
-    {"actionBuildFortFortressBuoy", "Build Fort/Fortress/Buoy", "Shift+F", "", "Build Fort/Fortress/Buoy", false, false, false},
-    {"actionBuildAirstripAirbase", "Build Airstrip/Airbase", "Shift+E", "", "", false, false, false},
-    {"actionPillage", "Pillage...", "Shift+P", "", "", false, false, false},
-    {"actionBuildCity", "Build City", "B", "", "", false, false, false},
-    {"actionAutoWorker", "Auto Worker", "A", "", "Auto Worker", false, false, false},
-    {"actionBuildRoad", "Build Road", "R", "", "", false, false, false},
-    {"actionIrrigate", "Irrigate", "I", "", "Irrigate", false, false, false},
-    {"actionMine", "Mine", "M", "", "Mine", false, false, false},
-    {"actionConnectWithRoad", "Connect with Road", "Shift+R", "", "", false, false, false},
-    {"actionConnectWithRailway", "Connect with Railway", "Shift+L", "", "", false, false, false},
-    {"actionConnectWithIrrigation", "Connect with Irrigation", "Shift+L", "", "", false, false, false},
-    {"actionTransform", "Transform", "O", "", "Transform", false, false, false},
-    {"actionCleanPollution", "Clean Pollution", "P", "", "", false, false, false},
-    {"actionCleanNuclearFallout", "Clean Nuclear Fallout", "N", "", "", false, false, false},
-    {"actionHelpBuildWonder", "Help Build Wonder", "B", "", "", false, false, false},
-    {"actionEstablishTraderoute", "Establish Traderoute", "R", "", "", false, false, false},
-    {"actionUnits", "Units", "F2", "", "", false, false, false},
-    {"actionPlayers", "Players", "F3", "", "", false, false, false},
-    {"actionCities", "Cities", "F4", "", "", false, false, false},
-    {"actionEconomy", "Economy", "F5", "", "", false, false, false},
-    {"actionResearch", "Research", "F6", "", "", false, false, false},
-    {"actionSpaceship", "Spaceship", "F12", "", "", false, false, false},
-    {"actionOptions", "Options...", "", "configure", "", true, false, false},
+    {"saveGameAs", "Save Game As...", "Ctrl+Shift+S", "document-save", "Save game as", false, false, false},
+    {"newGame", "New Game...", "Ctrl+N", "document-new", "New game", true, false, false},
+    {"loadScenario", "Load Scenario...", "", "", "Load scenario game", true, false, false},
+    {"loadGame", "Load Game...", "", "", "Load saved game", true, false, false},
+    {"connectToGame", "Connect to Game...", "", "", "Connect to game server", true, false, false},
+    {"quit", "Quit", "Ctrl+Q", "application-exit", "Quit", true, false, false},
+    {"fullScreen", "Fullscreen", "Alt+Return", "", "Play freeciv in full screen", false, true, false},
+    {"minimap", "Minimap", "Ctrl+M", "", "Hide/show overview map", false, true, true},
+    {"cityOutlines", "City Outlines", "Ctrl+Y", "", DRW(city_outlines), false, true, false},
+    {"cityOutput", "City Output", "Alt+W", "", DRW(city_output), false, true, false},
+    {"mapGrid", "Map Grid", "Ctrl+G", "", DRW(map_grid), false, true, false},
+    {"nationalBorders", "National Borders", "Ctrl+B", "", DRW(borders), false, true, false},
+    {"nativeTiles", "Native Tiles", "Alt+Shift+N", "", DRW(native), false, true, false},
+    {"cityFullBar", "City Full Bar", "Alt+F", "", DRW(full_citybar), false, true, false},
+    {"cityNames", "City Names", "Alt+N", "", DRW(city_names), false, true, false},
+    {"cityGrowth", "City Growth", "Ctrl+R", "", DRW(city_growth), false, true, false},
+    {"cityProductionLevels", "City Production Levels", "Ctrl+P", "", DRW(city_productions), false, true, false},
+    {"cityBuyCost", "City Buy Cost", "Alt+B", "", DRW(city_buycost), false, true, false},
+    {"cityTradeRoutes", "City Traderoutes", "Alt+D", "", DRW(city_trade_routes), false, true, false},
+    {"centerView", "Center View", "C", "", "", false, false, false},
+    {"zoomIn", "Zoom In", "Ctrl++", "zoom-in", "", false, false, false},
+    {"zoomOut", "Zoom Out", "Ctrl+-", "zoom-out", "", false, false, false},
+    {"scaleFonts", "Scale Fonts", "", "", "", false, true, false},
+    {"gotoTile", "Go to Tile", "G", "", "", false, false, false},
+    {"gotoNearestCity", "Go to Nearest City", "Shift+G", "", "", false, false, false},
+    {"goAirlifttoCity", "Go / Airlift to City...", "T", "", "Go / Airlift to City", false, false, false},
+    {"autoExplore", "Auto Explore", "X", "", "Auto Explore", false, false, false},
+    {"patrol", "Patrol", "Q", "", "", false, false, false},
+    {"sentry", "Sentry", "S", "", "", false, false, false},
+    {"unsentryAllOnTile", "Unsentry all on Tile", "Shift+S", "", "", false, false, false},
+    {"load", "Load", "L", "", "", false, false, false},
+    {"unload", "Unload", "U", "", "", false, false, false},
+    {"unloadAllFromTransporter", "Unload all from Transporter", "Shift+U", "", "", false, false, false},
+    {"setHomeCity", "Set Home City", "H", "", "", false, false, false},
+    {"upgrade", "Upgrade", "Shift+U", "", "", false, false, false},
+    {"convert", "Convert", "Ctrl+O", "", "", false, false, false},
+    {"disband", "Disband", "Shift+D", "", "", false, false, false},
+    {"wait", "Wait", "W", "", "", false, false, false},
+    {"done", "Done", "Space", "", "", false, false, false},
+    {"fortifyUnit", "Fortify Unit", "F", "", "", false, false, false},
+    {"buildFortFortressBuoy", "Build Fort/Fortress/Buoy", "Shift+F", "", "Build Fort/Fortress/Buoy", false, false, false},
+    {"buildAirstripAirbase", "Build Airstrip/Airbase", "Shift+E", "", "", false, false, false},
+    {"pillage", "Pillage...", "Shift+P", "", "", false, false, false},
+    {"buildCity", "Build City", "B", "", "", false, false, false},
+    {"autoWorker", "Auto Worker", "A", "", "Auto Worker", false, false, false},
+    {"buildRoad", "Build Road", "R", "", "", false, false, false},
+    {"irrigate", "Irrigate", "I", "", "Irrigate", false, false, false},
+    {"mine", "Mine", "M", "", "Mine", false, false, false},
+    {"connectWithRoad", "Connect with Road", "Shift+R", "", "", false, false, false},
+    {"connectWithRailway", "Connect with Railway", "Shift+L", "", "", false, false, false},
+    {"connectWithIrrigation", "Connect with Irrigation", "Shift+L", "", "", false, false, false},
+    {"transform", "Transform", "O", "", "Transform", false, false, false},
+    {"cleanPollution", "Clean Pollution", "P", "", "", false, false, false},
+    {"cleanNuclearFallout", "Clean Nuclear Fallout", "N", "", "", false, false, false},
+    {"helpBuildWonder", "Help Build Wonder", "B", "", "", false, false, false},
+    {"establishTraderoute", "Establish Traderoute", "R", "", "", false, false, false},
+    {"units", "Units", "F2", "", "", false, false, false},
+    {"players", "Players", "F3", "", "", false, false, false},
+    {"cities", "Cities", "F4", "", "", false, false, false},
+    {"economy", "Economy", "F5", "", "", false, false, false},
+    {"research", "Research", "F6", "", "", false, false, false},
+    {"spaceship", "Spaceship", "F12", "", "", false, false, false},
+    {"options", "Options...", "", "configure", "", true, false, false},
   };
+
+#undef DRW
 
   for (auto d: actionData) {
     auto a = new QAction(this);
@@ -705,11 +721,20 @@ void MainWindow::addActions() {
     if (!d.theme.isEmpty()) {
       a->setIcon(QIcon::fromTheme(d.theme));
     }
+    if (!d.tooltipOrKey.isEmpty()) {
+      auto opt = optset_option_by_name(client_optset, d.tooltipOrKey.toUtf8());
+      if (opt != nullptr) {
+        a->setToolTip(option_description(opt));
+        a->setWhatsThis(option_help_text(opt));
+        if (d.checkable) { // boolean option
+          a->setChecked(option_bool_get(opt));
+        }
+      } else {
+        a->setToolTip(d.tooltipOrKey);
+      }
+    }
     if (!d.shortcut.isEmpty()) {
       actionCollection()->setDefaultShortcut(a, d.shortcut);
-    }
-    if (!d.tooltip.isEmpty()) {
-      a->setToolTip(d.tooltip);
     }
     a->setEnabled(d.enabled);
   }

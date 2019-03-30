@@ -69,7 +69,7 @@ private:
   using Panes = QVector<IOutputPane*>;
 
   explicit OutputPaneManager(const Panes& panes, MainWindow *parent = nullptr);
-  ~OutputPaneManager() override = default;
+  ~OutputPaneManager() override;
 
   friend class MainWindow;
   friend class OutputPaneManageButton;
@@ -84,6 +84,11 @@ private:
   void hidePane();
   void configOutput();
   void refreshOutput();
+
+  void writeSettings();
+  void readSettings();
+
+private:
 
   QLabel *m_titleLabel = nullptr;
   OutputPaneManageButton *m_manageButton = nullptr;

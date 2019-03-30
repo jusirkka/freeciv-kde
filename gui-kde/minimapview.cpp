@@ -379,19 +379,28 @@ int MinimapView::bufferSize() const {
   return m_bufferSize;
 }
 
+MinimapView::~MinimapView() {
+  // make sure that thread is not waitng for empty frame
+  m_empty.release(m_bufferSize - m_empty.available());
+}
+
+
+// Thread implementation
+
 MinimapThread::MinimapThread(MinimapView *parent)
   : QThread(parent)
   , m_parent(parent)
 {}
 
 MinimapThread::~MinimapThread() {
+  m_done = true;
   wait();
 }
 
 void MinimapThread::run()
 {
   int slot = 0;
-  while (gui_options.overview.map != nullptr) {
+  while (gui_options.overview.map != nullptr && !m_done) {
 
     m_parent->acquireEmptyFrame();
 
@@ -431,6 +440,10 @@ void MinimapThread::run()
                   Qt::IgnoreAspectRatio, Qt::FastTransformation);
     }
 
+    if (m_parent->buffer().isEmpty()) {
+      m_done = true;
+      continue;
+    }
     m_parent->buffer()[slot] = pix;
     // qCDebug(FC) << "produced slot" << slot;
     slot = (slot + 1) % m_parent->bufferSize();

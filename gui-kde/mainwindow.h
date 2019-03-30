@@ -14,6 +14,7 @@ namespace KV {
 namespace State {
 class Base;
 class Network;
+class Game;
 }
 
 class ChatLineEdit;
@@ -30,6 +31,7 @@ class MainWindow: public KXmlGuiWindow
   Q_OBJECT
 
   friend class State::Network;
+  friend class State::Game;
 
 public:
 
@@ -50,67 +52,67 @@ protected:
 
 private slots:
 
-  void on_actionSaveGameAs_triggered();
-  void on_actionLoadScenario_triggered();
-  void on_actionLoadGame_triggered();
-  void on_actionQuit_triggered();
-  void on_actionFullscreen_toggled(bool on);
-  void on_actionMinimap_toggled(bool on);
-  void on_actionCityOutlines_toggled(bool on);
-  void on_actionCityOutput_toggled(bool on);
-  void on_actionMapGrid_toggled(bool on);
-  void on_actionNationalBorders_toggled(bool on);
-  void on_actionNativeTiles_toggled(bool on);
-  void on_actionCityFullBar_toggled(bool on);
-  void on_actionCityNames_toggled(bool on);
-  void on_actionCityGrowth_toggled(bool on);
-  void on_actionCityProductionLevels_toggled(bool on);
-  void on_actionCityBuyCost_toggled(bool on);
-  void on_actionCityTradeRoutes_toggled(bool on);
-  void on_actionCenterView_triggered();
-  void on_actionZoomIn_triggered();
-  void on_actionZoomOut_triggered();
-  void on_actionScaleFonts_toggled(bool on);
-  void on_actionGotoTile_triggered();
-  void on_actionGotoNearestCity_triggered();
-  void on_actionGoAirlifttoCity_triggered();
-  void on_actionAutoExplore_triggered();
-  void on_actionPatrol_triggered();
-  void on_actionSentry_triggered();
-  void on_actionUnsentryAllOnTile_triggered();
-  void on_actionLoad_triggered();
-  void on_actionUnload_triggered();
-  void on_actionUnloadAllFromTransporter_triggered();
-  void on_actionSetHomeCity_triggered();
-  void on_actionUpgrade_triggered();
-  void on_actionConvert_triggered();
-  void on_actionDisband_triggered();
-  void on_actionWait_triggered();
-  void on_actionDone_triggered();
-  void on_actionFortifyUnit_triggered();
-  void on_actionBuildFortFortressBuoy_triggered();
-  void on_actionBuildAirstripAirbase_triggered();
-  void on_actionPillage_triggered();
-  void on_actionBuildCity_triggered();
-  void on_actionAutoWorker_triggered();
-  void on_actionBuildRoad_triggered();
-  void on_actionIrrigate_triggered();
-  void on_actionMine_triggered();
-  void on_actionConnectWithRoad_triggered();
-  void on_actionConnectWithRailway_triggered();
-  void on_actionConnectWithIrrigation_triggered();
-  void on_actionTransform_triggered();
-  void on_actionCleanPollution_triggered();
-  void on_actionCleanNuclearFallout_triggered();
-  void on_actionHelpBuildWonder_triggered();
-  void on_actionEstablishTraderoute_triggered();
-  void on_actionUnits_triggered();
-  void on_actionPlayers_triggered();
-  void on_actionCities_triggered();
-  void on_actionEconomy_triggered();
-  void on_actionResearch_triggered();
-  void on_actionSpaceship_triggered();
-  void on_actionOptions_triggered();
+  void on_saveGameAs_triggered();
+  void on_loadScenario_triggered();
+  void on_loadGame_triggered();
+  void on_quit_triggered();
+  void on_fullScreen_toggled(bool on);
+  void on_minimap_toggled(bool on);
+  void on_cityOutlines_toggled(bool on);
+  void on_cityOutput_toggled(bool on);
+  void on_mapGrid_toggled(bool on);
+  void on_nationalBorders_toggled(bool on);
+  void on_nativeTiles_toggled(bool on);
+  void on_cityFullBar_toggled(bool on);
+  void on_cityNames_toggled(bool on);
+  void on_cityGrowth_toggled(bool on);
+  void on_cityProductionLevels_toggled(bool on);
+  void on_cityBuyCost_toggled(bool on);
+  void on_cityTradeRoutes_toggled(bool on);
+  void on_centerView_triggered();
+  void on_zoomIn_triggered();
+  void on_zoomOut_triggered();
+  void on_scaleFonts_toggled(bool on);
+  void on_gotoTile_triggered();
+  void on_gotoNearestCity_triggered();
+  void on_goAirlifttoCity_triggered();
+  void on_autoExplore_triggered();
+  void on_patrol_triggered();
+  void on_sentry_triggered();
+  void on_unsentryAllOnTile_triggered();
+  void on_load_triggered();
+  void on_unload_triggered();
+  void on_unloadAllFromTransporter_triggered();
+  void on_setHomeCity_triggered();
+  void on_upgrade_triggered();
+  void on_convert_triggered();
+  void on_disband_triggered();
+  void on_wait_triggered();
+  void on_done_triggered();
+  void on_fortifyUnit_triggered();
+  void on_buildFortFortressBuoy_triggered();
+  void on_buildAirstripAirbase_triggered();
+  void on_pillage_triggered();
+  void on_buildCity_triggered();
+  void on_autoWorker_triggered();
+  void on_buildRoad_triggered();
+  void on_irrigate_triggered();
+  void on_mine_triggered();
+  void on_connectWithRoad_triggered();
+  void on_connectWithRailway_triggered();
+  void on_connectWithIrrigation_triggered();
+  void on_transform_triggered();
+  void on_cleanPollution_triggered();
+  void on_cleanNuclearFallout_triggered();
+  void on_helpBuildWonder_triggered();
+  void on_establishTraderoute_triggered();
+  void on_units_triggered();
+  void on_players_triggered();
+  void on_cities_triggered();
+  void on_economy_triggered();
+  void on_research_triggered();
+  void on_spaceship_triggered();
+  void on_options_triggered();
 
   void setCurrentState(bool active);
   void stateChange(client_pages page);
@@ -139,6 +141,7 @@ private:
   CityView* m_cityReport;
   CityDialog* m_cityManager;
   ScienceDialog* m_scienceReport;
+  QRect m_fallbackGeom;
 
 };
 

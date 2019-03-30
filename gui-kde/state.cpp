@@ -124,10 +124,10 @@ Network::~Network() {
 void Network::onEntry(QEvent* event) {
   if (event->type() == QEvent::StateMachineSignal) {
     auto signalEvent = static_cast<QStateMachine::SignalEvent*>(event);
-    if (signalEvent->sender() == m_parent->action("actionConnectToGame")) {
+    if (signalEvent->sender() == m_parent->action("connectToGame")) {
       m_networkDialog->init();
       m_networkDialog->show();
-    } else if (signalEvent->sender() == m_parent->action("actionNewGame")) {
+    } else if (signalEvent->sender() == m_parent->action("newGame")) {
       if (!is_server_running()) {
         client_start_server();
       }
@@ -162,11 +162,16 @@ Game::~Game() {}
 void Game::onEntry(QEvent* event) {
   m_parent->setMapView(createMapWidget());
   m_parent->enableGameMenus(true);
+  if (m_parent->m_fallbackGeom.isValid()) {
+    // go fullscreen
+    m_parent->action("fullScreen")->setChecked(true);
+  }
   QState::onEntry(event);
 }
 
 void Game::onExit(QEvent* event) {
   m_parent->enableGameMenus(false);
+  m_parent->setCentralWidget(new QWidget);
   QState::onExit(event);
 }
 

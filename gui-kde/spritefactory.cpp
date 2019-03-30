@@ -6,6 +6,7 @@
 #include <QPixmapCache>
 #include <QPainter>
 #include <cmath>
+#include "logging.h"
 
 using namespace KV;
 
@@ -111,8 +112,8 @@ SpriteFactory::SpriteFactory() {
 
   for (int j = 0; j < formats.size(); j++) {
     auto fmt = formats[j];
-    auto bytes = new char[sizeof(fmt.data())];
-    strncpy(bytes, fmt.data(), sizeof(char) * fmt.size());
+    auto bytes = new char[fmt.size() + 1];
+    strncpy(bytes, fmt.data(), fmt.size() + 1);
     m_formats[j] = bytes;
   }
 }

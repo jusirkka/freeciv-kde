@@ -22,6 +22,7 @@ public:
   using FrameVector = QVector<QPixmap>;
 
   explicit MinimapView(QWidget *parent = nullptr);
+  virtual ~MinimapView();
 
   void reset();
 
@@ -75,7 +76,6 @@ private:
   FrameVector m_buffer;
   QSemaphore m_filled;
   QSemaphore m_empty;
-
 };
 
 
@@ -95,6 +95,7 @@ protected:
 private:
 
   MinimapView* m_parent;
+  bool m_done = false;
 
 };
 

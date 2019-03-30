@@ -81,7 +81,6 @@ set(fc_kde_srcs
     sciencedialog.cpp
     researchtreewidget.cpp
     actionselector.cpp
-    settingsmanager.cpp
     ioutputpane.h
 )
 
@@ -100,7 +99,10 @@ ki18n_wrap_ui(fc_kde_srcs
     sciencedialog.ui
 )
 
-kconfig_add_kcfg_files(fc_kde_srcs conf_mainwindow.kcfgc)
+kconfig_add_kcfg_files(fc_kde_srcs
+  conf_mainwindow.kcfgc
+  conf_outputpanemanager.kcfgc
+)
 
 qt5_add_resources(fc_kde_srcs freeciv-kde.qrc)
 

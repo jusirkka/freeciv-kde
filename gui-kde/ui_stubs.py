@@ -66,8 +66,9 @@ class Parser(object):
     def print_actions_template(self):
         for k, v in self.tree.items():
             # name, title, shortcut, icon, enabled, checkable, checked
+            name = k.replace('action', '')
             fmt = '"{}"'
-            data = [fmt.format(k), 
+            data = [fmt.format(name[0].lower() + name[1:]), 
                     fmt.format(v.get('text', '')), 
                     fmt.format(v.get('shortcut', '')), 
                     fmt.format(v.get('icon', '')),
@@ -77,15 +78,22 @@ class Parser(object):
                     v.get('checked', 'false')]
             print('{{{}}},'.format(', '.join(data)))
 
-#    <Menu name="file" >
-#      <Action name="clearAction" />
+#    <Menu name="camera">
+#      <text>Camera</text>
+#      <Separator/>
+#      <Action name="centerView"/>
 #    </Menu>
 
     def print_menus_template(self):
         for k in self.menus:
-            print('    <Menu name="{}">'.format(k))
+            print('    <Menu name="{}">'.format(k[0].lower() + k[1:]))
+            print('      <text>{}</text>'.format(k))
             for a in self.actions[k]:
-                print('      <Action name="{}"/>'.format(a))
+                if a == 'separator':
+                    print('      <Separator/>')
+                else:
+                    name = a.replace('action', '')
+                    print('      <Action name="{}"/>'.format(name[0].lower() + name[1:]))
             print('    </Menu>')
 
 

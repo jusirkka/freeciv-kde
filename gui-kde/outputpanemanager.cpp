@@ -28,6 +28,7 @@
 #include "application.h"
 #include "mainwindow.h"
 #include "logging.h"
+#include "conf_outputpanemanager.h"
 
 #include <QAction>
 #include <QApplication>
@@ -224,6 +225,51 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
   hidePane();
+
+  readSettings();
+}
+
+
+OutputPaneManager::~OutputPaneManager() {
+  writeSettings();
+}
+
+
+void OutputPaneManager::readSettings() {
+  qCDebug(FC) << "OutputPaneManager::readSettings";
+
+  QList<int> panes = Conf::OutputPaneManager::visiblePanes();
+  QList<int> left{0, 1, 2, 3, 4, 5}; // TODO: magic number 6 = number of panes
+  for (int idx: panes) {
+    left.removeOne(idx);
+  }
+  for (int idx: left) {
+    OutputPaneData &data = m_outputPanes[idx];
+    data.pane->visibilityChanged(false);
+    data.button->setChecked(false);
+    data.button->hide();
+    data.buttonVisible = false;
+  }
+
+  QSize s = Conf::OutputPaneManager::paneSize();
+  if (s.isValid()) {
+    resize(s);
+  }
+}
+
+void OutputPaneManager::writeSettings() {
+  qCDebug(FC) << "OutputPaneManager::writeSettings";
+
+  QList<int> panes;
+  for (int idx = 0; idx < m_outputPanes.count(); idx++) {
+    OutputPaneData &data = m_outputPanes[idx];
+    if (data.buttonVisible) {
+      panes << idx;
+    }
+  }
+  Conf::OutputPaneManager::setVisiblePanes(panes);
+  Conf::OutputPaneManager::setPaneSize(size());
+  Conf::OutputPaneManager::self()->save();
 }
 
 void OutputPaneManager::paintEvent(QPaintEvent *)

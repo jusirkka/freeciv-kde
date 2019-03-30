@@ -1,12 +1,22 @@
 TODO
-- settings manager
-- action manager
+- message panel settings & dialog
+- chat panel settings & dialog
+- player dialog settings
+- city dialog settings
+- science report settings
+- QActions manager & remaining shortcuts
 - tidyup gui funcs in main.cpp
 - economy report
 - units report
 - help dialog
 - font manager
+- governor
+- button/popup to delete worklists
+- options (server, client) dialog
 BUGS
+- minimap not toggled by the corresponding QAction
+- action selection: dialog does not close after selection
+- action selection: discard button does not close the dialog
 - unitinfo does not display info for first item in the list
 - error handling in messages pane: popup placement
 - sporadic freezes when starting new game
