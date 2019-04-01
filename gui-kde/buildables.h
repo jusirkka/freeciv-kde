@@ -83,23 +83,6 @@ private:
 
 };
 
-class BuildablesTableModel: public QAbstractProxyModel {
-  Q_OBJECT
-
-public:
-
-  BuildablesTableModel(int columns, QObject* parent = nullptr);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
-  QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
-  QModelIndex parent(const QModelIndex &child) const override;
-  QModelIndex index(int row, int column, const QModelIndex &parent) const override;
-
-private:
-
-  int m_columns;
-};
 
 class BuildablesDelegate: public QItemDelegate
 {

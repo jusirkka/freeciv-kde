@@ -5,6 +5,7 @@
 #include <QStringList>
 #include "application.h"
 #include "logging.h"
+#include "conf_playerwidget.h"
 
 #include "plrdlg_common.h"
 #include "research.h"
@@ -32,11 +33,6 @@ PlayerWidget::PlayerWidget(QWidget *parent)
   m_ui->playerView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
   m_ui->playerView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-  for (int col = 0; col < m_players->columnCount(); col++) {
-    bool show = m_players->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
-    m_ui->playerView->setColumnHidden(col, !show);
-  }
-
   connect(m_ui->playerView->header(), &QWidget::customContextMenuRequested,
           this, &PlayerWidget::popupHeaderMenu);
   connect(m_ui->playerView->selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -47,8 +43,54 @@ PlayerWidget::PlayerWidget(QWidget *parent)
   connect(Application::instance(), &Application::updatePlayers,
           this, &PlayerWidget::updatePlayers);
 
+  connect(m_players, &PlayerModel::headerDataChanged, this, [=] (Qt::Orientation ori, int first, int last) {
+    while (first <= last) {
+      bool show = m_players->headerData(first, ori, Qt::UserRole).toBool();
+      m_ui->playerView->setColumnHidden(first, !show);
+      first += 1;
+    }
+  });
+
+  readSettings();
 }
 
+PlayerWidget::~PlayerWidget()
+{
+  writeSettings();
+  delete m_ui;
+}
+
+void PlayerWidget::readSettings() {
+  QList<int> visibles = Conf::PlayerWidget::columns();
+  if (!visibles.isEmpty()) {
+    for (int col = 0; col < m_players->columnCount(); col++) {
+      bool show = m_players->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+      bool vis = visibles.contains(col);
+      if ((vis && !show) || (!vis && show)) {
+        m_players->setHeaderData(col, Qt::Horizontal, vis, Qt::UserRole);
+      } else {
+        m_ui->playerView->setColumnHidden(col, !show);
+      }
+    }
+  } else { // defaults
+    for (int col = 0; col < m_players->columnCount(); col++) {
+      bool show = m_players->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+      m_ui->playerView->setColumnHidden(col, !show);
+    }
+  }
+}
+
+void PlayerWidget::writeSettings() {
+  QList<int> visibles;
+  for (int col = 0; col < m_players->columnCount(); col++) {
+    bool show = m_players->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+    if (show) {
+      visibles << col;
+    }
+  }
+  Conf::PlayerWidget::setColumns(visibles);
+  Conf::PlayerWidget::self()->save();
+}
 
 void PlayerWidget::updatePlayers() {
   auto curr = m_ui->playerView->selectionModel()->selection();
@@ -89,8 +131,7 @@ void PlayerWidget::popupHeaderMenu(const QPoint &p)
     a->setCheckable(true);
     a->setChecked(!m_ui->playerView->isColumnHidden(i));
     connect(a, &QAction::toggled, this, [this, i] (bool visible) {
-      m_ui->playerView->setColumnHidden(i, !visible);
-      player_dlg_columns[i].show = visible;
+      m_players->setHeaderData(i, Qt::Horizontal, visible, Qt::UserRole);
     });
   }
   menu.exec(mapToGlobal(p));
@@ -301,11 +342,8 @@ void PlayerWidget::on_closeButton_clicked() {
   emit closeRequest();
 }
 
-PlayerWidget::~PlayerWidget()
-{
-  delete m_ui;
-}
 
+// PlayerModel implementation
 
 PlayerModel::PlayerModel(QObject *parent)
   : QAbstractListModel(parent)
@@ -322,6 +360,7 @@ int PlayerModel::columnCount(const QModelIndex &/*parent*/) const {
 QVariant PlayerModel::data(const QModelIndex &index, int role) const {
 
   if (!index.isValid()) return QVariant();
+  if (nation_count() == 0) return QVariant();
 
   int row = index.row();
   auto pplayer = m_players[row];
@@ -335,13 +374,10 @@ QVariant PlayerModel::data(const QModelIndex &index, int role) const {
 
   if (role == Qt::DecorationRole) {
     if (pcol->type == COL_FLAG) {
-      if (nation_of_player(pplayer)) {
-        return get_nation_flag_sprite(tileset, nation_of_player(pplayer))->pm;
-      }
-      return QVariant();
+        return get_nation_flag_sprite(get_tileset(), nation_of_player(pplayer))->pm;
     }
     if (pcol->type == COL_COLOR) {
-      return get_player_color(tileset, pplayer)->qcolor;
+      return get_player_color(get_tileset(), pplayer)->qcolor;
     }
     return QVariant();
   }
@@ -351,10 +387,7 @@ QVariant PlayerModel::data(const QModelIndex &index, int role) const {
       return pcol->bool_func(pplayer);
     }
     if (pcol->type == COL_TEXT) {
-      if (nation_of_player(pplayer)) {
         return pcol->func(pplayer);
-      }
-      return QVariant();
     }
     if (pcol->type == COL_RIGHT_TEXT) {
       QString r = pcol->func(pplayer);
@@ -369,10 +402,10 @@ QVariant PlayerModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-QVariant PlayerModel::headerData(int section, Qt::Orientation orientation,
+QVariant PlayerModel::headerData(int section, Qt::Orientation /*orientation*/,
                                  int role) const
 {
-  if (orientation == Qt::Horizontal && section < num_player_dlg_columns) {
+  if (section < num_player_dlg_columns) {
     struct player_dlg_column* pcol = &player_dlg_columns[section];
     if (role == Qt::DisplayRole) {
       return pcol->title;
@@ -384,6 +417,14 @@ QVariant PlayerModel::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
+bool PlayerModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
+  if (role != Qt::UserRole) return false;
+  if (section >= num_player_dlg_columns) return false;
+  if (!value.isValid()) return false;
+  player_dlg_columns[section].show = value.toBool();
+  emit headerDataChanged(orientation, section, section);
+  return true;
+}
 
 void PlayerModel::reset() {
   beginResetModel();

@@ -1,6 +1,7 @@
 #include "chatpane.h"
 #include "chatwindow.h"
 #include "chatlineedit.h"
+#include "messageconfigdialog.h"
 
 #include <QVBoxLayout>
 
@@ -49,7 +50,13 @@ void ChatPane::refreshContents() {
 }
 
 void ChatPane::configureOutput() {
-  // noop
+  if (m_config == nullptr) {
+    m_config = new MessageConfigDialog(MW_OUTPUT, "Chat Messages", m_mainWidget);
+    connect(m_config, &MessageConfigDialog::finished, this, [=] () {
+      m_config = nullptr;
+    });
+  }
+  m_config->show();
 }
 
 void ChatPane::visibilityChanged(bool /*visible*/) {
@@ -57,7 +64,7 @@ void ChatPane::visibilityChanged(bool /*visible*/) {
 }
 
 bool ChatPane::canConfigure() const {
-  return false;
+  return true;
 }
 
 bool ChatPane::canRefresh() const {

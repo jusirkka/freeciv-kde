@@ -347,6 +347,8 @@ void UnitItem::mouseDoubleClickEvent(QMouseEvent *event)
     // qCDebug(FC) << "mouse double click in unit";
     unit_focus_set(m_unit);
     popdown_all_city_dialogs();
+    event->accept();
+    return;
   }
   event->ignore();
 }

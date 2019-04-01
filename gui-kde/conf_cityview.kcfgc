@@ -1,6 +1,6 @@
 # Code generation options for kconfig_compiler
-File=conf_mainwindow.kcfg
+File=conf_cityview.kcfg
 NameSpace=Conf
-ClassName=MainWindow
+ClassName=CityView
 Singleton=true
 Mutators=true

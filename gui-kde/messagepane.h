@@ -7,6 +7,8 @@
 
 namespace KV {
 
+class MessageConfigDialog;
+
 class ErrorWidget: public QLabel {
   Q_OBJECT
 public:
@@ -58,6 +60,7 @@ private:
 
   QWidget *m_mainWidget;
   BrowserWidget *m_browser;
+  MessageConfigDialog* m_config = nullptr;
 
 };
 

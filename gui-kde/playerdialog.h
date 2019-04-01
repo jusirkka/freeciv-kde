@@ -17,6 +17,7 @@ class PlayerDialog: public QDialog
 public:
 
   PlayerDialog(QWidget* parent = nullptr);
+  ~PlayerDialog();
 
 private:
 

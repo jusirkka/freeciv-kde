@@ -9,6 +9,10 @@
 #include "tilespec.h"
 #include "application.h"
 #include <QApplication>
+#include <KConfigGroup>
+#include <KWindowConfig>
+#include <KSharedConfig>
+#include <QWindow>
 
 using namespace KV;
 
@@ -50,6 +54,16 @@ PlayerDialog::PlayerDialog(QWidget *parent)
   setMinimumWidth(800);
   setMinimumHeight(450);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "PlayerDialog");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
+}
+
+PlayerDialog::~PlayerDialog() {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "PlayerDialog");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
 }
 
 void PlayerDialog::initMeeting(int counterpart) {

@@ -2,6 +2,11 @@
 #include "cityview.h"
 #include <QMenu>
 #include "application.h"
+#include <KConfigGroup>
+#include <KWindowConfig>
+#include <KSharedConfig>
+#include <QWindow>
+#include "conf_cityview.h"
 
 #include "cityrepdata.h"
 #include "city.h"
@@ -46,29 +51,38 @@ QVariant CityModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-QVariant CityModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (orientation == Qt::Horizontal && section < NUM_CREPORT_COLS) {
-    city_report_spec *spec = &city_report_specs[section];
+QVariant CityModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
+  if (section >= NUM_CREPORT_COLS) return QVariant();
 
-    if (role == Qt::DisplayRole) {
-      return QString("%1\n%2")
-          .arg(spec->title1 ? spec->title1 : "")
-          .arg(spec->title2 ? spec->title2 : "")
-          .trimmed();
-    }
+  city_report_spec *spec = &city_report_specs[section];
 
-    if (role == Qt::ToolTipRole) {
-      return QString(spec->explanation);
-    }
-
-    if (role == Qt::UserRole) {
-      return spec->show;
-    }
-
+  if (role == Qt::DisplayRole) {
+    return QString("%1\n%2")
+        .arg(spec->title1 ? spec->title1 : "")
+        .arg(spec->title2 ? spec->title2 : "")
+        .trimmed();
   }
-  return QVariant();
 
+  if (role == Qt::ToolTipRole) {
+    return QString(spec->explanation);
+  }
+
+  if (role == Qt::UserRole) {
+    return spec->show;
+  }
+
+  return QVariant();
 }
+
+bool CityModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
+  if (role != Qt::UserRole) return false;
+  if (section >= NUM_CREPORT_COLS) return false;
+  if (!value.isValid()) return false;
+  city_report_specs[section].show = value.toBool();
+  emit headerDataChanged(orientation, section, section);
+  return true;
+}
+
 
 void CityModel::reset() {
   beginResetModel();
@@ -204,10 +218,7 @@ CityView::CityView(QWidget* parent)
   m_filter->setDynamicSortFilter(true);
   m_ui->cityView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
   m_ui->cityView->setContextMenuPolicy(Qt::CustomContextMenu);
-  for (int col = 0; col < m_cities->columnCount(); col++) {
-    bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
-    m_ui->cityView->setColumnHidden(col, !show);
-  }
+
   connect(m_ui->cityView->horizontalHeader(),
           &QTableView::customContextMenuRequested,
           this,
@@ -228,9 +239,64 @@ CityView::CityView(QWidget* parent)
 
   setWindowTitle(qAppName() + ": Cities");
 
-  setMinimumWidth(800);
-  setMinimumHeight(450);
+  setMinimumWidth(400);
+  setMinimumHeight(300);
   setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+  connect(m_cities, &CityModel::headerDataChanged, this, [=] (Qt::Orientation ori, int first, int last) {
+    while (first <= last) {
+      bool show = m_cities->headerData(first, ori, Qt::UserRole).toBool();
+      m_ui->cityView->setColumnHidden(first, !show);
+      first += 1;
+    }
+  });
+
+  readSettings();
+}
+
+CityView::~CityView() {
+  writeSettings();
+}
+
+
+void CityView::readSettings() {
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "CityView");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
+
+  QList<int> visibles = Conf::CityView::columns();
+  if (!visibles.isEmpty()) {
+    for (int col = 0; col < m_cities->columnCount(); col++) {
+      bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+      bool vis = visibles.contains(col);
+      if ((vis && !show) || (!vis && show)) {
+        m_cities->setHeaderData(col, Qt::Horizontal, vis, Qt::UserRole);
+      } else {
+        m_ui->cityView->setColumnHidden(col, !show);
+      }
+    }
+  } else { // defaults
+    for (int col = 0; col < m_cities->columnCount(); col++) {
+      bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+      m_ui->cityView->setColumnHidden(col, !show);
+    }
+  }
+}
+
+void CityView::writeSettings() {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "CityView");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
+
+  QList<int> visibles;
+  for (int col = 0; col < m_cities->columnCount(); col++) {
+    bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+    if (show) {
+      visibles << col;
+    }
+  }
+  Conf::CityView::setColumns(visibles);
+  Conf::CityView::self()->save();
 }
 
 bool CityView::hasPrev(city* c) const {
@@ -273,29 +339,23 @@ void CityView::on_filterButton_clicked() {
   // TODO
 }
 
-void CityView::popupHeaderMenu(const QPoint& /*pos*/) {
+void CityView::popupHeaderMenu(const QPoint& p) {
 
   QMenu menu;
   menu.setTitle(_("Column visibility"));
 
-  QVector<QAction*> actions;
-  int numCols = m_cities->columnCount();
-  for (int i = 0; i < numCols; i++) {
-    QString name = m_cities->headerData(i, Qt::Horizontal, Qt::ToolTipRole).toString();
-    auto a = menu.addAction(name);
+  int n = m_ui->cityView->horizontalHeader()->count();
+  for (int i = 0; i < n; ++i) {
+    QAction *a = menu.addAction(m_cities->headerData(i, Qt::Horizontal).toString());
     a->setCheckable(true);
     a->setChecked(!m_ui->cityView->isColumnHidden(i));
-    actions.append(a);
+    connect(a, &QAction::toggled, this, [this, i] (bool visible) {
+      m_cities->setHeaderData(i, Qt::Horizontal, visible, Qt::UserRole);
+    });
   }
-
-  auto selected = menu.exec(QCursor::pos());
-  if (selected) {
-    int col = actions.indexOf(selected);
-    m_ui->cityView->setColumnHidden(col, !selected->isChecked());
-    auto spec = &city_report_specs[col];
-    spec->show = selected->isChecked();
-  }
+  menu.exec(mapToGlobal(p));
 }
+
 
 void CityView::popupListMenu(const QPoint& pos) {
   // TODO

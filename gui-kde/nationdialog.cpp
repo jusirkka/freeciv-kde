@@ -4,6 +4,10 @@
 #include <QItemSelection>
 #include <QFontDatabase>
 #include "sprite.h"
+#include <KConfigGroup>
+#include <KWindowConfig>
+#include <KSharedConfig>
+#include <QWindow>
 
 #include "options.h"
 #include "helpdata.h"
@@ -54,10 +58,16 @@ NationDialog::NationDialog(QWidget *parent) :
   connect(this, &NationDialog::accepted,
           this, &NationDialog::setNation);
 
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "NationDialog");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
 }
 
 NationDialog::~NationDialog()
 {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "NationDialog");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
   delete m_ui;
 }
 

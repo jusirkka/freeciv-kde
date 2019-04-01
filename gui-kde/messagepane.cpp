@@ -3,6 +3,7 @@
 #include "logging.h"
 #include <QTimer>
 #include <QVBoxLayout>
+#include "messageconfigdialog.h"
 
 #include "messagewin_common.h"
 
@@ -13,7 +14,9 @@ ErrorWidget::ErrorWidget(const QString& e, QWidget* p)
   : QLabel(e, p)
 {
   setWindowFlags(Qt::X11BypassWindowManagerHint |
-                 Qt::FramelessWindowHint);
+                 Qt::FramelessWindowHint |
+                 Qt::WindowStaysOnTopHint);
+  setAttribute(Qt::WA_DeleteOnClose);
   auto fm = fontMetrics();
   setFixedHeight(fm.height() + 6);
   setFixedWidth(fm.width(e) + 6);
@@ -30,15 +33,13 @@ BrowserWidget::BrowserWidget()
 
 void BrowserWidget::handleError(const QString &msg) {
   if (m_errorWidget) {
-    m_errorWidget->hide();
-    delete m_errorWidget;
+    m_errorWidget->close();
     m_errorWidget = nullptr;
   }
-  m_errorWidget = new ErrorWidget(msg);
-  QPoint p = mapFromGlobal(QCursor::pos());
-  m_errorWidget->move(p.x(), p.y() - m_errorWidget->height());
+  m_errorWidget = new ErrorWidget(msg, this);
+  m_errorWidget->move(mapFromGlobal(QCursor::pos()));
   m_errorWidget->show();
-  QTimer::singleShot(2000, [=] () {
+  QTimer::singleShot(4000, [=] () {
     m_errorWidget->hide();
   });
 }
@@ -93,7 +94,13 @@ void MessagePane::refreshContents() {
 }
 
 void MessagePane::configureOutput() {
-  // TODO: select which messages to display
+  if (m_config == nullptr) {
+    m_config = new MessageConfigDialog(MW_MESSAGES, "Messages", m_mainWidget);
+    connect(m_config, &MessageConfigDialog::finished, this, [=] () {
+      m_config = nullptr;
+    });
+  }
+  m_config->show();
 }
 
 void MessagePane::visibilityChanged(bool /*visible*/) {

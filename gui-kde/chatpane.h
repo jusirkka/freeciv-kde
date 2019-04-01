@@ -8,6 +8,7 @@ namespace KV {
 
 class ChatLineEdit;
 class ChatWindow;
+class MessageConfigDialog;
 
 class ChatPane : public IOutputPane
 {
@@ -38,6 +39,8 @@ private:
   QWidget *m_mainWidget;
   ChatLineEdit* m_chatLine;
   ChatWindow* m_chatWindow;
+  MessageConfigDialog* m_config = nullptr;
+
 
 };
 

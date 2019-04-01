@@ -28,6 +28,9 @@ public:
   QVariant headerData(int section,
                       Qt::Orientation orientation,
                       int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section,
+                     Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::DisplayRole) override;
 
   void reset();
   void updateCity(city* c);
@@ -84,11 +87,12 @@ private:
 
 class CityView : public QDialog
 {
-
   Q_OBJECT
 
 public:
   CityView(QWidget* parent = nullptr);
+  ~CityView();
+
   bool hasPrev(city* c) const;
   bool hasNext(city* c) const;
   city* next(city* c) const;
@@ -105,6 +109,11 @@ private slots:
   void popupHeaderMenu(const QPoint& pos);
   void popupListMenu(const QPoint& pos);
   void gotoCity(const QModelIndex& cityIndex);
+
+private:
+
+  void readSettings();
+  void writeSettings();
 
 private:
 

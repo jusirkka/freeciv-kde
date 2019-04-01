@@ -1,9 +1,6 @@
 TODO
-- message panel settings & dialog
-- chat panel settings & dialog
-- player dialog settings
-- city dialog settings
-- science report settings
+- network dialog settings
+- return key to select a unit in UnitList
 - QActions manager & remaining shortcuts
 - tidyup gui funcs in main.cpp
 - economy report
@@ -13,13 +10,13 @@ TODO
 - governor
 - button/popup to delete worklists
 - options (server, client) dialog
+- cityview filter
 BUGS
+- message settings dialog: filter is only applied when hovering over events table
+- message settings dialog: changes not applied
 - minimap not toggled by the corresponding QAction
-- action selection: dialog does not close after selection
-- action selection: discard button does not close the dialog
 - unitinfo does not display info for first item in the list
-- error handling in messages pane: popup placement
-- sporadic freezes when starting new game
+- sporadic freezes when starting a new game
 - fix minimap: zoom does not work
 - hex tiles take too much space
-- segfault when selecting unit in citydialog.
+- select nation dialog: first nation is overlined, but reseverved nations not

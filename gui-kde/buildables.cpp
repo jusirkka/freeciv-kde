@@ -10,6 +10,7 @@
 #include "logging.h"
 #include <QItemSelectionModel>
 #include <QMimeData>
+#include "proxytablemodel.h"
 
 #include "city.h"
 #include "tech.h"
@@ -323,44 +324,6 @@ Qt::ItemFlags BuildablesDragModel::flags(const QModelIndex &index) const {
 }
 
 
-BuildablesTableModel::BuildablesTableModel(int columns, QObject* parent)
-  : QAbstractProxyModel(parent)
-  , m_columns(columns)
-{}
-
-int BuildablesTableModel::columnCount(const QModelIndex &parent) const {
-  int sourceRows = sourceModel()->rowCount(parent);
-  if (sourceRows < m_columns) {
-    return sourceRows;
-  }
-  return m_columns;
-}
-
-int BuildablesTableModel::rowCount(const QModelIndex &parent) const {
-  int sourceRows = sourceModel()->rowCount(parent);
-  return (sourceRows + m_columns - 1) / m_columns;
-}
-
-QModelIndex BuildablesTableModel::mapFromSource(const QModelIndex &sourceIndex) const {
-  if (sourceIndex.column() > 0) return QModelIndex();
-  int col = sourceIndex.row() % m_columns;
-  int row = sourceIndex.row() / m_columns;
-  return createIndex(row, col);
-}
-
-QModelIndex BuildablesTableModel::mapToSource(const QModelIndex &proxyIndex) const {
-  int row = proxyIndex.row() * m_columns + proxyIndex.column();
-  if (row >= sourceModel()->rowCount()) return QModelIndex();
-  return sourceModel()->index(row, 0);
-}
-
-QModelIndex BuildablesTableModel::parent(const QModelIndex &/*child*/) const {
-  return QModelIndex();
-}
-
-QModelIndex BuildablesTableModel::index(int row, int column, const QModelIndex &parent) const {
-  return createIndex(row, column);
-}
 
 BuildablesDelegate::BuildablesDelegate(city* c, QSize hint, QObject* parent)
   : QItemDelegate(parent)
@@ -453,7 +416,7 @@ Buildables::Buildables(city* c, quint64 flags, QWidget* parent)
   auto buildables = new BuildablesModel(m_city, this);
   auto filter = new BuildablesFilter(m_city, flags, this);
   filter->setSourceModel(buildables);
-  auto table = new BuildablesTableModel(3, this);
+  auto table = new ProxyTableModel(3, this);
   table->setSourceModel(filter);
   setModel(table);
   auto hint = computeCellSize(filter);

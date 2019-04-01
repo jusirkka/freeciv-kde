@@ -1,7 +1,6 @@
 project(freeciv-kde)
 
 cmake_minimum_required (VERSION 3.13 FATAL_ERROR)
-set (QT_MIN_VERSION "5.12.0")
 set (KF5_MIN_VERSION "5.56.0")
 
 find_package(ECM ${KF5_MIN_VERSION} REQUIRED CONFIG)
@@ -81,6 +80,8 @@ set(fc_kde_srcs
     sciencedialog.cpp
     researchtreewidget.cpp
     actionselector.cpp
+    messageconfigdialog.cpp
+    proxytablemodel.cpp
     ioutputpane.h
 )
 
@@ -97,11 +98,14 @@ ki18n_wrap_ui(fc_kde_srcs
     governordialog.ui
     playerwidget.ui
     sciencedialog.ui
+    messageconfigdialog.ui
 )
 
 kconfig_add_kcfg_files(fc_kde_srcs
   conf_mainwindow.kcfgc
   conf_outputpanemanager.kcfgc
+  conf_playerwidget.kcfgc
+  conf_cityview.kcfgc
 )
 
 qt5_add_resources(fc_kde_srcs freeciv-kde.qrc)

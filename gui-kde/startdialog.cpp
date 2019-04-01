@@ -7,6 +7,11 @@
 #include <QAction>
 #include "sprite.h"
 #include "colors.h"
+#include <KConfigGroup>
+#include <KWindowConfig>
+#include <KSharedConfig>
+#include <QWindow>
+
 
 #include "game.h"
 #include "tilespec.h"
@@ -77,8 +82,20 @@ StartDialog::StartDialog(QWidget *parent)
           this, &StartDialog::observe);
 
   updateButtons();
-  setWindowTitle(qAppName());
+  setWindowTitle(QString("%1: pregame settings").arg(qAppName()));
+
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "StartDialog");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
 }
+
+StartDialog::~StartDialog() {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "StartDialog");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
+  delete m_ui;
+}
+
 
 void StartDialog::populateTree() {
 
@@ -395,13 +412,6 @@ void StartDialog::updateButtons() {
     m_ui->aiCombo->setCurrentIndex(-1);
   }
 }
-
-StartDialog::~StartDialog()
-{
-  delete m_ui;
-}
-
-
 
 void StartDialog::rulesetChange(const QString& rules) {
   set_ruleset(rules.toUtf8());

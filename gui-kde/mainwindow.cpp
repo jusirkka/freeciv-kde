@@ -294,23 +294,21 @@ void MainWindow::on_quit_triggered() {
 }
 
 void MainWindow::writeSettings() {
-  qCDebug(FC) << "write settings";
-  Conf::Mainwindow::setMinimap(action("minimap")->isChecked());
-  Conf::Mainwindow::setScaleFonts(action("scaleFonts")->isChecked());
-  Conf::Mainwindow::setFullScreen(action("fullScreen")->isChecked());
+  Conf::MainWindow::setMinimap(action("minimap")->isChecked());
+  Conf::MainWindow::setScaleFonts(action("scaleFonts")->isChecked());
+  Conf::MainWindow::setFullScreen(action("fullScreen")->isChecked());
   if (m_fallbackGeom.isValid()) {
-    Conf::Mainwindow::setLastGeom(m_fallbackGeom);
+    Conf::MainWindow::setLastGeom(m_fallbackGeom);
   }
-  Conf::Mainwindow::self()->save();
+  Conf::MainWindow::self()->save();
 }
 
 void MainWindow::readSettings() {
-  qCDebug(FC) << "read settings";
-  action("minimap")->setChecked(Conf::Mainwindow::minimap());
-  action("scaleFonts")->setChecked(Conf::Mainwindow::scaleFonts());
+  action("minimap")->setChecked(Conf::MainWindow::minimap());
+  action("scaleFonts")->setChecked(Conf::MainWindow::scaleFonts());
   m_fallbackGeom = QRect();
-  if (Conf::Mainwindow::fullScreen()) {
-    m_fallbackGeom = Conf::Mainwindow::lastGeom();
+  if (Conf::MainWindow::fullScreen()) {
+    m_fallbackGeom = Conf::MainWindow::lastGeom();
     // go fullscreen only when game commences
     if (m_fallbackGeom.isValid()) {
       setGeometry(m_fallbackGeom);

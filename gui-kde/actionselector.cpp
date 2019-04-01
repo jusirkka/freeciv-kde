@@ -29,7 +29,7 @@ ActionDialog::ActionDialog(const QString& title, const QString& header, QWidget*
   buttons->setLayout(m_buttonLayout);
   mainLayout->addWidget(buttons);
 
-  auto box = new QDialogButtonBox(QDialogButtonBox::Discard, Qt::Horizontal);
+  auto box = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
   connect(box, &QDialogButtonBox::rejected, this, &ActionDialog::reject);
   mainLayout->addWidget(box);
 
@@ -46,8 +46,9 @@ void ActionDialog::addButton(int id, int actor, int target, const act_prob& prob
   QString text = action_prepare_ui_name(id, "&", prob, nullptr);
   auto but = new QPushButton(text);
   but->setToolTip(action_get_tool_tip(id, prob));
-  connect(but, &QPushButton::clicked, this, [id, actor, target] () {
+  connect(but, &QPushButton::clicked, this, [this, id, actor, target] () {
     request_do_action(id, actor, target, 0, "");
+    close();
   });
 
   if (!m_actions.contains(id)) {

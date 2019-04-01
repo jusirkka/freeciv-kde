@@ -3,7 +3,10 @@
 #include "sprite.h"
 #include "application.h"
 #include <QApplication>
-
+#include <KConfigGroup>
+#include <KWindowConfig>
+#include <KSharedConfig>
+#include <QWindow>
 
 #include"research.h"
 #include "client_main.h"
@@ -29,10 +32,17 @@ ScienceDialog::ScienceDialog(QWidget *parent)
           this, &ScienceDialog::updateReport);
 
   setWindowTitle(qAppName() + ": Research");
+
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "ScienceDialog");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
 }
 
 ScienceDialog::~ScienceDialog()
 {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "ScienceDialog");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
   delete m_ui;
 }
 
