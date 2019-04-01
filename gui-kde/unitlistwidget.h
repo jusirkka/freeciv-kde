@@ -75,6 +75,7 @@ class UnitItem: public QLabel {
 public:
 
   UnitItem(unit* punit, QWidget* parent = nullptr);
+  void handleEnterKey();
 
 protected:
 

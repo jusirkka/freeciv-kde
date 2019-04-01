@@ -28,6 +28,10 @@ public:
   city* current() const;
   void refresh(city* c);
 
+protected:
+
+  bool eventFilter(QObject *obj, QEvent *ev) override;
+
 public slots:
 
   void changeCity(city* c);

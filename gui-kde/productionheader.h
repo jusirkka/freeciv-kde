@@ -18,6 +18,7 @@ public:
   explicit ProductionHeader(QWidget *parent = nullptr);
   ~ProductionHeader();
 
+
 public slots:
 
   void changeCity(city* c);

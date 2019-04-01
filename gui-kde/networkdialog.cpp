@@ -4,6 +4,10 @@
 #include <QApplication>
 #include <QItemSelection>
 #include <QTimer>
+#include <KConfigGroup>
+#include <KWindowConfig>
+#include <KSharedConfig>
+#include <QWindow>
 
 #include "fcintl.h"
 #include "fcthread.h"
@@ -24,7 +28,7 @@ NetworkDialog::NetworkDialog(QWidget *parent)
 {
   m_ui->setupUi(this);
 
-  setWindowTitle(QApplication::applicationName());
+  setWindowTitle(QString("%1: connect to game server").arg(qAppName()));
 
   connect(m_ui->detailsButton, &QPushButton::toggled,
           this, &NetworkDialog::setDetailsButtonText);
@@ -53,11 +57,24 @@ NetworkDialog::NetworkDialog(QWidget *parent)
 
   connect(m_scanTimer, &QTimer::timeout, this, &NetworkDialog::checkServerScans);
 
-
-  resize(640, 480);
-
   initWidget();
+
+  setMinimumWidth(400);
+  setMinimumHeight(300);
+  setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "NetworkDialog");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
 }
+
+NetworkDialog::~NetworkDialog() {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "NetworkDialog");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
+  delete m_ui;
+}
+
 
 void NetworkDialog::initWidget() {
   m_ui->detailsButton->setChecked(false);
@@ -159,12 +176,6 @@ void NetworkDialog::updateServerList(server_scan *scan, const server_list *serve
     row++;
   } server_list_iterate_end;
 
-}
-
-
-
-NetworkDialog::~NetworkDialog() {
-  delete m_ui;
 }
 
 void NetworkDialog::setDetailsButtonText(bool checked) {

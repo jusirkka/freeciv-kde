@@ -344,14 +344,15 @@ void BuildablesDelegate::paint(QPainter *painter,
     return;
   }
 
+  auto d = index.data(Qt::DecorationRole);
+  if (!d.isValid()) return;
+
   auto opt = QItemDelegate::setOptions(index, option);
   painter->save();
   opt.displayAlignment = Qt::AlignLeft;
   opt.textElideMode = Qt::ElideMiddle;
   QItemDelegate::drawBackground(painter, opt, index);
 
-  auto d = index.data(Qt::DecorationRole);
-  if (!d.isValid()) return;
   auto pix = d.value<QPixmap>();
   pix = pix.scaledToHeight(m_hint.height() - 2, Qt::SmoothTransformation);
 

@@ -8,6 +8,8 @@
 #include "cityinfowidget.h"
 #include "productiondialog.h"
 #include "governordialog.h"
+#include "logging.h"
+#include <QKeyEvent>
 
 
 #include "city.h"
@@ -72,7 +74,31 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
     m_governor->show();
   });
 
+  // filter out enter key in unit lists
+  m_ui->supportedFrame->installEventFilter(this);
+  m_ui->presentFrame->installEventFilter(this);
 }
+
+bool CityDialog::eventFilter(QObject *obj, QEvent *ev) {
+  if (ev->type() != QEvent::KeyPress) return QDialog::eventFilter(obj, ev);
+  auto k = static_cast<QKeyEvent*>(ev);
+  if (k->key() != Qt::Key_Enter && k->key() != Qt::Key_Return) return QDialog::eventFilter(obj, ev);
+  if (obj == m_ui->supportedFrame || obj == m_ui->presentFrame) {
+    // qCDebug(FC) << "unit list frame";
+    auto widget = qobject_cast<UnitListWidget*>(obj);
+    auto p = QCursor::pos();
+    auto items = widget->findChildren<UnitItem*>();
+    for (auto item: items) {
+      // qCDebug(FC) << "unit item" << item->rect() << item->mapFromGlobal(p);
+      if (item->rect().contains(item->mapFromGlobal(p))) {
+        item->handleEnterKey();
+        return true;
+      }
+    }
+  }
+  return QDialog::eventFilter(obj, ev);
+}
+
 
 CityDialog::~CityDialog()
 {

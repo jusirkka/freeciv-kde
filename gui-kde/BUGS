@@ -1,6 +1,4 @@
 TODO
-- network dialog settings
-- return key to select a unit in UnitList
 - QActions manager & remaining shortcuts
 - tidyup gui funcs in main.cpp
 - economy report
@@ -8,6 +6,7 @@ TODO
 - help dialog
 - font manager
 - governor
+- happiness & other city info dialog
 - button/popup to delete worklists
 - options (server, client) dialog
 - cityview filter
@@ -20,3 +19,4 @@ BUGS
 - fix minimap: zoom does not work
 - hex tiles take too much space
 - select nation dialog: first nation is overlined, but reseverved nations not
+- default size of start dialog is too small

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
-    <height>76</height>
+    <width>288</width>
+    <height>72</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,6 +71,9 @@
            <width>30</width>
            <height>30</height>
           </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
          </property>
          <property name="text">
           <string/>

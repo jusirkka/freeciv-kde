@@ -28,13 +28,15 @@ ProductionHeader::ProductionHeader(QWidget *parent)
                                    "production"));
   connect(m_ui->targetButton, &QPushButton::clicked,
           this, &ProductionHeader::popupTargets);
+
+
   // buy button
   m_ui->buyButton->setIcon(Application::Icon("help-donate"));
   connect(m_ui->buyButton, &QPushButton::clicked,
           this, &ProductionHeader::buy);
 
-
 }
+
 
 void ProductionHeader::changeCity(city *c) {
   m_city = c;

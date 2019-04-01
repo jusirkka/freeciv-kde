@@ -35,7 +35,6 @@ UnitListWidget::UnitListWidget(QWidget *parent)
   m_timer = new QTimer(this);
   m_timer->setInterval(1000/25);
   connect(m_timer, &QTimer::timeout, this, &UnitListWidget::slide);
-  installEventFilter(this);
 }
 
 
@@ -345,11 +344,15 @@ void UnitItem::mouseDoubleClickEvent(QMouseEvent *event)
 
   if (event->button() == Qt::LeftButton) {
     // qCDebug(FC) << "mouse double click in unit";
-    unit_focus_set(m_unit);
-    popdown_all_city_dialogs();
+    handleEnterKey();
     event->accept();
     return;
   }
   event->ignore();
 }
 
+void UnitItem::handleEnterKey() {
+  qCDebug(FC) << "handleEnterKey";
+  unit_focus_set(m_unit);
+  popdown_all_city_dialogs();
+}
