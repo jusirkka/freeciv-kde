@@ -60,9 +60,13 @@ class OutputPaneManager : public QWidget
 
 public:
 
-  void updateStatusButtons(bool visible);
+  void hidePane();
+  void buttonTriggered(int idx);
+
+protected:
 
   void paintEvent(QPaintEvent *event) override;
+
 
 private:
 
@@ -80,10 +84,9 @@ private:
   void showPane(int idx);
   int currentIndex() const;
   void setCurrentIndex(int idx);
-  void buttonTriggered(int idx);
-  void hidePane();
   void configOutput();
   void refreshOutput();
+  void updateStatusButtons(bool visible);
 
   void writeSettings();
   void readSettings();

@@ -83,6 +83,7 @@ set(fc_kde_srcs
     messageconfigdialog.cpp
     proxytablemodel.cpp
     ioutputpane.h
+    unitactionchecker.cpp
 )
 
 ki18n_wrap_ui(fc_kde_srcs

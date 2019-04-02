@@ -432,6 +432,17 @@ void Application::UpdateScienceReport() {
   instance()->updateScienceReport();
 }
 
+void Application::UpdateActions() {
+  instance()->updateActions();
+}
+
+void Application::PopdownNationDialog() {
+  instance()->popdownNationDialog();
+}
+
+void Application::RefreshNationDialog(bool nationsetChanged) {
+  instance()->refreshNationDialog(nationsetChanged);
+}
 
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";

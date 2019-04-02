@@ -25,7 +25,8 @@ void popup_races_dialog(struct player *pplayer) {
 }
 
 void popdown_races_dialog() {
-  qCDebug(FC) << "TODO: popdown_races_dialog";
+  qCDebug(FC) << "popdown_races_dialog";
+  KV::Application::PopdownNationDialog();
 }
 
 void unit_select_dialog_popup(tile *ptile) {
@@ -39,11 +40,13 @@ void unit_select_dialog_update_real(void */*unused*/) {
 }
 
 void races_toggles_set_sensitive() {
-  qCDebug(FC) << "TODO: races_toggles_set_sensitive";
+  qCDebug(FC) << "races_toggles_set_sensitive";
+  KV::Application::RefreshNationDialog(false);
 }
 
 void races_update_pickable(bool nationset_change) {
-  qCDebug(FC) << "TODO: races_update_pickable";
+  qCDebug(FC) << "races_update_pickable";
+  KV::Application::RefreshNationDialog(nationset_change);
 }
 
 void show_img_play_snd(const char *img_path, const char *snd_path, const char *desc, bool fullsize) {

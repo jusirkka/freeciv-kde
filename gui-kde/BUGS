@@ -1,22 +1,27 @@
 TODO
-- QActions manager & remaining shortcuts
-- tidyup gui funcs in main.cpp
-- economy report
 - units report
+- disband unit dialog
+- economy report
 - help dialog
-- font manager
-- governor
-- happiness & other city info dialog
-- button/popup to delete worklists
+- city governor
 - options (server, client) dialog
+- button/popup to delete worklists
+- font manager
+- battle log
+- happiness & other city info dialog
 - cityview filter
+- load saved game dialog
+- load scenario dialog
+- save game dialog
 BUGS
 - message settings dialog: filter is only applied when hovering over events table
 - message settings dialog: changes not applied
+- hex tiles take too much space
 - minimap not toggled by the corresponding QAction
 - unitinfo does not display info for first item in the list
 - sporadic freezes when starting a new game
 - fix minimap: zoom does not work
-- hex tiles take too much space
 - select nation dialog: first nation is overlined, but reseverved nations not
 - default size of start dialog is too small
+- Sometimes Esc key does not properly close diplo dialog
+

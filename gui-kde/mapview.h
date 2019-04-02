@@ -29,6 +29,10 @@ public:
   void zoomIn();
   void zoomOut();
 
+public slots:
+
+  void popupUnitSelector(tile* t);
+
 protected:
 
   void paintEvent(QPaintEvent *event) override;
@@ -48,7 +52,6 @@ private slots:
   void dirtyRect(const QRect& r);
   void updateCursor(cursor_type ct);
   void createLine();
-  void popupUnitSelector(tile* t);
 
   void handleSelectPress(const QPoint& p);
   void handleSelectRelease(const QPoint& p);

@@ -93,11 +93,9 @@ void MapView::zoomOut() {
 void MapView::popupUnitSelector(tile *t) {
   if (m_unitSelector) {
     m_unitSelector->close();
-    delete m_unitSelector;
   }
   m_unitSelector = new UnitSelector(t, this);
-  connect(m_unitSelector, &UnitSelector::destroyed,
-          this, [=] () {
+  connect(m_unitSelector, &UnitSelector::destroyed, this, [=] () {
     m_unitSelector = nullptr;
   });
   m_unitSelector->show();
@@ -424,8 +422,6 @@ void MapView::handleAppendFocus(const QPoint &p) {
   action_button_pressed(p.x(), p.y(), SELECT_APPEND);
 }
 
-
-
 void MapView::handleAdjustWorkers(const QPoint &p) {
   adjust_workers_button_pressed(p.x(), p.y());
 }
@@ -510,63 +506,3 @@ void MapView::mouseMoveEvent(QMouseEvent *event)
   }
   control_mouse_cursor(canvas_pos_to_tile(p.x(), p.y()));
 }
-
-
-/* TODO: create actions for these
-
-  case Qt::Key_Enter:
-  case Qt::Key_Return:
-    if (shift) {
-      key_end_turn();
-    }
-    return;
-
-  if (gui()->menu_bar->delayed_order == false) {
-    sc = fc_shortcuts::sc()->get_shortcut(SC_SHOW_UNITS);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod
-        && ptile != nullptr && unit_list_size(ptile->units) > 0) {
-      gui()->toggle_unit_sel_widget(ptile);
-      return;
-    }
-  }
-
-    sc = fc_shortcuts::sc()->get_shortcut(SC_POPUP_COMB_INF);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod
-        && gui()->battlelog_wdg != nullptr) {
-      gui()->battlelog_wdg->show();
-      return;
-    }
-
-    sc = fc_shortcuts::sc()->get_shortcut(SC_RELOAD_THEME);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod) {
-      load_theme(gui_options.gui_qt_default_theme_name);
-      return;
-    }
-
-    sc = fc_shortcuts::sc()->get_shortcut(SC_RELOAD_TILESET);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod) {
-      QPixmapCache::clear();
-      tilespec_reread(tileset_basename(tileset), true, gui()->map_scale);
-      return;
-    }
-
-    sc = fc_shortcuts::sc()->get_shortcut(SC_LOAD_LUA);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod) {
-      qload_lua_script();
-      return;
-    }
-
-    sc = fc_shortcuts::sc()->get_shortcut(SC_RELOAD_LUA);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod) {
-      qreload_lua_script();
-      return;
-    }
-
-    sc = fc_shortcuts::sc()->get_shortcut(SC_BUY_MAP);
-    if (((key && key == sc->key) || bt == sc->mouse) && md == sc->mod
-        && mycity) {
-      city_buy_production(pcity);
-      return;
-    }
-
-*/

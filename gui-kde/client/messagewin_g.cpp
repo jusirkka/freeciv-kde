@@ -4,12 +4,12 @@ extern "C" {
 #include "logging.h"
 #include "application.h"
 
-void meswin_dialog_popup(bool raise) {
-  qCDebug(FC) << "TODO: meswin_dialog_popup";
+void meswin_dialog_popup(bool /*raise*/) {
+  qCDebug(FC) << "meswin_dialog_popup: dummy";
 }
 
 bool meswin_dialog_is_open() {
-  qCDebug(FC) << "TODO: meswin_dialog_is_open";
+  qCDebug(FC) << "meswin_dialog_is_open: dummy";
   return true;
 }
 

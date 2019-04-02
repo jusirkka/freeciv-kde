@@ -8,6 +8,7 @@
 #include <KWindowConfig>
 #include <KSharedConfig>
 #include <QWindow>
+#include "application.h"
 
 #include "options.h"
 #include "helpdata.h"
@@ -58,10 +59,12 @@ NationDialog::NationDialog(QWidget *parent) :
   connect(this, &NationDialog::accepted,
           this, &NationDialog::setNation);
 
+
   create(); // ensure there's a window created
   const KConfigGroup cnf(KSharedConfig::openConfig(), "NationDialog");
   KWindowConfig::restoreWindowSize(windowHandle(), cnf);
   resize(windowHandle()->size());
+
 }
 
 NationDialog::~NationDialog()
@@ -71,6 +74,14 @@ NationDialog::~NationDialog()
   delete m_ui;
 }
 
+
+void NationDialog::refresh(bool nationsetChange) {
+  if (nationsetChange) {
+    init(m_player);
+  } else {
+    initNationGroups();
+  }
+}
 
 void NationDialog::init(const player *p) {
   QString title;

@@ -25,6 +25,10 @@ public:
 
   void init(const player* p);
 
+public slots:
+
+  void refresh(bool nationsetChange);
+
 private slots:
 
   void nationsetChanged(const QString& s);

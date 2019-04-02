@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <KXmlGuiWindow>
 #include <QStateMachine>
@@ -24,6 +23,7 @@ class PlayerDialog;
 class CityView;
 class CityDialog;
 class ScienceDialog;
+class UnitActionChecker;
 
 class MainWindow: public KXmlGuiWindow
 {
@@ -32,6 +32,7 @@ class MainWindow: public KXmlGuiWindow
 
   friend class State::Network;
   friend class State::Game;
+  friend class OutputPaneManager;
 
 public:
 
@@ -89,6 +90,23 @@ private slots:
   void on_disband_triggered();
   void on_wait_triggered();
   void on_done_triggered();
+  void on_moveNorth_triggered();
+  void on_moveEast_triggered();
+  void on_moveSouth_triggered();
+  void on_moveWest_triggered();
+  void on_moveNortheast_triggered();
+  void on_moveSoutheast_triggered();
+  void on_moveSouthwest_triggered();
+  void on_moveNorthwest_triggered();
+  void on_panNorth_triggered();
+  void on_panEast_triggered();
+  void on_panSouth_triggered();
+  void on_panWest_triggered();
+  void on_previousFocus_triggered();
+  void on_cancel_triggered();
+  void on_endTurn_triggered();
+  void on_showUnits_triggered();
+  void on_combatInfo_triggered();
   void on_fortifyUnit_triggered();
   void on_buildFortFortressBuoy_triggered();
   void on_buildAirstripAirbase_triggered();
@@ -117,6 +135,7 @@ private slots:
   void setCurrentState(bool active);
   void stateChange(client_pages page);
   void restartStateMachine();
+  void checkActions();
 
 signals:
 
@@ -128,8 +147,12 @@ private:
   void readSettings();
   void addActions();
   void createStateMachine();
+  void registerPaneAction(QAction* a, int idx, const QKeySequence& sc);
 
 private:
+
+  using CheckerMap = QMap<QString, UnitActionChecker*>;
+  using CheckerMapIterator = QMapIterator<QString, UnitActionChecker*>;
 
   QStateMachine m_states;
   State::Base* m_currentState;
@@ -142,8 +165,8 @@ private:
   CityDialog* m_cityManager;
   ScienceDialog* m_scienceReport;
   QRect m_fallbackGeom;
-
+  CheckerMap m_checkers;
+  QStringList m_staticGameActions;
 };
 
 }
-#endif // MAINWINDOW_H

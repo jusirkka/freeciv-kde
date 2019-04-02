@@ -115,6 +115,9 @@ public:
   static void UpdateOverview();
   static void PopupScienceReport();
   static void UpdateScienceReport();
+  static void UpdateActions();
+  static void PopdownNationDialog();
+  static void RefreshNationDialog(bool);
 
 
 
@@ -157,6 +160,9 @@ signals:
   void updateOverview();
   void popupScienceReport();
   void updateScienceReport();
+  void updateActions();
+  void popdownNationDialog();
+  void refreshNationDialog(bool);
 
 
 

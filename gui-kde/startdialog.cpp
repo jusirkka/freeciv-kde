@@ -50,6 +50,12 @@ StartDialog::StartDialog(QWidget *parent)
   connect(Application::instance(), &Application::playersChanged,
           this, &StartDialog::populateTree);
 
+  connect(Application::instance(), &Application::popdownNationDialog,
+          m_nationDialog, &NationDialog::accept);
+
+  connect(Application::instance(), &Application::refreshNationDialog,
+          m_nationDialog, &NationDialog::refresh);
+
   // Rules combo
   connect(m_ui->rulesCombo, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
           this, &StartDialog::rulesetChange);

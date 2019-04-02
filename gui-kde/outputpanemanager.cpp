@@ -191,7 +191,7 @@ OutputPaneManager::OutputPaneManager(const Panes& panes, MainWindow *parent)
     suffix.remove(QLatin1Char(' '));
     data.id = baseId + suffix;
     data.action = new QAction(outPane->displayName(), this);
-    data.action->setShortcut(paneShortCut(idx));
+    m_parent->registerPaneAction(data.action, i, paneShortCut(shortcutNumber));
     auto button = new OutputPaneToggleButton(shortcutNumber, outPane->displayName(),
                                              data.action);
     data.button = button;

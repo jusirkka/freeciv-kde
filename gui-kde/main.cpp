@@ -15,10 +15,10 @@ extern "C" {
 #include "application.h"
 #include "spritefactory.h"
 #include "logging.h"
-
 #include <QPainter>
 #include <QFontMetrics>
 #include <QApplication>
+#include "mainwindow.h"
 
 #pragma GCC diagnostic pop
 
@@ -38,7 +38,7 @@ static void setup_gui_funcs() {
     qCDebug(FC) << "insert_client_build_info: dummy";
   };
   funcs->adjust_default_options = [] () {
-    qCDebug(FC) << "TODO: adjust_default_options";
+    qCDebug(FC) << "adjust_default_options: dummy";
   };
 
   funcs->version_message = KV::Application::VersionMessage;
@@ -70,34 +70,30 @@ static void setup_gui_funcs() {
     delete pcolor;
   };
 
-  funcs->canvas_create = [] (int width, int height) {
+  funcs->canvas_create = [] (int w, int h) {
     // qCDebug(FC) << "canvas_create";
-    struct canvas *store = new canvas;
-    store->map_pixmap = QPixmap(width, height);
+    auto store = new canvas;
+    store->map_pixmap = QPixmap(w, h);
     return store;
   };
-  funcs->canvas_free = [] (struct canvas *store) {
+  funcs->canvas_free = [] (canvas *store) {
     // qCDebug(FC) << "canvas_free";
     delete store;
   };
   funcs->canvas_set_zoom = [] (canvas*, float) {
-    // qCDebug(FC) << "TODO: canvas_set_zoom";
+    qCDebug(FC) << "TODO: canvas_set_zoom";
   };
   funcs->has_zoom_support = [] () {
-    return false;
+    return true;
   };
-  funcs->canvas_copy = [] (
-      struct canvas *dest, struct canvas *src,
-      int src_x, int src_y, int dest_x, int dest_y, int width,
-      int height) {
+  funcs->canvas_copy = [] (canvas *dest, canvas *src,
+      int src_x, int src_y, int dest_x, int dest_y, int w, int h) {
     // qCDebug(FC) << "canvas_copy";
 
-    QRectF source_rect(src_x, src_y, width, height);
-    QRectF dest_rect(dest_x, dest_y, width, height);
+    QRectF source_rect(src_x, src_y, w, h);
+    QRectF dest_rect(dest_x, dest_y, w, h);
 
-    if (!width || !height) {
-      return;
-    }
+    if (!w || !h) return;
 
     QPainter p;
     p.begin(&dest->map_pixmap);
@@ -105,33 +101,26 @@ static void setup_gui_funcs() {
     p.end();
   };
 
-  funcs->canvas_put_sprite = [] (      
-      struct canvas *pcanvas,
-      int canvas_x, int canvas_y,
-      struct sprite *sprite,
-      int offset_x, int offset_y, int width, int height) {
+  funcs->canvas_put_sprite = [] (canvas *pcanvas,
+      int canvas_x, int canvas_y, sprite *s,
+      int offset_x, int offset_y, int w, int h) {
 
     // qCDebug(FC) << "canvas_put_sprite";
     QPainter p;
     p.begin(&pcanvas->map_pixmap);
-    p.drawPixmap(canvas_x, canvas_y, sprite->pm, offset_x, offset_y, width, height);
+    p.drawPixmap(canvas_x, canvas_y, s->pm, offset_x, offset_y, w, h);
     p.end();
   };
-  funcs->canvas_put_sprite_full = [] (
-      struct canvas *pcanvas,
-      int canvas_x, int canvas_y,
-      struct sprite *sprite) {
+  funcs->canvas_put_sprite_full = [] (canvas *pcanvas,
+      int canvas_x, int canvas_y, sprite *s) {
 
     // qCDebug(FC) << "canvas_put_sprite_full";
-    int width, height;
-    get_sprite_dimensions(sprite, &width, &height);
-    canvas_put_sprite(pcanvas, canvas_x, canvas_y, sprite,
-                      0, 0, width, height);
+    int w, h;
+    get_sprite_dimensions(s, &w, &h);
+    canvas_put_sprite(pcanvas, canvas_x, canvas_y, s, 0, 0, w, h);
   };
-  funcs->canvas_put_sprite_fogged = [] (
-      struct canvas *pcanvas,
-      int canvas_x, int canvas_y,
-      struct sprite *psprite,
+  funcs->canvas_put_sprite_fogged = [] (canvas *pcanvas,
+      int canvas_x, int canvas_y, sprite *s,
       bool /*fog*/, int /*fog_x*/, int /*fog_y*/) {
 
     // qCDebug(FC) << "canvas_put_sprite_fogged";
@@ -139,14 +128,11 @@ static void setup_gui_funcs() {
     p.begin(&pcanvas->map_pixmap);
     p.setCompositionMode(QPainter::CompositionMode_Difference);
     p.setOpacity(0.5);
-    p.drawPixmap(canvas_x, canvas_y, psprite->pm);
+    p.drawPixmap(canvas_x, canvas_y, s->pm);
     p.end();
   };
-  funcs->canvas_put_rectangle = [] (
-      struct canvas *pcanvas,
-      struct color *pcolor,
-      int canvas_x, int canvas_y,
-      int width, int height) {
+  funcs->canvas_put_rectangle = [] (canvas *pcanvas, color *pcolor,
+      int canvas_x, int canvas_y, int w, int h) {
 
     // qCDebug(FC) << "canvas_put_rectangle";
     QBrush brush(pcolor->qcolor);
@@ -155,31 +141,27 @@ static void setup_gui_funcs() {
     p.begin(&pcanvas->map_pixmap);
     p.setPen(pen);
     p.setBrush(brush);
-    if (width == 1 && height == 1) {
+    if (w == 1 && h == 1) {
       p.drawPoint(canvas_x, canvas_y);
-    } else if (width == 1) {
-      p.drawLine(canvas_x, canvas_y, canvas_x, canvas_y + height -1);
-    } else if (height == 1) {
-      p.drawLine(canvas_x, canvas_y, canvas_x + width - 1, canvas_y);
+    } else if (w == 1) {
+      p.drawLine(canvas_x, canvas_y, canvas_x, canvas_y + h - 1);
+    } else if (h == 1) {
+      p.drawLine(canvas_x, canvas_y, canvas_x + w - 1, canvas_y);
     } else {
-      p.drawRect(canvas_x, canvas_y, width, height);
+      p.drawRect(canvas_x, canvas_y, w, h);
     }
     p.end();
   };
-  funcs->canvas_fill_sprite_area = [] (
-      struct canvas *pcanvas,
-      struct sprite *psprite, struct color *pcolor,
-      int canvas_x, int canvas_y) {
+  funcs->canvas_fill_sprite_area = [] (canvas *pcanvas,
+      sprite *psprite, color *pcolor, int canvas_x, int canvas_y) {
 
     // qCDebug(FC) << "canvas_fill_sprite_area";
-    int width, height;
-    get_sprite_dimensions(psprite, &width, &height);
-    canvas_put_rectangle(pcanvas, pcolor, canvas_x, canvas_y, width, height);
+    int w, h;
+    get_sprite_dimensions(psprite, &w, &h);
+    canvas_put_rectangle(pcanvas, pcolor, canvas_x, canvas_y, w, h);
   };
-  funcs->canvas_put_line = [] (
-      struct canvas *pcanvas, struct color *pcolor,
-      enum line_type ltype, int start_x, int start_y,
-      int dx, int dy) {
+  funcs->canvas_put_line = [] (canvas *pcanvas, color *pcolor,
+      line_type ltype, int start_x, int start_y, int dx, int dy) {
 
     // qCDebug(FC) << "canvas_put_line";
     QPen pen;
@@ -198,10 +180,8 @@ static void setup_gui_funcs() {
     p.drawLine(start_x, start_y, start_x + dx, start_y + dy);
     p.end();
   };
-  funcs->canvas_put_curved_line = [] (
-      struct canvas *pcanvas, struct color *pcolor,
-      enum line_type ltype, int start_x, int start_y,
-      int dx, int dy) {
+  funcs->canvas_put_curved_line = [] (canvas *pcanvas, color *pcolor,
+      line_type ltype, int start_x, int start_y, int dx, int dy) {
 
     // qCDebug(FC) << "canvas_put_curved_line";
     QPen pen;
@@ -225,9 +205,8 @@ static void setup_gui_funcs() {
     p.drawPath(path);
     p.end();
   };
-  funcs->get_text_size = [] (
-      int *width, int *height,
-      enum client_font font, const char *text) {
+  funcs->get_text_size = [] (int *width, int *height,
+      client_font font, const char *text) {
 
     // qCDebug(FC) << "get_text_size";
     auto afont = KV::Application::Font(font);
@@ -240,10 +219,8 @@ static void setup_gui_funcs() {
     }
     delete fm;
   };
-  funcs->canvas_put_text = [] (
-      struct canvas *pcanvas, int canvas_x, int canvas_y,
-      enum client_font font, struct color *pcolor,
-      const char *text) {
+  funcs->canvas_put_text = [] (canvas *pcanvas, int canvas_x, int canvas_y,
+      client_font font, color *pcolor, const char *text) {
 
     // qCDebug(FC) << "canvas_put_text";
     QColor color(pcolor->qcolor);
@@ -272,47 +249,48 @@ static void setup_gui_funcs() {
   funcs->add_net_input = KV::Application::AddServerSource;
   funcs->remove_net_input = KV::Application::RemoveServerSource;
   funcs->real_conn_list_dialog_update = KV::Application::UpdateUsers;
+
   funcs->close_connection_dialog = [] () {
-    qCDebug(FC) << "TODO: close_connection_dialog";
+    qCDebug(FC) << "close_connection_dialog";
+    if (KV::Application::CurrentState() == PAGE_NETWORK) {
+      KV::Application::StateChange(PAGE_MAIN);
+    }
   };
+
   funcs->add_idle_callback = KV::Application::AddIdleCallback;
 
   funcs->real_set_client_page = KV::Application::StateChange;
   funcs->get_current_client_page = KV::Application::CurrentState;
 
-  funcs->set_unit_icon = [] (int idx, struct unit* punit) {
+  funcs->set_unit_icon = [] (int idx, unit* punit) {
     qCDebug(FC) << "TODO: set_unit_icon" << idx << punit->id;
   };
   funcs->set_unit_icons_more_arrow = [] (bool onoff) {
     qCDebug(FC) << "TODO: set_unit_icons_more_arrow" << onoff;
   };
-  funcs->real_focus_units_changed = [] () {
-    qCDebug(FC) << "TODO: real_focus_units_changed";
-  };
-  funcs->gui_update_font = [] (
-      const char *font_name,
-      const char *font_value) {
+  funcs->real_focus_units_changed = [] () {/*noop*/};
+  funcs->gui_update_font = [] (const char *font_name, const char *font_value) {
     qCDebug(FC) << "TODO: gui_update_font" << font_name << font_value;
   };
 
   funcs->editgui_refresh = [] () {
     // qCDebug(FC) << "TODO: editgui_refresh";
   };
-  funcs->editgui_notify_object_created = [] (int tag, int id) {
+  funcs->editgui_notify_object_created = [] (int /*tag*/, int /*id*/) {
     // qCDebug(FC) << "TODO: editgui_notify_object_created" << tag << id;
   };
-  funcs->editgui_notify_object_changed = [] (
-      int objtype, int object_id, bool removal) {
+  funcs->editgui_notify_object_changed = [] (int /*objtype*/,
+      int /*object_id*/, bool /*removal*/) {
     // qCDebug(FC) << "TODO: editgui_notify_object_changed" << objtype << object_id << removal;
   };
-  funcs->editgui_popup_properties = [] (const struct tile_list* /*tiles*/, int objtype) {
+  funcs->editgui_popup_properties = [] (const struct tile_list* /*tiles*/, int /*objtype*/) {
     // qCDebug(FC) << "TODO: editgui_popup_properties" << objtype;
   };
   funcs->editgui_tileset_changed = [] () {
     // qCDebug(FC) << "TODO: editgui_tileset_changed";
   };
   funcs->editgui_popdown_all = [] () {
-    // qCDebug(FC) << "TODO: editgui_popdown_all";
+    // qCDebug(FC) << "editgui_popdown_all: dummy";
   };
 
   funcs->popup_combat_info = [] (
