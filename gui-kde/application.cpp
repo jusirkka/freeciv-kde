@@ -64,13 +64,13 @@ void Application::Main(int argc, char **argv) {
         // A displayable program name string. (displayName)
         qAppName(),
         // The program version string. (version)
-        QStringLiteral("0.0.1"),
+        QStringLiteral("0.0.9"),
         // Short description of what the app does. (shortDescription)
         i18n("KDE Freeciv client"),
         // The license this code is released under
         KAboutLicense::GPL,
         // Copyright Statement (copyrightStatement = QString())
-        i18n("(c) 2019"),
+        i18n("Jukak Sirkka (c) 2019"),
         // Optional text shown in the About box.
         // Can contain any information desired. (otherText)
         i18n("Now... Go Give 'em Hell!"),
@@ -443,6 +443,23 @@ void Application::PopdownNationDialog() {
 void Application::RefreshNationDialog(bool nationsetChanged) {
   instance()->refreshNationDialog(nationsetChanged);
 }
+
+void Application::UpdateUnitReport() {
+  instance()->updateUnitReport();
+}
+
+void Application::PopupUnitReport() {
+  instance()->popupUnitReport();
+}
+
+void Application::UpdateEconomyReport() {
+  instance()->updateEconomyReport();
+}
+
+void Application::PopupEconomyReport() {
+  instance()->popupEconomyReport();
+}
+
 
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";

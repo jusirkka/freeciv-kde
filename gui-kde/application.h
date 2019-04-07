@@ -1,5 +1,4 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include <QObject>
 #include <QVector>
@@ -45,6 +44,8 @@ class Application: public QObject {
   friend class CityModel;
   friend class UnitSelector;
   friend class ScienceDialog;
+  friend class UnitReport;
+  friend class EconomyReport;
 
 public:
 
@@ -118,6 +119,10 @@ public:
   static void UpdateActions();
   static void PopdownNationDialog();
   static void RefreshNationDialog(bool);
+  static void PopupUnitReport();
+  static void UpdateUnitReport();
+  static void PopupEconomyReport();
+  static void UpdateEconomyReport();
 
 
 
@@ -163,6 +168,10 @@ signals:
   void updateActions();
   void popdownNationDialog();
   void refreshNationDialog(bool);
+  void popupUnitReport();
+  void updateUnitReport();
+  void popupEconomyReport();
+  void updateEconomyReport();
 
 
 
@@ -211,5 +220,3 @@ private:
 
 
 }
-
-#endif // APPLICATION_H

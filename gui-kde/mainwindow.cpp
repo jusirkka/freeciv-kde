@@ -10,6 +10,7 @@ extern "C" {
 #include "control.h"
 #include "options.h"
 #include "mapview_common.h"
+#include "mapctrl_common.h"
 
 #include "mainwindow.h"
 #include "messagebox.h"
@@ -35,7 +36,11 @@ extern "C" {
 #include <QStatusBar>
 #include "conf_mainwindow.h"
 #include "unitactionchecker.h"
-#include "mapctrl_common.h"
+#include "unitreport.h"
+#include "economyreport.h"
+#include <KHelpMenu>
+#include <KAboutData>
+#include "helpdialog.h"
 
 using namespace KV;
 
@@ -90,17 +95,27 @@ MainWindow::MainWindow()
   connect(m_cityReport, &CityView::manageCity, this, [=] (city* c) {
     m_cityManager->changeCity(c);
     m_cityManager->show();
-    m_cityManager->raise();
   });
 
   m_scienceReport = new ScienceDialog(this);
   connect(Application::instance(), &Application::popupScienceReport, this, [=] () {
     m_scienceReport->show();
-    m_scienceReport->raise();
+  });
+
+  m_unitReport = new UnitReport(this);
+  connect(Application::instance(), &Application::popupUnitReport, this, [=] () {
+    m_unitReport->showAsTable();
+  });
+
+  m_economyReport = new EconomyReport(this);
+  connect(Application::instance(), &Application::popupEconomyReport, this, [=] () {
+    m_economyReport->showAsTable();
   });
 
   connect(Application::instance(), &Application::updateActions,
           this, &MainWindow::checkActions);
+
+  m_help = new HelpDialog(this);
 
   addActions();
   createStateMachine();
@@ -624,7 +639,14 @@ void MainWindow::on_establishTraderoute_triggered() {
   } unit_list_iterate_end;
 }
 
-void MainWindow::on_units_triggered() {}
+void MainWindow::on_units_triggered() {
+  if (m_unitReport->isVisible()) {
+      m_unitReport->hide();
+  } else {
+    m_unitReport->showAsTable();
+    m_unitReport->raise();
+  }
+}
 
 void MainWindow::on_players_triggered() {
   if (m_players->isVisible()) {
@@ -644,7 +666,14 @@ void MainWindow::on_cities_triggered() {
   }
 }
 
-void MainWindow::on_economy_triggered() {}
+void MainWindow::on_economy_triggered() {
+  if (m_economyReport->isVisible()) {
+      m_economyReport->hide();
+  } else {
+    m_economyReport->showAsTable();
+    m_economyReport->raise();
+  }
+}
 
 void MainWindow::on_research_triggered() {
   if (m_scienceReport->isVisible()) {
@@ -657,6 +686,15 @@ void MainWindow::on_research_triggered() {
 
 void MainWindow::on_spaceship_triggered() {}
 void MainWindow::on_options_triggered() {}
+
+void MainWindow::popupManual() {
+  if (m_help->isVisible()) {
+    m_help->hide();
+  } else {
+    m_help->checkAndShow();
+    m_help->raise();
+  }
+}
 
 
 void MainWindow::addActions() {
@@ -884,7 +922,27 @@ void MainWindow::addActions() {
     }
   }
 
+  auto help = new KHelpMenu(this, KAboutData::applicationData(), true);
+
+  QAction *whatsThisAction = help->action(KHelpMenu::menuWhatsThis);
+  actionCollection()->addAction(whatsThisAction->objectName(), whatsThisAction);
+
+  QAction *reportBugAction = help->action(KHelpMenu::menuReportBug);
+  actionCollection()->addAction(reportBugAction->objectName(), reportBugAction);
+
+  QAction *aboutAppAction = help->action(KHelpMenu::menuAboutApp);
+  actionCollection()->addAction(aboutAppAction->objectName(), aboutAppAction);
+
+  QAction *aboutKdeAction = help->action(KHelpMenu::menuAboutKDE);
+  actionCollection()->addAction(aboutKdeAction->objectName(), aboutKdeAction);
+
+  QAction* manual = KStandardAction::helpContents(this, &MainWindow::popupManual, this);
+  actionCollection()->addAction(manual->objectName(), manual);
+
+  setHelpMenuEnabled(false);
+
   setupGUI();
+
   QMetaObject::connectSlotsByName(this);
 }
 

@@ -24,6 +24,9 @@ class CityView;
 class CityDialog;
 class ScienceDialog;
 class UnitActionChecker;
+class UnitReport;
+class EconomyReport;
+class HelpDialog;
 
 class MainWindow: public KXmlGuiWindow
 {
@@ -136,6 +139,7 @@ private slots:
   void stateChange(client_pages page);
   void restartStateMachine();
   void checkActions();
+  void popupManual();
 
 signals:
 
@@ -167,6 +171,9 @@ private:
   QRect m_fallbackGeom;
   CheckerMap m_checkers;
   QStringList m_staticGameActions;
+  UnitReport* m_unitReport;
+  EconomyReport* m_economyReport;
+  HelpDialog* m_help;
 };
 
 }

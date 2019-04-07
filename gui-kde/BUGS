@@ -1,27 +1,29 @@
 TODO
-- units report
-- disband unit dialog
-- economy report
-- help dialog
+- help: search
+- help: history
+- help: settings
+- button/popup to delete worklists
 - city governor
 - options (server, client) dialog
-- button/popup to delete worklists
-- font manager
 - battle log
+- font manager
 - happiness & other city info dialog
 - cityview filter
 - load saved game dialog
 - load scenario dialog
 - save game dialog
 BUGS
+- city report has extra column "BS" in spite of config
+- F/G/P in unit report is always zero
 - message settings dialog: filter is only applied when hovering over events table
 - message settings dialog: changes not applied
 - hex tiles take too much space
 - minimap not toggled by the corresponding QAction
 - unitinfo does not display info for first item in the list
 - sporadic freezes when starting a new game
+- sporadic freezes when quitting the game
 - fix minimap: zoom does not work
-- select nation dialog: first nation is overlined, but reseverved nations not
+- select nation dialog: first nation is overlined, but reserved nations not
 - default size of start dialog is too small
 - Sometimes Esc key does not properly close diplo dialog
 

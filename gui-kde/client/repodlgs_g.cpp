@@ -14,12 +14,14 @@ void science_report_dialog_redraw() {
   KV::Application::UpdateScienceReport();
 }
 
-void economy_report_dialog_popup(bool raise) {
-  qCDebug(FC) << "TODO: economy_report_dialog_popup";
+void economy_report_dialog_popup(bool /*raise*/) {
+  qCDebug(FC) << "economy_report_dialog_popup";
+  KV::Application::PopupEconomyReport();
 }
 
-void units_report_dialog_popup(bool raise) {
-  qCDebug(FC) << "TODO: units_report_dialog_popup";
+void units_report_dialog_popup(bool /*raise*/) {
+  // qCDebug(FC) << "units_report_dialog_popup";
+  KV::Application::PopupUnitReport();
 }
 
 void endgame_report_dialog_start(const struct packet_endgame_report *packet) {
@@ -35,11 +37,13 @@ void real_science_report_dialog_update(void */*unused*/) {
   KV::Application::UpdateScienceReport();
 }
 
-void real_economy_report_dialog_update(void *unused) {
-  qCDebug(FC) << "TODO: real_economy_report_dialog_update";
+void real_economy_report_dialog_update(void */*unused*/) {
+  qCDebug(FC) << "real_economy_report_dialog_update";
+  KV::Application::UpdateEconomyReport();
 }
 
-void real_units_report_dialog_update(void *unused) {
-  qCDebug(FC) << "TODO: real_units_report_dialog_update";
+void real_units_report_dialog_update(void */*unused*/) {
+  // qCDebug(FC) << "real_units_report_dialog_update";
+  KV::Application::UpdateUnitReport();
 }
 

@@ -1,9 +1,15 @@
 extern "C" {
 #include "dialogs_g.h"
 }
+#include "text.h"
+#include "control.h"
+
 #include "logging.h"
 #include "application.h"
 #include "actionselector.h"
+#include "messagebox.h"
+#include <QApplication>
+
 
 void popup_notify_goto_dialog(const char *headline, const char *lines, const struct text_tag_list *tags, struct tile *ptile) {
   qCDebug(FC) << "TODO: popup_notify_goto_dialog"
@@ -134,11 +140,37 @@ void popup_pillage_dialog(struct unit *punit, bv_extras extras) {
 }
 
 void popup_upgrade_dialog(struct unit_list *punits) {
-  qCDebug(FC) << "TODO: popup_upgrade_dialog";
+  if (punits == nullptr || unit_list_size(punits) == 0) return;
+
+  char buf[1024];
+  bool canDo = get_units_upgrade_info(buf, sizeof(buf), punits);
+  QString title = canDo ? _("Upgrade Obsolete Units") : _("Upgrade Unit!");
+  KV::StandardMessageBox ask(qApp->topLevelAt(QCursor::pos()), buf, title);
+  if (!canDo) ask.setStandardButtons(QMessageBox::Ok);
+  if (ask.exec() == QMessageBox::Ok) {
+    unit_list_iterate(punits, punit) {
+      request_unit_upgrade(punit);
+    }
+    unit_list_iterate_end;
+  }
 }
 
 void popup_disband_dialog(struct unit_list *punits) {
-  qCDebug(FC) << "TODO: popup_disband_dialog";
+  if (punits == nullptr || unit_list_size(punits) == 0) return;
+
+  QString title = _("Disband Units");
+  QString text = QString(PL_("Are you sure you want to disband %1 unit?",
+                             "Are you sure you want to disband %1 units?",
+                             unit_list_size(punits))).arg(unit_list_size(punits));
+  KV::StandardMessageBox ask(qApp->topLevelAt(QCursor::pos()), text, title);
+  if (ask.exec() == QMessageBox::Ok) {
+    unit_list_iterate(punits, punit) {
+      if (unit_can_do_action(punit, ACTION_DISBAND_UNIT)) {
+        request_unit_disband(punit);
+      }
+    }
+    unit_list_iterate_end;
+  }
 }
 
 void popup_tileset_suggestion_dialog() {

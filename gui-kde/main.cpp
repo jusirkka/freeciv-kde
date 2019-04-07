@@ -334,7 +334,7 @@ static void setup_gui_funcs() {
     real_city_dialog_refresh(tile_city(punit->tile));
   };
   funcs->city_dialog_is_open = [] (struct city* /*pcity*/) {
-    qCDebug(FC) << "TODO: city_dialog_is_open";
+    qCDebug(FC) << "city_dialog_is_open: dummy";
     return false;
   };
 

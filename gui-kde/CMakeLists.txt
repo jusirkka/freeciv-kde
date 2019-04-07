@@ -84,6 +84,9 @@ set(fc_kde_srcs
     proxytablemodel.cpp
     ioutputpane.h
     unitactionchecker.cpp
+    unitreport.cpp
+    economyreport.cpp
+    helpdialog.cpp
 )
 
 ki18n_wrap_ui(fc_kde_srcs
@@ -100,6 +103,9 @@ ki18n_wrap_ui(fc_kde_srcs
     playerwidget.ui
     sciencedialog.ui
     messageconfigdialog.ui
+    unitreport.ui
+    economyreport.ui
+    helpdialog.ui
 )
 
 kconfig_add_kcfg_files(fc_kde_srcs

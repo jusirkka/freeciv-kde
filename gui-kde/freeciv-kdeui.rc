@@ -110,7 +110,7 @@
       <Action name="options"/>
     </Menu>
 
-  </MenuBar>
+</MenuBar>
 
   <ToolBar name="mainToolBar" >
     <text>Main Toolbar</text>
