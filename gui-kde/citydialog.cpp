@@ -30,6 +30,8 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
   , m_governor(new GovernorDialog(cities, this))
 {
   m_ui->setupUi(this);
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+
   // map widget
   connect(this, &CityDialog::cityChanged,
           m_ui->mapWidget, &CityMap::changeCity);
@@ -143,8 +145,7 @@ void CityDialog::changeCity(city *c) {
     m_governor->refresh(m_city);
   }
 
-
-  updateTitle();
+  setWindowTitle(Title(m_city));
 }
 
 void CityDialog::updateButtons() {
@@ -235,26 +236,29 @@ void CityDialog::updateProperty() {
 }
 
 
-void CityDialog::updateTitle() {
+QString CityDialog::Title(city* c) {
 
-  if (m_city == nullptr) return;
+  QString name = city_name_get(c);
+  QString pop = population_to_text(city_population(c));
+  int s = city_size_get(c);
 
-  QString name = city_name_get(m_city);
-  QString pop = population_to_text(city_population(m_city));
-  int s = city_size_get(m_city);
-  if (city_unhappy(m_city)) {
+  if (city_unhappy(c)) {
     /* TRANS: city dialog title */
-    setWindowTitle(QString(_("%1 - size %2 - %3 citizens - DISORDER")).arg(name).arg(s).arg(pop));
-  } else if (city_celebrating(m_city)) {
-    /* TRANS: city dialog title */
-    setWindowTitle(QString(_("%1 - size %2 - %3 citizens - celebrating")).arg(name).arg(s).arg(pop));
-  } else if (city_happy(m_city)) {
-    /* TRANS: city dialog title */
-    setWindowTitle(QString(_("%1 - size %2 - %3 citizens - happy")).arg(name).arg(s).arg(pop));
-  } else {
-    /* TRANS: city dialog title */
-    setWindowTitle(QString(_("%1 - size %2 - %3 citizens")).arg(name).arg(s).arg(pop));
+    return QString(_("%1 - size %2 - %3 citizens - DISORDER")).arg(name).arg(s).arg(pop);
   }
+
+  if (city_celebrating(c)) {
+    /* TRANS: city dialog title */
+    return QString(_("%1 - size %2 - %3 citizens - celebrating")).arg(name).arg(s).arg(pop);
+  }
+
+  if (city_happy(c)) {
+    /* TRANS: city dialog title */
+    return QString(_("%1 - size %2 - %3 citizens - happy")).arg(name).arg(s).arg(pop);
+  }
+
+  /* TRANS: city dialog title */
+  return QString(_("%1 - size %2 - %3 citizens")).arg(name).arg(s).arg(pop);
 }
 
 

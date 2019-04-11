@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>GovernorDialog</class>
  <widget class="QDialog" name="GovernorDialog">
@@ -6,14 +6,551 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>240</height>
+    <width>596</width>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="enabledBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Governor enabled</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="governorFrame">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="1,10">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="nameLabel">
+          <property name="text">
+           <string>Untitled</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="copyButton">
+          <property name="text">
+           <string>Make a copy</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="saveButton">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-add"/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="openButton">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset theme="quickopen"/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="deleteButton">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-remove"/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1">
+        <item>
+         <widget class="QGroupBox" name="settingsBox">
+          <property name="title">
+           <string>Settings</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout" rowstretch="1,9,9,9,9,9,9,9" columnstretch="1,1,2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="emptyHeader">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="minHeader">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Min Surplus</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="priorityheader">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Priority</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="f">
+             <property name="text">
+              <string>Food</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="fmin">
+             <property name="minimum">
+              <number>-20</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QSlider" name="fpri">
+             <property name="minimum">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="p">
+             <property name="text">
+              <string>Prod</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="pmin">
+             <property name="minimum">
+              <number>-20</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QSlider" name="ppri">
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="t">
+             <property name="text">
+              <string>Trade</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="tmin">
+             <property name="minimum">
+              <number>-20</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QSlider" name="tpri">
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="g">
+             <property name="text">
+              <string>Gold</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="gmin">
+             <property name="minimum">
+              <number>-20</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QSlider" name="gpri">
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="l">
+             <property name="text">
+              <string>Luxury</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QSpinBox" name="lmin">
+             <property name="minimum">
+              <number>-20</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QSlider" name="lpri">
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::NoTicks</enum>
+             </property>
+             <property name="tickInterval">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="s">
+             <property name="text">
+              <string>Science</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QSpinBox" name="smin">
+             <property name="minimum">
+              <number>-20</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2">
+            <widget class="QSlider" name="spri">
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="c">
+             <property name="text">
+              <string>Celebrate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QToolButton" name="celButton">
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset theme="drink-beer">
+               <normaloff>.</normaloff>.</iconset>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="2">
+            <widget class="QSlider" name="cpri">
+             <property name="maximum">
+              <number>25</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="resultsBox">
+          <property name="title">
+           <string>Results</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="resultsLabel">
+             <property name="text">
+              <string>placeholder</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>205</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="previousButton">
+       <property name="text">
+        <string>Previous</string>
+       </property>
+       <property name="icon">
+        <iconset theme="go-previous">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="nextButton">
+       <property name="text">
+        <string>Next</string>
+       </property>
+       <property name="icon">
+        <iconset theme="go-next">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Reset</string>
+       </property>
+       <property name="icon">
+        <iconset theme="kt-restore-defaults"/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Apply</string>
+       </property>
+       <property name="icon">
+        <iconset theme="dialog-ok-apply"/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Close</string>
+       </property>
+       <property name="icon">
+        <iconset theme="dialog-close"/>
+       </property>
+       <property name="shortcut">
+        <string>Esc</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset theme="quickopen"/>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="toolTip">
+    <string>Open saved governor settings</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset theme="list-add"/>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save current settings</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset theme="list-remove"/>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete governore settings</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>GovernorDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>547</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>207</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -66,6 +66,8 @@
       <Separator/>
       <Action name="wait"/>
       <Action name="done"/>
+      <Separator/>
+      <Action name="endTurn"/>
     </Menu>
     <Menu name="combat">
       <text>Combat</text>

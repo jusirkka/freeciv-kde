@@ -15,6 +15,9 @@
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
 #include "logging.h"
+#include "application.h"
+#include <QTimer>
+#include "conf_helpdialog.h"
 
 #include "tilespec.h"
 #include "government.h"
@@ -53,16 +56,12 @@ HelpDialog::HelpDialog(QWidget *parent)
   m_ui->setupUi(this);
 
   m_ui->helpPanel->setLayout(new QVBoxLayout);
-  m_ui->mainSplitter->setStretchFactor(0, 1);
-  m_ui->mainSplitter->setStretchFactor(1, 10);
   m_panelWidget = m_browser;
 
-  m_filter->setChapters(m_ui->chaptersButton->isChecked());
-  m_filter->setHeaders(m_ui->headersButton->isChecked());
   m_filter->setSourceModel(m_model);
 
-  m_ui->searchLine->setEnabled(m_ui->headersButton->isChecked() ||
-                               m_ui->chaptersButton->isChecked());
+  m_ui->forwardButton->setDisabled(true);
+  m_ui->backButton->setDisabled(true);
 
   m_ui->helpTree->setModel(m_filter);
   if (m_model->isValid()) {
@@ -72,21 +71,54 @@ HelpDialog::HelpDialog(QWidget *parent)
   connect(this, &HelpDialog::anchorClicked, m_ui->helpTree, &QTreeView::clicked);
   connect(m_model, &HelpModel::modelAboutToBeReset, this, &HelpDialog::modelReset);
 
+
+  connect(Application::instance(), &Application::popupHelpDialog,
+          this, &HelpDialog::showMatchingTopics);
+
   setWindowTitle("Freeciv Manual");
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  readSettings();
+}
+
+HelpDialog::~HelpDialog()
+{
+  writeSettings();
+  delete m_ui;
+}
+
+void HelpDialog::readSettings() {
 
   create(); // ensure there's a window created
   const KConfigGroup cnf(KSharedConfig::openConfig(), "HelpDialog");
   KWindowConfig::restoreWindowSize(windowHandle(), cnf);
   resize(windowHandle()->size());
 
+  m_ui->mainSplitter->setSizes(Conf::HelpDialog::mainSplit());
+  m_hSplitterSizes = Conf::HelpDialog::leftSplit();
+  m_vSplitterSizes = Conf::HelpDialog::bottomSplit();
+
+  m_ui->chaptersButton->setChecked(Conf::HelpDialog::searchChapters());
+  m_ui->headersButton->setChecked(Conf::HelpDialog::searchHeaders());
 }
 
-HelpDialog::~HelpDialog()
-{
+void HelpDialog::writeSettings() const {
+  if (m_ui->mainSplitter->sizes() != QList<int>{71, 22}) {
+    Conf::HelpDialog::setMainSplit(m_ui->mainSplitter->sizes());
+  } else {
+    qCDebug(FC) << "A hack to work around a QSplitter bug: not writing main splitter sizes";
+  }
+  Conf::HelpDialog::setLeftSplit(m_hSplitterSizes);
+  Conf::HelpDialog::setBottomSplit(m_vSplitterSizes);
+
+  Conf::HelpDialog::setSearchChapters(m_ui->chaptersButton->isChecked());
+  Conf::HelpDialog::setSearchHeaders(m_ui->headersButton->isChecked());
+
+  Conf::HelpDialog::self()->save();
+
   KConfigGroup cnf(KSharedConfig::openConfig(), "HelpDialog");
   KWindowConfig::saveWindowSize(windowHandle(), cnf);
-  delete m_ui;
 }
+
 
 void HelpDialog::checkAndShow() {
   if (!m_model->isValid()) {
@@ -102,10 +134,17 @@ void HelpDialog::checkAndShow() {
 void HelpDialog::modelReset() {
   m_ui->helpPanel->layout()->removeWidget(m_panelWidget);
   m_panelWidget->setParent(nullptr);
+
   qDeleteAll(m_leftCache);
   qDeleteAll(m_bottomCache);
   m_leftCache.clear();
   m_bottomCache.clear();
+
+  m_history.clear();
+  m_future.clear();
+
+  m_ui->forwardButton->setDisabled(true);
+  m_ui->backButton->setDisabled(true);
 }
 
 void HelpDialog::on_chaptersButton_clicked() {
@@ -132,6 +171,37 @@ void HelpDialog::on_searchLine_textEdited(const QString &s) {
 
 void HelpDialog::on_helpTree_clicked(QModelIndex index) {
 
+  if (m_currentPage.isValid()) {
+    m_history.push(m_currentPage);
+  }
+  m_currentPage = index;
+  m_future.clear();
+  m_ui->backButton->setDisabled(m_history.isEmpty());
+  m_ui->forwardButton->setDisabled(true);
+
+  changePage(index);
+}
+
+void HelpDialog::on_forwardButton_clicked() {
+  auto idx = m_future.pop();
+  changePage(idx);
+  m_history.push(m_currentPage);
+  m_currentPage = idx;
+  m_ui->forwardButton->setDisabled(m_future.isEmpty());
+  m_ui->backButton->setEnabled(true);
+}
+
+void HelpDialog::on_backButton_clicked() {
+  auto idx = m_history.pop();
+  changePage(idx);
+  m_future.push(m_currentPage);
+  m_currentPage = idx;
+  m_ui->forwardButton->setEnabled(true);
+  m_ui->backButton->setDisabled(m_history.isEmpty());
+}
+
+
+void HelpDialog::changePage(QModelIndex index) {
   m_ui->title->setText(index.data(Qt::DisplayRole).toString());
   m_browser->setText(index.data(HelpModel::TextRole).toString());
 
@@ -223,8 +293,6 @@ QWidget* HelpDialog::bottomPanel(const universal& u) {
   if (bottom == nullptr) return bottom;
 
   auto area = new QScrollArea;
-  area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  area->setWidgetResizable(true);
   area->setWidget(bottom);
   m_bottomCache[cacheIndex] = area;
   return area;
@@ -522,23 +590,14 @@ QWidget* HelpDialog::terrainBottom(terrain *terr) {
   if (terr == nullptr) return nullptr;
 
   auto bottom = new QWidget;
-  auto lay = new QGridLayout;
+  auto lay = new QHBoxLayout;
   bottom->setLayout(lay);
 
   extra_type** resource = terr->resources;
 
   while (*resource != nullptr) {
     auto w = terrainExtraBottom(terr, *resource);
-    int idx = resource - terr->resources;
-    int row = idx / 2;
-    int col = idx % 2;
-    if (col == 1) {
-      auto s = new QSpacerItem(5, 5, QSizePolicy::Expanding, QSizePolicy::Fixed);
-      lay->addItem(s, row, 1);
-      lay->addWidget(w, row, 2);
-    } else {
-      lay->addWidget(w, row, 0);
-    }
+    lay->addWidget(w);
     resource++;
   }
 
@@ -590,11 +649,26 @@ void HelpDialog::interpretLink(const QString &link) {
   auto kind = static_cast<universals_n>(parts[0].toInt());
   auto value = parts[1].toInt();
   auto u = universal_by_number(kind, value);
-  QModelIndex idx = m_model->findByUniversal(u, QModelIndex());
+  QModelIndex idx = m_model->findByUniversal(u);
   if (idx.isValid()) {
     emit anchorClicked(m_filter->mapFromSource(idx));
   }
 }
+
+void HelpDialog::showMatchingTopics(const QString &topic, help_page_type section) {
+  checkAndShow();
+  IndexStack indices = m_model->findByTopic(topic, section);
+  if (indices.isEmpty()) return;
+  auto idx = indices.pop();
+  emit anchorClicked(m_filter->mapFromSource(idx));
+  while (!indices.isEmpty()) {
+    idx = indices.pop();
+    QTimer::singleShot(1000, this, [=] () {
+      emit anchorClicked(m_filter->mapFromSource(idx));
+    });
+  }
+}
+
 
 QWidget* HelpDialog::keyValueLabel(const QStringList &data) {
   int cnt = data.count() / 2;
@@ -634,7 +708,11 @@ QWidget* HelpDialog::property(const QString &key, int value) {
 QWidget* HelpDialog::terrainExtraBottom(terrain *terr, const extra_type *resource) {
 
   auto bottom = new QWidget;
-  auto lay = new QVBoxLayout;
+  auto lay = new QHBoxLayout;
+  auto margins = lay->contentsMargins();
+  margins.setBottom(0);
+  margins.setTop(0);
+  lay->setContentsMargins(margins);
   bottom->setLayout(lay);
 
   auto title = QString("<b>%1</b><br/>F/P/T = %2/%3/%4")
@@ -643,9 +721,11 @@ QWidget* HelpDialog::terrainExtraBottom(terrain *terr, const extra_type *resourc
       .arg(terr->output[O_SHIELD]  + resource->data.resource->output[O_SHIELD])
       .arg(terr->output[O_TRADE]  + resource->data.resource->output[O_TRADE]);
 
-  lay->addWidget(new QLabel(title));
+  auto label = new QLabel(title);
+  label->setWordWrap(true);
+  lay->addWidget(label);
 
-  auto label = new QLabel;
+  label = new QLabel;
   auto effect = new QGraphicsDropShadowEffect;
   effect->setBlurRadius(3);
   effect->setOffset(0, 2);
@@ -719,7 +799,7 @@ void HelpModel::reset() {
     }
     auto node = new HelpNode(parent);
     node->type = h->type;
-    node->title = h->topic;
+    node->title = QString(h->topic).trimmed();
     node->u = universal_by_topic(h->type, s);
     node->text = chapter(node, h->text);
     node->pix = pixmap(node);
@@ -787,16 +867,47 @@ bool HelpModel::isValid() const {
   return children().count() > 0 && client_state() >= C_S_RUNNING;
 }
 
-QModelIndex HelpModel::findByUniversal(const universal &u, const QModelIndex &parent) const {
+QModelIndex HelpModel::findByUniversal(const universal &u,
+                                       const QModelIndex &parent) const {
+  IndexStack results;
+  findAnything(results, parent, true, [u] (HelpNode* node) {
+    return are_universals_equal(&u, &(node->u));
+  });
+  if (results.isEmpty()) return QModelIndex();
+  return results.pop();
+}
+
+HelpModel::IndexStack HelpModel::findByTopic(const QString &title,
+                                             help_page_type section,
+                                             const QModelIndex &parent) const {
+  IndexStack results;
+
+  if (section == HELP_ANY) {
+    findAnything(results, parent, false, [title] (HelpNode* node) {
+      return title == node->title;
+    });
+  } else {
+    findAnything(results, parent, true, [title, section] (HelpNode* node) {
+      return (title == node->title) && (section == node->type);
+    });
+  }
+  return results;
+}
+
+void HelpModel::findAnything(IndexStack& results,
+                             const QModelIndex &parent,
+                             bool stopAtFirst,
+                             MatchFunc matchFunc) const {
   int rows = rowCount(parent);
   for (int row = 0; row < rows; row++) {
     auto idx = index(row, 0, parent);
     auto node = static_cast<HelpNode*>(idx.internalPointer());
-    if (are_universals_equal(&u, &(node->u))) return idx;
-    auto childIndex = findByUniversal(u, idx);
-    if (childIndex.isValid()) return childIndex;
+    if (matchFunc(node)) {
+      results.push(idx);
+      if (stopAtFirst) return;
+    }
+    findAnything(results, idx, stopAtFirst, matchFunc);
   }
-  return QModelIndex();
 }
 
 

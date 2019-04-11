@@ -6,6 +6,8 @@
 #include "options.h"
 
 
+class QSortFilterProxyModel;
+
 namespace Ui {
 class MessageConfigDialog;
 }
@@ -25,12 +27,14 @@ public:
 private slots:
 
   void saveConfig();
+  void filterChanged(const QString& s);
 
 private:
 
   Ui::MessageConfigDialog* m_ui;
   int m_flag;
   MessageConfigModel* m_model;
+  QSortFilterProxyModel* m_filter;
 
 };
 

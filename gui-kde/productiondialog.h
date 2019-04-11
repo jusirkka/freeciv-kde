@@ -43,6 +43,7 @@ private slots:
   void on_actionPaste_triggered();
   void on_actionOpen_triggered();
   void on_actionSave_triggered();
+  void on_actionDelete_triggered();
   void on_futureCheckBox_toggled(bool);
   void on_unitsCheckBox_toggled(bool);
   void on_wondersCheckBox_toggled(bool);

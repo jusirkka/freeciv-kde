@@ -460,6 +460,14 @@ void Application::PopupEconomyReport() {
   instance()->popupEconomyReport();
 }
 
+void Application::PopupHelpDialog(const QString &topic, help_page_type section) {
+  instance()->popupHelpDialog(topic, section);
+}
+
+void Application::PopdownHelpDialog() {
+  instance()->popdownHelpDialog();
+}
+
 
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";

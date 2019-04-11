@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name="freeciv-kderc"/>
+  <include>QList</include>
+  <group name="HelpDialog">
+    <entry name="SearchHeaders" key="search_headers" type="Bool">
+      <label>Filter acts on headers.</label>
+      <default>true</default>
+    </entry>
+    <entry name="SearchChapters" key="search_chapters" type="Bool">
+      <label>Filter acts on chapters.</label>
+      <default>false</default>
+    </entry>
+    <entry name="MainSplit" key="main_split" type="IntList">
+      <label>Sizes of help tree and help panel</label>
+      <default code="true">QList&lt;int&gt;{100, 500}</default>
+    </entry>
+    <entry name="LeftSplit" key="left_split" type="IntList">
+      <label>Sizes of left and right panels</label>
+      <default code="true">QList&lt;int&gt;{150, 350}</default>
+    </entry>
+    <entry name="BottomSplit" key="bottom_split" type="IntList">
+      <label>Sizes of top and bottom panels</label>
+      <default code="true">QList&lt;int&gt;{400, 100}</default>
+    </entry>
+  </group>
+</kcfg>

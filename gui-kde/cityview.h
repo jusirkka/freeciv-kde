@@ -39,6 +39,7 @@ public:
 private:
 
   QVector<city*> m_cities;
+  int m_columnCount = 0;
 
 };
 

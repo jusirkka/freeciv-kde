@@ -28,6 +28,8 @@ public:
   city* current() const;
   void refresh(city* c);
 
+  static QString Title(city* c);
+
 protected:
 
   bool eventFilter(QObject *obj, QEvent *ev) override;
@@ -48,7 +50,6 @@ private slots:
 private:
 
   void updateProperty();
-  void updateTitle();
 
 private:
   Ui::CityDialog *m_ui;

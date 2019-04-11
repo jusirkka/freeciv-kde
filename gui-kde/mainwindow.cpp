@@ -68,7 +68,6 @@ MainWindow::MainWindow()
     m_players->raise();
   });
 
-
   m_cityReport = new CityView(this);
   connect(Application::instance(), &Application::popupCityReport, this, [=] () {
     m_cityReport->show();
@@ -112,10 +111,13 @@ MainWindow::MainWindow()
     m_economyReport->showAsTable();
   });
 
+  m_help = new HelpDialog(this);
+  connect(Application::instance(), &Application::popdownHelpDialog, this, [=] () {
+    m_help->hide();
+  });
+
   connect(Application::instance(), &Application::updateActions,
           this, &MainWindow::checkActions);
-
-  m_help = new HelpDialog(this);
 
   addActions();
   createStateMachine();
@@ -760,7 +762,7 @@ void MainWindow::addActions() {
       nullptr},
     {"cityTradeRoutes", "City Traderoutes", "Alt+D", "", DRW(city_trade_routes), false, true, false,
       nullptr},
-    {"centerView", "Center View", "C", "", "", false, false, false,
+    {"centerView", "Center View", "C", "quickview", "", false, false, false,
       nullptr},
     {"zoomIn", "Zoom In", "Ctrl++", "zoom-in", "", false, false, false,
       nullptr},
@@ -800,7 +802,7 @@ void MainWindow::addActions() {
       nullptr},
     {"cancel", "Cancel action", "Esc", "", "", false, false, false,
       nullptr},
-    {"endTurn", "End turn", "Shift+Return", "", "", false, false, false,
+    {"endTurn", "End turn", "Shift+Return", "games-endturn", "", false, false, false,
       nullptr},
     {"showUnits", "Show Units", "Ctrl+Space", "", "", false, false, false,
       nullptr},
@@ -921,6 +923,8 @@ void MainWindow::addActions() {
       m_staticGameActions << d.name;
     }
   }
+
+  // Customized help menu
 
   auto help = new KHelpMenu(this, KAboutData::applicationData(), true);
 

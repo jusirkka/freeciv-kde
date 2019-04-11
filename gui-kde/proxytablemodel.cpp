@@ -1,4 +1,5 @@
 #include "proxytablemodel.h"
+#include <QAbstractItemModel>
 
 using namespace KV;
 
@@ -6,6 +7,24 @@ ProxyTableModel::ProxyTableModel(int columns, QObject* parent)
   : QAbstractProxyModel(parent)
   , m_columns(columns)
 {}
+
+void ProxyTableModel::setSourceModel(QAbstractItemModel *model) {
+  beginResetModel();
+  disconnect(sourceModel(), &QAbstractItemModel::rowsInserted,
+             this, &ProxyTableModel::sourceRowsInserted);
+  disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
+             this, &ProxyTableModel::sourceRowsRemoved);
+  disconnect(sourceModel(), &QAbstractItemModel::modelReset,
+             this, &ProxyTableModel::modelReset);
+  QAbstractProxyModel::setSourceModel(model);
+  connect(sourceModel(), &QAbstractItemModel::rowsInserted,
+             this, &ProxyTableModel::sourceRowsInserted);
+  connect(sourceModel(), &QAbstractItemModel::rowsRemoved,
+             this, &ProxyTableModel::sourceRowsRemoved);
+  connect(sourceModel(), &QAbstractItemModel::modelReset,
+             this, &ProxyTableModel::modelReset);
+  endResetModel();
+}
 
 int ProxyTableModel::columnCount(const QModelIndex &parent) const {
   int sourceRows = sourceModel()->rowCount(parent);
@@ -39,4 +58,16 @@ QModelIndex ProxyTableModel::parent(const QModelIndex &/*child*/) const {
 
 QModelIndex ProxyTableModel::index(int row, int column, const QModelIndex &parent) const {
   return createIndex(row, column);
+}
+
+void ProxyTableModel::sourceRowsRemoved(const QModelIndex &/*parent*/, int first, int last) {
+  auto topLeft = index(first / m_columns, 0);
+  auto bottomRight = index(sourceModel()->rowCount() - 1 / m_columns, m_columns - 1);
+  emit dataChanged(topLeft, bottomRight);
+}
+
+void ProxyTableModel::sourceRowsInserted(const QModelIndex &/*parent*/, int first, int last) {
+  auto topLeft = index(first / m_columns, 0);
+  auto bottomRight = index(sourceModel()->rowCount() - 1 / m_columns, m_columns - 1);
+  emit dataChanged(topLeft, bottomRight);
 }

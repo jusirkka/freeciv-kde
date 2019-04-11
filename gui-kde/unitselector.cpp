@@ -88,7 +88,7 @@ void UnitSelector::createPixmap()
 
   m_pixHigh = QPixmap(m_itemSize);
   m_pixHigh.fill(palette().color(QPalette::HighlightedText));
-  int unitCount = m_unitList.size() - m_unitOffset;
+  int unitCount = m_unitList.count() - m_unitOffset;
   if (unitCount < 5) {
     m_pix = QPixmap(m_itemSize.width() * m_unitList.size(),
                     m_itemSize.height());
@@ -147,7 +147,7 @@ void UnitSelector::paintEvent(QPaintEvent */*event*/)
 {
 
   QString textHigh;
-  if (m_indexHigh > 0 && m_indexHigh < m_unitList.count()) {
+  if (m_indexHigh >= 0 && m_indexHigh < m_unitList.count()) {
     auto punit = m_unitList[m_indexHigh];
     /* TRANS: HP - hit points */
     textHigh = QString(_("%1 HP:%2/%3"))

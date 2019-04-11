@@ -8,6 +8,8 @@
 #include <QMimeData>
 #include "inputbox.h"
 #include "logging.h"
+#include "messagebox.h"
+#include "citydialog.h"
 
 #include "city.h"
 #include "client_main.h"
@@ -22,19 +24,22 @@ ProductionDialog::ProductionDialog(CityView* cities, QWidget *parent)
   , m_cities(cities)
 {
   m_ui->setupUi(this);
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
 
-  // cut, copy, paste, open, save
+  // cut, copy, paste, open, save, delete
   m_ui->cutButton->setDefaultAction(m_ui->actionCut);
   m_ui->copyButton->setDefaultAction(m_ui->actionCopy);
   m_ui->pasteButton->setDefaultAction(m_ui->actionPaste);
   m_ui->openButton->setDefaultAction(m_ui->actionOpen);
   m_ui->saveButton->setDefaultAction(m_ui->actionSave);
+  m_ui->deleteButton->setDefaultAction(m_ui->actionDelete);
 
   m_ui->actionCut->setDisabled(true);
   m_ui->actionCopy->setDisabled(true);
   m_ui->actionPaste->setDisabled(true);
   m_ui->actionOpen->setEnabled(can_client_issue_orders());
   m_ui->actionSave->setEnabled(can_client_issue_orders());
+  m_ui->actionDelete->setEnabled(can_client_issue_orders());
 
 
   // production header
@@ -85,7 +90,8 @@ ProductionDialog::ProductionDialog(CityView* cities, QWidget *parent)
   });
 
   // next/prev buttons
-  updateCityButtons();
+  m_ui->nextButton->setEnabled(false);
+  m_ui->previousButton->setEnabled(false);
 
 
   connect(m_cities, &CityView::orderingChanged,
@@ -118,8 +124,9 @@ void ProductionDialog::changeCity(city *c) {
   emit cityChanged(m_city);
 
   // open, save
-  m_ui->actionOpen->setEnabled(m_city != nullptr && can_client_issue_orders());
-  m_ui->actionSave->setEnabled(m_city != nullptr && can_client_issue_orders());
+  m_ui->actionOpen->setEnabled(can_client_issue_orders());
+  m_ui->actionSave->setEnabled(can_client_issue_orders());
+  m_ui->actionDelete->setEnabled(can_client_issue_orders());
   // production header - signalled
   // worklist - signalled
   // filter buttons - inert to city changes
@@ -127,7 +134,7 @@ void ProductionDialog::changeCity(city *c) {
   // next/prev buttons
   updateCityButtons();
 
-  setWindowTitle(QString("%1: Production").arg(parentWidget()->windowTitle()));
+  setWindowTitle(QString("%1: Production").arg(CityDialog::Title(m_city)));
 }
 
 void ProductionDialog::refresh(city* c) {
@@ -137,11 +144,6 @@ void ProductionDialog::refresh(city* c) {
 }
 
 void ProductionDialog::updateCityButtons() {
-  bool canDo = m_city != nullptr;
-  m_ui->nextButton->setEnabled(canDo);
-  m_ui->previousButton->setEnabled(canDo);
-
-  if (!canDo) return;
 
   bool canGo = m_cities->hasNext(m_city);
   m_ui->nextButton->setEnabled(canGo);
@@ -236,6 +238,26 @@ void ProductionDialog::on_actionSave_triggered() {
       global_worklist_set(gw, &queue);
     }
   }
+}
+
+void ProductionDialog::on_actionDelete_triggered() {
+  QMenu menu;
+  global_worklists_iterate(wl) {
+    int id = global_worklist_id(wl);
+    auto a = new QAction(global_worklist_name(wl));
+    connect(a, &QAction::triggered, this, [this, id] () {
+      StandardMessageBox ask(this,
+                             QString("Do you really want delete %1?")
+                             .arg(global_worklist_name(global_worklist_by_id(id))),
+                             "Delete worklist");
+      if (ask.exec() == QMessageBox::Ok) {
+        global_worklist_destroy(global_worklist_by_id(id));
+      }
+    });
+    menu.addAction(a);
+  } global_worklists_iterate_end;
+
+  menu.exec(QCursor::pos());
 }
 
 static int updateFlag(int flags, int bit, bool on) {

@@ -5,6 +5,8 @@
 #include <QPixmap>
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
+#include <QStack>
+#include <functional>
 
 #include "fc_types.h"
 #include "helpdata.h"
@@ -48,9 +50,12 @@ private  slots:
   void on_chaptersButton_clicked();
   void on_headersButton_clicked();
   void on_searchLine_textEdited(const QString& s);
+  void on_backButton_clicked();
+  void on_forwardButton_clicked();
 
   void modelReset();
   void interpretLink(const QString&);
+  void showMatchingTopics(const QString& title, help_page_type section);
 
 signals:
 
@@ -58,6 +63,7 @@ signals:
 
 private:
 
+  void changePage(QModelIndex);
   void saveSplitterSizes();
 
   QWidget* leftPanel(const universal&);
@@ -76,9 +82,13 @@ private:
   QWidget* property(const QString& key, const QString& value);
   QWidget* terrainExtraBottom(terrain*, const extra_type* resource);
 
+  void readSettings();
+  void writeSettings() const;
+
 private:
 
   using WidgetCache = QMap<int, QWidget*>;
+  using IndexStack = QStack<QModelIndex>;
 
   Ui::HelpDialog *m_ui;
   HelpModel* m_model;
@@ -90,6 +100,9 @@ private:
   WidgetCache m_leftCache;
   WidgetCache m_bottomCache;
   HelpFilter* m_filter;
+  IndexStack m_history;
+  IndexStack m_future;
+  QModelIndex m_currentPage;
 };
 
 class HelpFilter: public QSortFilterProxyModel {
@@ -121,9 +134,11 @@ public:
   static const int TypeRole = Qt::UserRole + 1;
   static const int UidRole = Qt::UserRole + 2;
 
+  using IndexStack = QStack<QModelIndex>;
+
   HelpModel(QObject* parent = nullptr);
 
-  QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
   QModelIndex parent(const QModelIndex &index) const override;
 
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -133,13 +148,22 @@ public:
 
 public:
 
-  QModelIndex findByUniversal(const universal& u, const QModelIndex& parent) const;
-
+  QModelIndex findByUniversal(const universal& u,
+                              const QModelIndex& parent = QModelIndex()) const;
+  IndexStack findByTopic(const QString& title, help_page_type section,
+                         const QModelIndex& parent = QModelIndex()) const;
   bool isValid() const;
 
 public slots:
 
   void reset();
+
+private:
+
+  using MatchFunc = std::function<bool (HelpNode*)>;
+
+  void findAnything(IndexStack& results, const QModelIndex& parent, bool stopAtFirst,
+                    MatchFunc matchFunc) const;
 
 private:
 

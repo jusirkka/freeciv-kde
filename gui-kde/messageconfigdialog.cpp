@@ -16,6 +16,8 @@ MessageConfigDialog::MessageConfigDialog(int flag, const QString& title, QWidget
   : QDialog(parent)
   , m_ui(new Ui::MessageConfigDialog)
   , m_flag(flag)
+  , m_model(new MessageConfigModel(flag, this))
+  , m_filter(new QSortFilterProxyModel(this))
 {
   m_ui->setupUi(this);
 
@@ -23,19 +25,19 @@ MessageConfigDialog::MessageConfigDialog(int flag, const QString& title, QWidget
   setAttribute(Qt::WA_DeleteOnClose);
 
 
-  m_model = new MessageConfigModel(flag, this);
-  auto filter = new QSortFilterProxyModel(this);
-  filter->setSourceModel(m_model);
+  m_filter->setSourceModel(m_model);
   auto table = new ProxyTableModel(3, this);
-  table->setSourceModel(filter);
+  table->setSourceModel(m_filter);
   m_ui->eventsTable->setModel(table);
 
-  filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
-  filter->sort(0);
+  m_filter->sort(0);
   m_ui->eventsTable->resizeColumnsToContents();
 
   connect(m_ui->filterEdit, &QLineEdit::textChanged,
-          filter, &QSortFilterProxyModel::setFilterFixedString);
+          this, &MessageConfigDialog::filterChanged);
+
+  connect(this, &MessageConfigDialog::accepted,
+          this, &MessageConfigDialog::saveConfig);
 
   create(); // ensure there's a window created
   const KConfigGroup cnf(KSharedConfig::openConfig(), "MessageConfigDialog");
@@ -49,6 +51,13 @@ MessageConfigDialog::~MessageConfigDialog() {
   KWindowConfig::saveWindowSize(windowHandle(), cnf);
 }
 
+void MessageConfigDialog::filterChanged(const QString &s) {
+  if (s.length() < 3) {
+    m_filter->setFilterRegExp(QRegExp());
+  } else {
+    m_filter->setFilterRegExp(QRegExp(s, Qt::CaseInsensitive, QRegExp::FixedString));
+  }
+}
 
 void MessageConfigDialog::saveConfig() {
   for (event_type e = event_type_begin(); e != event_type_end(); e = event_type_next(e)) {

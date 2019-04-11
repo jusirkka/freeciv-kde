@@ -7,6 +7,7 @@
 #include <KSharedConfig>
 #include <QWindow>
 #include "conf_cityview.h"
+#include "logging.h"
 
 #include "cityrepdata.h"
 #include "city.h"
@@ -14,11 +15,163 @@
 
 using namespace KV;
 
+CityView::CityView(QWidget* parent)
+  : QDialog(parent)
+  , m_ui(new Ui::CityView)
+{
+  m_ui->setupUi(this);
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+
+  m_filter = new CityFilterModel(this);
+  m_cities = new CityModel(this);
+
+  m_filter->setSourceModel(m_cities);
+  m_ui->cityView->setModel(m_filter);
+  m_ui->cityView->setItemDelegate(new CityDelegate);
+  m_filter->setDynamicSortFilter(true);
+  m_ui->cityView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+  m_ui->cityView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+  connect(m_ui->cityView->horizontalHeader(),
+          &QTableView::customContextMenuRequested,
+          this,
+          &CityView::popupHeaderMenu);
+  connect(m_cities, &CityModel::modelReset,
+          m_ui->cityView->horizontalHeader(), &QHeaderView::reset);
+  connect(m_ui->cityView,
+          &QTableView::doubleClicked,
+          this,
+          &CityView::gotoCity);
+  connect(m_ui->cityView,
+          &QTableView::customContextMenuRequested,
+          this,
+          &CityView::popupListMenu);
+
+  connect(m_filter,
+          &CityFilterModel::layoutChanged,
+          this,
+          &CityView::orderingChanged);
+
+  setWindowTitle(qAppName() + ": Cities");
+
+  setMinimumWidth(400);
+  setMinimumHeight(300);
+  setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+  connect(m_cities, &CityModel::headerDataChanged, this, [=] (Qt::Orientation ori, int first, int last) {
+    while (first <= last) {
+      bool show = m_cities->headerData(first, ori, Qt::UserRole).toBool();
+      m_ui->cityView->setColumnHidden(first, !show);
+      first += 1;
+    }
+  });
+
+  m_ui->cityView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+  readSettings();
+}
+
+CityView::~CityView() {
+  writeSettings();
+}
+
+void CityView::readSettings() {
+  create(); // ensure there's a window created
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "CityView");
+  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
+  resize(windowHandle()->size());
+  // visibles are read in model reset func
+}
+
+void CityView::writeSettings() {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "CityView");
+  KWindowConfig::saveWindowSize(windowHandle(), cnf);
+
+  QList<int> visibles;
+  for (int col = 0; col < m_cities->columnCount(); col++) {
+    bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+    if (show) {
+      visibles << col;
+    }
+  }
+  Conf::CityView::setColumns(visibles);
+  Conf::CityView::self()->save();
+}
+
+bool CityView::hasPrev(city* c) const {
+  int numRows = m_filter->rowCount();
+  if (numRows < 2) return false;
+  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
+  if (!curr.isValid()) return false;
+  int row = (curr.row() - 1 + numRows) % numRows;
+  return m_filter->index(row, 0).isValid();
+}
+
+bool CityView::hasNext(city* c) const {
+  int numRows = m_filter->rowCount();
+  if (numRows < 2) return false;
+  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
+  if (!curr.isValid()) return false;
+  int row = (curr.row() + 1 + numRows) % numRows;
+  return m_filter->index(row, 0).isValid();
+}
+
+city* CityView::next(city* c) const {
+  int numRows = m_filter->rowCount();
+  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
+  int row = (curr.row() + 1 + numRows) % numRows;
+  auto next = m_filter->mapToSource(m_filter->index(row, 0));
+  auto data = m_cities->data(next, Qt::UserRole);
+  return reinterpret_cast<city*>(data.value<void*>());
+}
+
+city* CityView::prev(city* c) const {
+  int numRows = m_filter->rowCount();
+  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
+  int row = (curr.row() - 1 + numRows) % numRows;
+  auto prev = m_filter->mapToSource(m_filter->index(row, 0));
+  auto data = m_cities->data(prev, Qt::UserRole);
+  return reinterpret_cast<city*>(data.value<void*>());
+}
+
+void CityView::on_filterButton_clicked() {
+  // TODO
+}
+
+void CityView::popupHeaderMenu(const QPoint& p) {
+
+  QMenu menu;
+  menu.setTitle(_("Column visibility"));
+
+  int n = m_ui->cityView->horizontalHeader()->count();
+  for (int i = 0; i < n; ++i) {
+    QAction *a = menu.addAction(m_cities->headerData(i, Qt::Horizontal).toString());
+    a->setCheckable(true);
+    a->setChecked(!m_ui->cityView->isColumnHidden(i));
+    connect(a, &QAction::toggled, this, [this, i] (bool visible) {
+      m_cities->setHeaderData(i, Qt::Horizontal, visible, Qt::UserRole);
+    });
+  }
+  menu.exec(mapToGlobal(p));
+}
+
+
+void CityView::popupListMenu(const QPoint& pos) {
+  // TODO
+}
+
+void CityView::gotoCity(const QModelIndex& cityIndex) {
+  auto selected = m_filter->mapToSource(cityIndex);
+  auto data = m_cities->data(selected, Qt::UserRole);
+  auto c = reinterpret_cast<city*>(data.value<void*>());
+  emit manageCity(c);
+}
+
+
+
 CityModel::CityModel(QObject *parent)
   : QAbstractTableModel(parent)
 {
-  init_city_report_game_data();
-  reset();
   connect(Application::instance(), &Application::updateCity,
           this, &CityModel::updateCity);
   connect(Application::instance(), &Application::updateCityReport,
@@ -30,7 +183,7 @@ int CityModel::rowCount(const QModelIndex &/*index*/) const {
 }
 
 int CityModel::columnCount(const QModelIndex &/*parent*/) const {
-  return num_city_report_spec();
+  return m_columnCount;
 }
 
 QVariant CityModel::data(const QModelIndex &index, int role) const {
@@ -52,7 +205,7 @@ QVariant CityModel::data(const QModelIndex &index, int role) const {
 }
 
 QVariant CityModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
-  if (section >= NUM_CREPORT_COLS) return QVariant();
+  if (section >= m_columnCount) return QVariant();
 
   city_report_spec *spec = &city_report_specs[section];
 
@@ -76,7 +229,7 @@ QVariant CityModel::headerData(int section, Qt::Orientation /*orientation*/, int
 
 bool CityModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
   if (role != Qt::UserRole) return false;
-  if (section >= NUM_CREPORT_COLS) return false;
+  if (section >= m_columnCount) return false;
   if (!value.isValid()) return false;
   city_report_specs[section].show = value.toBool();
   emit headerDataChanged(orientation, section, section);
@@ -85,8 +238,18 @@ bool CityModel::setHeaderData(int section, Qt::Orientation orientation, const QV
 
 
 void CityModel::reset() {
+
+  bool needInit = false;
+
   beginResetModel();
+
   m_cities.clear();
+  if (client_state() < C_S_RUNNING) return;
+
+  if (m_columnCount == 0) {
+    m_columnCount = NUM_CREPORT_COLS;
+    needInit = true;
+  }
   if (client_has_player()) {
     city_list_iterate(client_player()->cities, pcity) {
       m_cities.append(pcity);
@@ -97,6 +260,18 @@ void CityModel::reset() {
     } cities_iterate_end;
   }
   endResetModel();
+
+  if (needInit) {
+    QList<int> visibles = Conf::CityView::columns();
+    for (int col = 0; col < m_columnCount; col++) {
+      if (!visibles.isEmpty()) {
+        setHeaderData(col, Qt::Horizontal, visibles.contains(col), Qt::UserRole);
+      } else {
+        bool show = headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
+        setHeaderData(col, Qt::Horizontal, show, Qt::UserRole);
+      }
+    }
+  }
 }
 
 void CityModel::updateCity(city* c) {
@@ -114,7 +289,6 @@ QModelIndex CityModel::toIndex(city* c, int col) const {
   }
   return QModelIndex();
 }
-
 
 CityFilterModel::CityFilterModel(QObject* parent)
   : QSortFilterProxyModel(parent)
@@ -202,169 +376,4 @@ QSize CityDelegate::sizeHint(const QStyleOptionViewItem& option,
   return s;
 }
 
-
-CityView::CityView(QWidget* parent)
-  : QDialog(parent)
-  , m_ui(new Ui::CityView)
-{
-  m_ui->setupUi(this);
-  m_filter = new CityFilterModel(this);
-  m_cities = new CityModel(this);
-
-
-  m_filter->setSourceModel(m_cities);
-  m_ui->cityView->setModel(m_filter);
-  m_ui->cityView->setItemDelegate(new CityDelegate);
-  m_filter->setDynamicSortFilter(true);
-  m_ui->cityView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-  m_ui->cityView->setContextMenuPolicy(Qt::CustomContextMenu);
-
-  connect(m_ui->cityView->horizontalHeader(),
-          &QTableView::customContextMenuRequested,
-          this,
-          &CityView::popupHeaderMenu);
-  connect(m_ui->cityView,
-          &QTableView::doubleClicked,
-          this,
-          &CityView::gotoCity);
-  connect(m_ui->cityView,
-          &QTableView::customContextMenuRequested,
-          this,
-          &CityView::popupListMenu);
-
-  connect(m_filter,
-          &CityFilterModel::layoutChanged,
-          this,
-          &CityView::orderingChanged);
-
-  setWindowTitle(qAppName() + ": Cities");
-
-  setMinimumWidth(400);
-  setMinimumHeight(300);
-  setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
-  connect(m_cities, &CityModel::headerDataChanged, this, [=] (Qt::Orientation ori, int first, int last) {
-    while (first <= last) {
-      bool show = m_cities->headerData(first, ori, Qt::UserRole).toBool();
-      m_ui->cityView->setColumnHidden(first, !show);
-      first += 1;
-    }
-  });
-
-  readSettings();
-}
-
-CityView::~CityView() {
-  writeSettings();
-}
-
-
-void CityView::readSettings() {
-  create(); // ensure there's a window created
-  const KConfigGroup cnf(KSharedConfig::openConfig(), "CityView");
-  KWindowConfig::restoreWindowSize(windowHandle(), cnf);
-  resize(windowHandle()->size());
-
-  QList<int> visibles = Conf::CityView::columns();
-  if (!visibles.isEmpty()) {
-    for (int col = 0; col < m_cities->columnCount(); col++) {
-      bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
-      bool vis = visibles.contains(col);
-      if ((vis && !show) || (!vis && show)) {
-        m_cities->setHeaderData(col, Qt::Horizontal, vis, Qt::UserRole);
-      } else {
-        m_ui->cityView->setColumnHidden(col, !show);
-      }
-    }
-  } else { // defaults
-    for (int col = 0; col < m_cities->columnCount(); col++) {
-      bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
-      m_ui->cityView->setColumnHidden(col, !show);
-    }
-  }
-}
-
-void CityView::writeSettings() {
-  KConfigGroup cnf(KSharedConfig::openConfig(), "CityView");
-  KWindowConfig::saveWindowSize(windowHandle(), cnf);
-
-  QList<int> visibles;
-  for (int col = 0; col < m_cities->columnCount(); col++) {
-    bool show = m_cities->headerData(col, Qt::Horizontal, Qt::UserRole).toBool();
-    if (show) {
-      visibles << col;
-    }
-  }
-  Conf::CityView::setColumns(visibles);
-  Conf::CityView::self()->save();
-}
-
-bool CityView::hasPrev(city* c) const {
-  int numRows = m_filter->rowCount();
-  if (numRows < 2) return false;
-  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
-  if (!curr.isValid()) return false;
-  int row = (curr.row() - 1 + numRows) % numRows;
-  return m_filter->index(row, 0).isValid();
-}
-
-bool CityView::hasNext(city* c) const {
-  int numRows = m_filter->rowCount();
-  if (numRows < 2) return false;
-  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
-  if (!curr.isValid()) return false;
-  int row = (curr.row() + 1 + numRows) % numRows;
-  return m_filter->index(row, 0).isValid();
-}
-
-city* CityView::next(city* c) const {
-  int numRows = m_filter->rowCount();
-  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
-  int row = (curr.row() + 1 + numRows) % numRows;
-  auto next = m_filter->mapToSource(m_filter->index(row, 0));
-  auto data = m_cities->data(next, Qt::UserRole);
-  return reinterpret_cast<city*>(data.value<void*>());
-}
-
-city* CityView::prev(city* c) const {
-  int numRows = m_filter->rowCount();
-  auto curr = m_filter->mapFromSource(m_cities->toIndex(c));
-  int row = (curr.row() - 1 + numRows) % numRows;
-  auto prev = m_filter->mapToSource(m_filter->index(row, 0));
-  auto data = m_cities->data(prev, Qt::UserRole);
-  return reinterpret_cast<city*>(data.value<void*>());
-}
-
-void CityView::on_filterButton_clicked() {
-  // TODO
-}
-
-void CityView::popupHeaderMenu(const QPoint& p) {
-
-  QMenu menu;
-  menu.setTitle(_("Column visibility"));
-
-  int n = m_ui->cityView->horizontalHeader()->count();
-  for (int i = 0; i < n; ++i) {
-    QAction *a = menu.addAction(m_cities->headerData(i, Qt::Horizontal).toString());
-    a->setCheckable(true);
-    a->setChecked(!m_ui->cityView->isColumnHidden(i));
-    connect(a, &QAction::toggled, this, [this, i] (bool visible) {
-      m_cities->setHeaderData(i, Qt::Horizontal, visible, Qt::UserRole);
-    });
-  }
-  menu.exec(mapToGlobal(p));
-}
-
-
-void CityView::popupListMenu(const QPoint& pos) {
-  // TODO
-}
-
-void CityView::gotoCity(const QModelIndex& cityIndex) {
-  auto selected = m_filter->mapToSource(cityIndex);
-  auto data = m_cities->data(selected, Qt::UserRole);
-  auto c = reinterpret_cast<city*>(data.value<void*>());
-  emit manageCity(c);
-}
 

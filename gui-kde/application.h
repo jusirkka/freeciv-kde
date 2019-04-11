@@ -6,6 +6,7 @@
 extern "C" {
 #include "canvas_g.h"
 #include "pages_g.h"
+#include "helpdlg_g.h"
 }
 #include "tilespec.h"
 
@@ -46,6 +47,7 @@ class Application: public QObject {
   friend class ScienceDialog;
   friend class UnitReport;
   friend class EconomyReport;
+  friend class HelpDialog;
 
 public:
 
@@ -123,6 +125,8 @@ public:
   static void UpdateUnitReport();
   static void PopupEconomyReport();
   static void UpdateEconomyReport();
+  static void PopupHelpDialog(const QString& topic, help_page_type section);
+  static void PopdownHelpDialog();
 
 
 
@@ -172,6 +176,8 @@ signals:
   void updateUnitReport();
   void popupEconomyReport();
   void updateEconomyReport();
+  void popupHelpDialog(const QString& topic, help_page_type section);
+  void popdownHelpDialog();
 
 
 

@@ -113,6 +113,7 @@ kconfig_add_kcfg_files(fc_kde_srcs
   conf_outputpanemanager.kcfgc
   conf_playerwidget.kcfgc
   conf_cityview.kcfgc
+  conf_helpdialog.kcfgc
 )
 
 qt5_add_resources(fc_kde_srcs freeciv-kde.qrc)
