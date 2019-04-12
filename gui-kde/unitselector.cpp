@@ -3,6 +3,7 @@
 #include <QWheelEvent>
 #include "canvas.h"
 #include "application.h"
+#include "logging.h"
 
 #include "tilespec.h"
 #include "control.h"
@@ -15,14 +16,16 @@ using namespace KV;
 
 UnitSelector::UnitSelector(tile* t, QWidget *parent)
   : QWidget(parent)
-  , m_itemSize(0, 0)
+  , m_itemSize(96, 96)
   , m_indexHigh(-1)
   , m_unitOffset(0)
   , m_tile(t)
+  , m_first(true)
 {
   setAttribute(Qt::WA_DeleteOnClose);
 
   m_font.setItalic(true);
+  m_font.setPixelSize(qMin(m_itemSize.width() / 4, 12));
   m_infoFont.setPointSize(12);
 
   setMouseTracking(true);
@@ -76,15 +79,8 @@ void UnitSelector::updateUnitList() {
 }
 
 
-
-
-void UnitSelector::createPixmap()
-{
-
+void UnitSelector::createPixmap() {
   if (m_unitList.isEmpty()) return;
-
-  m_itemSize.setWidth(tileset_full_tile_width(tileset));
-  m_itemSize.setHeight(tileset_tile_height(tileset) * 3 / 2);
 
   m_pixHigh = QPixmap(m_itemSize);
   m_pixHigh.fill(palette().color(QPalette::HighlightedText));
@@ -102,17 +98,16 @@ void UnitSelector::createPixmap()
   QVector<QPixmap> pixes;
   for (int i = m_unitOffset; i < unitCount; i++) {
     unit* punit = m_unitList[i];
-    auto pix = canvas_create(tileset_full_tile_width(tileset),
-                             tileset_tile_height(tileset) * 3 / 2);
+    auto pix = canvas_create(tileset_unit_width(get_tileset()),
+                             tileset_unit_height(get_tileset()));
     pix->map_pixmap.fill(Qt::transparent);
     put_unit(punit, pix, 1.0, 0, 0);
-    pixes << pix->map_pixmap;
+    pixes << Application::SaneMargins(pix->map_pixmap, m_itemSize);
     canvas_free(pix);
   }
 
   QPainter p;
   p.begin(&m_pix);
-  m_font.setPixelSize(qMin(m_itemSize.width() / 4, 12));
   p.setFont(m_font);
   QPen pen;
   pen.setColor(palette().color(QPalette::Text));
@@ -143,8 +138,14 @@ void UnitSelector::createPixmap()
 }
 
 
-void UnitSelector::paintEvent(QPaintEvent */*event*/)
-{
+void UnitSelector::paintEvent(QPaintEvent */*event*/) {
+
+  // a hack to workaround the bug of not painting the
+  // movement points string on first call.
+  if (m_first) {
+    createPixmap();
+    m_first = false;
+  }
 
   QString textHigh;
   if (m_indexHigh >= 0 && m_indexHigh < m_unitList.count()) {
@@ -160,7 +161,7 @@ void UnitSelector::paintEvent(QPaintEvent */*event*/)
 
   for (int i = m_infoFont.pointSize(); i > 4; i--) {
     QFontMetrics fm(m_infoFont);
-    if (10 + fm.width(textHigh) < width() && 10 + fm.width(text) < width()) {
+    if (fm.width(textHigh) < width() - 10 && fm.width(text) < width() - 10) {
       break;
     }
     m_infoFont.setPointSize(i);

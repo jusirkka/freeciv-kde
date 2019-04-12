@@ -33,7 +33,7 @@ Intro::Intro(KV::MainWindow* parent)
 Intro::~Intro() {}
 
 QWidget* Intro::createIntroWidget() {
-  QPixmap intro_pm(tileset_main_intro_filename(tileset));
+  QPixmap intro_pm(tileset_main_intro_filename(get_tileset()));
   QPainter painter(&intro_pm);
   painter.setPen(Qt::white);
   QFontMetrics fm(QApplication::font());

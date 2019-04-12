@@ -1,6 +1,9 @@
 TODO
-- happiness & other city info dialog
+- fix minimap: zoom does not work
 - options (server, client) dialog
+- sporadic freezes when starting a new game
+
+- happiness & other city info dialog
 - battle log
 - font manager
 - cityview filter
@@ -9,15 +12,9 @@ TODO
 - save game dialog
 - demographics config dialog
 BUGS
+- unitselector: "MP:" -string is displayed only after hovering over with mouse
 - demographics pane formatting could be better
-- turn end -action not visible in units menu
-- help: search works only for top level items
-- F/G/P in unit report is always zero
-- hex tiles take too much space
-- minimap not toggled by the corresponding QAction
-- sporadic freezes when starting a new game
 - sporadic freezes when quitting the game
-- fix minimap: zoom does not work
 - select nation dialog: first nation is overlined, but reserved nations not
 - default size of start dialog is too small
 - Sometimes Esc key does not properly close diplo dialog

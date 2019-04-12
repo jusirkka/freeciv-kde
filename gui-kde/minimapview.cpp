@@ -116,11 +116,11 @@ void MinimapView::showEvent(QShowEvent* event)
 
 
 static QPoint to_overview(const QPointF& p) {
-  const qreal W = tileset_tile_width(tileset);
-  const qreal H = tileset_tile_height(tileset);
+  const qreal W = tileset_tile_width(get_tileset());
+  const qreal H = tileset_tile_height(get_tileset());
 
   QPointF t;
-  if (tileset_is_isometric(tileset)) {
+  if (tileset_is_isometric(get_tileset())) {
     t.setX(p.x() / W + p.y() / H);
     t.setY(p.y() / H - p.x() / W);
   } else {

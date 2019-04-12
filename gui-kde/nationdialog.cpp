@@ -126,7 +126,7 @@ void NationDialog::init(const player *p) {
 
     if (i >= 0) {
       auto item = new QListWidgetItem;
-      auto pix = get_sample_city_sprite(tileset, i)->pm;
+      auto pix = get_sample_city_sprite(get_tileset(), i)->pm;
       item->setData(Qt::DecorationRole, pix);
       item->setData(Qt::UserRole, style_number(pstyle));
       item->setSizeHint(QSize(pix.width(), pix.height()));
@@ -225,7 +225,7 @@ void NationDialog::nationGroupSelected() {
       f.setStrikeOut(true);
       nations->setData(idx, f, Qt::FontRole);
     }
-    auto pix = get_nation_flag_sprite(tileset, pnation)->pm;
+    auto pix = get_nation_flag_sprite(get_tileset(), pnation)->pm;
     nations->setData(idx, pix, Qt::DecorationRole);
     nations->setData(idx, nation_number(pnation), Qt::UserRole);
     nations->setData(idx, nation_adjective_translation(pnation), Qt::DisplayRole);

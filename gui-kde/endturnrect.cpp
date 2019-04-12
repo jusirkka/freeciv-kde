@@ -63,7 +63,9 @@ EndTurnRect::EndTurnRect(QWidget *parent)
 
   m_researchIndicator = new SpriteWidget;
   hbox->addWidget(m_researchIndicator);
-  connect(m_researchIndicator, &QPushButton::clicked, &science_report_dialog_popup);
+  connect(m_researchIndicator, &QPushButton::clicked, [] () {
+    science_report_dialog_popup(true);
+  });
 
   m_governmentIndicator = new SpriteWidget;
   m_governmentIndicator->setMenu(new GovMenu());
@@ -147,16 +149,16 @@ void EndTurnRect::updateArea() {
 
   // Update tax rates
   int d = 0;
-  auto s = get_tax_sprite(tileset, O_LUXURY);
+  auto s = get_tax_sprite(get_tileset(), O_LUXURY);
   for (; d < client.conn.playing->economic.luxury / 10; ++d) {
     m_taxIndicators[d]->setSprite(s);
   }
-  s = get_tax_sprite(tileset, O_SCIENCE);
+  s = get_tax_sprite(get_tileset(), O_SCIENCE);
   for (; d < (client.conn.playing->economic.science
               + client.conn.playing->economic.luxury) / 10; ++d) {
     m_taxIndicators[d]->setSprite(s);
   }
-  s = get_tax_sprite(tileset, O_GOLD);
+  s = get_tax_sprite(get_tileset(), O_GOLD);
   for (; d < 10; ++d) {
     m_taxIndicators[d]->setSprite(s);
   }
@@ -170,10 +172,10 @@ void EndTurnRect::updateArea() {
                                      "rates. Use mouse wheel to change them"));
   }
   QFontMetrics fm(font());
-  setMinimumWidth(qMax(get_tax_sprite(tileset, O_LUXURY)->pm.width() * 10
+  setMinimumWidth(qMax(get_tax_sprite(get_tileset(), O_LUXURY)->pm.width() * 10
                   + 25, fm.width(m_done->text())));
   setMinimumHeight(fm.height() + client_research_sprite()->pm.height()
-                   + get_tax_sprite(tileset, O_LUXURY)->pm.height() + 25);
+                   + get_tax_sprite(get_tileset(), O_LUXURY)->pm.height() + 25);
   updateGeometry();
   auto delta = parentWidget()->size() - size();
   move(delta.width(), delta.height());

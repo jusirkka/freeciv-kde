@@ -30,6 +30,7 @@
 #include <QIcon>
 #include <KAboutData>
 #include <KLocalizedString>
+#include <QPainter>
 
 
 #include "application.h"
@@ -97,7 +98,7 @@ void Application::Main(int argc, char **argv) {
   // set application icon
   tileset_init(get_tileset());
   tileset_load_tiles(get_tileset());
-  qApp->setWindowIcon(QIcon(get_icon_sprite(tileset, ICON_FREECIV)->pm));
+  qApp->setWindowIcon(QIcon(get_icon_sprite(get_tileset(), ICON_FREECIV)->pm));
 
   // set system theme
   ThemesManager::ClearTheme();
@@ -118,7 +119,7 @@ void Application::Main(int argc, char **argv) {
 void Application::Exit() {
   // TODO
   // free_mapcanvas_and_overview();
-  tileset_free_tiles(tileset);
+  tileset_free_tiles(get_tileset());
 }
 
 void Application::Beep()
@@ -191,13 +192,13 @@ QString Application::ApplyTags(const char *s, const text_tag_list *tags) {
 
       switch (text_tag_link_type(ptag)) {
       case TLT_CITY:
-        pcolor = get_color(tileset, COLOR_MAPVIEW_CITY_LINK);
+        pcolor = get_color(get_tileset(), COLOR_MAPVIEW_CITY_LINK);
         break;
       case TLT_TILE:
-        pcolor = get_color(tileset, COLOR_MAPVIEW_TILE_LINK);
+        pcolor = get_color(get_tileset(), COLOR_MAPVIEW_TILE_LINK);
         break;
       case TLT_UNIT:
-        pcolor = get_color(tileset, COLOR_MAPVIEW_UNIT_LINK);
+        pcolor = get_color(get_tileset(), COLOR_MAPVIEW_UNIT_LINK);
         break;
       }
 
@@ -277,6 +278,51 @@ QIcon Application::Icon(const QString& name) {
   }
 
   return QIcon(icon);
+}
+
+QPixmap Application::SaneMargins(const QPixmap &pix, const QSize& frame) {
+  QImage img = pix.toImage().convertToFormat(QImage::Format_ARGB32);
+
+  int xmax = 0;
+  int xmin = img.width();
+  int ymin = img.height();
+  int ymax = 0;
+  for (int y = 0; y < img.height(); y++) {
+    QRgb row[img.width()];
+    bool rowFilled = false;
+
+    /* Copy to a location with guaranteed QRgb suitable alignment.
+       * That fixes clang compiler warning. */
+    memcpy(row, img.scanLine(y), img.width() * sizeof(QRgb));
+
+    for (int x = 0; x < img.width(); ++x) {
+      if (qAlpha(row[x])) {
+        rowFilled = true;
+        xmax = qMax(xmax, x);
+        if (xmin > x) {
+          xmin = x;
+          x = xmax;
+        }
+      }
+    }
+    if (rowFilled) {
+      ymin = qMin(ymin, y);
+      ymax = y;
+    }
+  }
+
+  QRect cr(xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
+  if (!cr.isValid()) return pix;
+  int x = (frame.width() - cr.width()) / 2;
+  int y = (frame.height() - cr.height()) / 2;
+  // qCDebug(FC) << cr << pix.rect() << frame << x << y;
+  QPixmap res(frame);
+  res.fill(Qt::transparent);
+  QPainter p;
+  p.begin(&res);
+  p.drawPixmap(x, y, pix.copy(cr));
+  p.end();
+  return res;
 }
 
 MainWindow* Application::Mainwin() {
@@ -371,13 +417,12 @@ void Application::UpdatePlayers() {
   instance()->updatePlayers();
 }
 
-void Application::InitMeeting(int counterpart) {
-  instance()->initMeeting(counterpart);
+void Application::InitMeeting(int counterpart, int initiator) {
+  instance()->initMeeting(counterpart, initiator);
 }
 
-
-void Application::CancelMeeting(int counterpart) {
-  instance()->cancelMeeting(counterpart);
+void Application::CancelMeeting(int counterpart, int canceler) {
+  instance()->cancelMeeting(counterpart, canceler);
 }
 
 void Application::CreateClause(int counterpart, const Clause& clause) {

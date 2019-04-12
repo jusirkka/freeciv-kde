@@ -50,7 +50,7 @@ MapView::MapView(MainWindow* parent)
   for (int cursor = 0; cursor < CURSOR_LAST; cursor++) {
     for (int frame = 0; frame < NUM_CURSOR_FRAMES; frame++) {
       auto curs = static_cast<cursor_type>(cursor);
-      auto s = get_cursor_sprite(tileset, curs, &x, &y, frame);
+      auto s = get_cursor_sprite(get_tileset(), curs, &x, &y, frame);
       m_cursors[cursor] <<  QCursor(s->pm, x, y);
     }
   }

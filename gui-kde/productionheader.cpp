@@ -60,10 +60,10 @@ void ProductionHeader::changeCity(city *c) {
 
   QPixmap pix;
   if (m_city->production.kind == VUT_UTYPE) {
-    pix = get_unittype_sprite(tileset, m_city->production.value.utype,
+    pix = get_unittype_sprite(get_tileset(), m_city->production.value.utype,
                               direction8_invalid())->pm;
   } else {
-    pix = get_building_sprite(tileset, m_city->production.value.building)->pm;
+    pix = get_building_sprite(get_tileset(), m_city->production.value.building)->pm;
   }
 
   m_ui->targetButton->setIconSize(pix.size());

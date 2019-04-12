@@ -5,14 +5,14 @@ extern "C" {
 #include "application.h"
 #include "diptreaty.h"
 
-void handle_diplomacy_init_meeting(int counterpart, int /*initiated_from*/) {
+void handle_diplomacy_init_meeting(int counterpart, int initiator) {
   qCDebug(FC) << "handle_diplomacy_init_meeting";
-  KV::Application::InitMeeting(counterpart);
+  KV::Application::InitMeeting(counterpart, initiator);
 }
 
-void handle_diplomacy_cancel_meeting(int counterpart, int /*initiated_from*/) {
+void handle_diplomacy_cancel_meeting(int counterpart, int canceler) {
   qCDebug(FC) << "handle_diplomacy_cancel_meeting";
-  KV::Application::CancelMeeting(counterpart);
+  KV::Application::CancelMeeting(counterpart, canceler);
 }
 
 void handle_diplomacy_create_clause(int counterpart, int giver, enum clause_type type, int value) {

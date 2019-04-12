@@ -29,12 +29,12 @@ UnitInfo::UnitInfo(QWidget* parent)
 
   setMouseTracking(true);
 
-  m_arrow = get_arrow_sprite(tileset, ARROW_PLUS)->pm.scaledToHeight(50);
+  m_arrow = get_arrow_sprite(get_tileset(), ARROW_PLUS)->pm.scaledToHeight(50);
 
   setFixedWidth(0);
-  setFixedHeight(52);
+  setFixedHeight(70);
 
-  m_font.setPixelSize(height() / 3);
+  m_font.setPixelSize(height() / 4);
 
   connect(Application::instance(), &Application::updateUnitInfo,
           this, [=] (void* p) {
@@ -89,20 +89,21 @@ void UnitInfo::updateUnits(unit_list *punits) {
   auto punit = head_of_units_in_focus();
   int w_width = 0;
   if (punit) {
-    float zoom = (qobject_cast<MapView*>(parentWidget()))->zoomLevel();
-    int w = tileset_unit_width(tileset);
-    int h = tileset_unit_height(tileset);
-
-    auto unitCanvas = canvas_create(w, h);
+    auto unitCanvas = canvas_create(tileset_unit_width(get_tileset()),
+                                    tileset_unit_height(get_tileset()));
     unitCanvas->map_pixmap.fill(Qt::transparent);
-    put_unit(punit, unitCanvas, zoom, 0, 0);
-    m_pix = unitCanvas->map_pixmap.scaledToHeight(height());
+    put_unit(punit, unitCanvas, 1., 0, 0);
+    m_pix = Application::SaneMargins(unitCanvas->map_pixmap, QSize(height(), height()));
+
     w_width += m_pix.width() + 1;
 
-    auto tileCanvas = canvas_create(w, h);
-    tileCanvas->map_pixmap.fill(QColor(0 , 0 , 0 , 85));
-    put_terrain(punit->tile, tileCanvas, zoom, 0, 0);
-    m_tile = tileCanvas->map_pixmap.scaledToHeight(height());
+    auto tileCanvas = canvas_create(tileset_full_tile_width(get_tileset()),
+                                    tileset_tile_height(get_tileset()) * 2);
+    tileCanvas->map_pixmap.fill(QColor(0, 0, 0, 85));
+    put_terrain(punit->tile, tileCanvas, 1., 0, 0);
+    m_tile = tileCanvas->map_pixmap
+        .scaledToHeight(height(), Qt::SmoothTransformation);
+
     w_width += m_tile.width() + 1;
 
     canvas_free(tileCanvas);
@@ -149,7 +150,7 @@ void UnitInfo::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void UnitInfo::updateArrowPix() {
-  m_arrow = get_arrow_sprite(tileset, ARROW_PLUS)->pm.scaledToHeight(height());
+  m_arrow = get_arrow_sprite(get_tileset(), ARROW_PLUS)->pm.scaledToHeight(height());
 }
 
 void UnitInfo::paintEvent(QPaintEvent*)

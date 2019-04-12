@@ -374,12 +374,12 @@ void MainWindow::on_centerView_triggered() {
 
 void MainWindow::on_zoomIn_triggered() {
   m_mapView->zoomIn();
-  tilespec_reread(tileset_basename(tileset), true, m_mapView->zoomLevel());
+  tilespec_reread(tileset_basename(get_tileset()), true, m_mapView->zoomLevel());
 }
 
 void MainWindow::on_zoomOut_triggered() {
   m_mapView->zoomOut();
-  tilespec_reread(tileset_basename(tileset), true, m_mapView->zoomLevel());
+  tilespec_reread(tileset_basename(get_tileset()), true, m_mapView->zoomLevel());
 }
 
 

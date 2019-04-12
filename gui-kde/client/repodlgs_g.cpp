@@ -4,9 +4,13 @@ extern "C" {
 #include "logging.h"
 #include "application.h"
 
-void science_report_dialog_popup(bool /*raise*/) {
+void science_report_dialog_popup(bool raise) {
   // qCDebug(FC) << "TODO: science_report_dialog_popup";
-  KV::Application::PopupScienceReport();
+  if (raise) {
+    KV::Application::PopupScienceReport();
+  } else {
+    KV::Application::UpdateScienceReport();
+  }
 }
 
 void science_report_dialog_redraw() {

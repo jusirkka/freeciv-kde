@@ -84,6 +84,8 @@ public:
   static QFont Font(enum client_font font);
   static QIcon Icon(const QString& name);
 
+  static QPixmap SaneMargins(const QPixmap& pix, const QSize& frame);
+
   static void AddServerSource(int sock);
   static void RemoveServerSource();
   static void UpdateUsers(void*);
@@ -104,8 +106,8 @@ public:
   static void UpdateReport(const QStringList& report);
   static void PopupPlayers();
   static void UpdatePlayers();
-  static void InitMeeting(int counterpart);
-  static void CancelMeeting(int counterpart);
+  static void InitMeeting(int counterpart, int initiator);
+  static void CancelMeeting(int counterpart, int canceler);
   static void CreateClause(int counterpart, const Clause& clause);
   static void RemoveClause(int counterpart, const Clause& clause);
   static void AcceptTreaty(int counterpart, bool resolution);
@@ -154,8 +156,8 @@ signals:
   void updateReport(const QStringList& report);
   void popupPlayers();
   void updatePlayers();
-  void initMeeting(int counterpart);
-  void cancelMeeting(int counterpart);
+  void initMeeting(int counterpart, int initiator);
+  void cancelMeeting(int counterpart, int canceler);
   void createClause(int counterpart, const Clause& clause);
   void removeClause(int counterpart, const Clause& clause);
   void acceptTreaty(int counterpart, bool resolution);

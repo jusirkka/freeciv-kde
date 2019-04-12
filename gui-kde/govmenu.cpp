@@ -21,7 +21,7 @@ GovMenu::GovMenu(QWidget *parent)
   auto revolGov = game.government_during_revolution;
 
   auto action = addAction(_("Revolution..."));
-  auto sprite = get_government_sprite(tileset, revolGov);
+  auto sprite = get_government_sprite(get_tileset(), revolGov);
   if (sprite != nullptr) {
     action->setIcon(QIcon(sprite->pm));
   }
@@ -37,7 +37,7 @@ GovMenu::GovMenu(QWidget *parent)
     if (gov == revolGov) continue;
     action = addAction(government_name_translation(gov));
     action->setData(i);
-    sprite = get_government_sprite(tileset, gov);
+    sprite = get_government_sprite(get_tileset(), gov);
     if (sprite != nullptr) {
       action->setIcon(QIcon(sprite->pm));
     }

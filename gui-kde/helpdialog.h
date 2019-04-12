@@ -135,6 +135,7 @@ public:
   static const int UidRole = Qt::UserRole + 2;
 
   using IndexStack = QStack<QModelIndex>;
+  using MatchFunc = std::function<bool (HelpNode*)>;
 
   HelpModel(QObject* parent = nullptr);
 
@@ -146,24 +147,19 @@ public:
 
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-public:
 
   QModelIndex findByUniversal(const universal& u,
                               const QModelIndex& parent = QModelIndex()) const;
   IndexStack findByTopic(const QString& title, help_page_type section,
                          const QModelIndex& parent = QModelIndex()) const;
+  void findAnything(IndexStack& results, const QModelIndex& parent, bool stopAtFirst,
+                    MatchFunc matchFunc) const;
+
   bool isValid() const;
 
 public slots:
 
   void reset();
-
-private:
-
-  using MatchFunc = std::function<bool (HelpNode*)>;
-
-  void findAnything(IndexStack& results, const QModelIndex& parent, bool stopAtFirst,
-                    MatchFunc matchFunc) const;
 
 private:
 

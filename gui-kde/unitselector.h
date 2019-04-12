@@ -52,6 +52,8 @@ private:
   tile *m_tile;
 
   QTimer m_delay;
+
+  bool m_first;
 };
 
 }

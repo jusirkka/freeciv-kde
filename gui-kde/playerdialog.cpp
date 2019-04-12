@@ -14,6 +14,8 @@
 #include <KSharedConfig>
 #include <QWindow>
 
+#include "client_main.h"
+
 using namespace KV;
 
 PlayerDialog::PlayerDialog(QWidget *parent)
@@ -66,9 +68,9 @@ PlayerDialog::~PlayerDialog() {
   KWindowConfig::saveWindowSize(windowHandle(), cnf);
 }
 
-void PlayerDialog::initMeeting(int counterpart) {
+void PlayerDialog::initMeeting(int counterpart, int initiator) {
   qCDebug(FC) << "initMeeting" << counterpart;
-  cancelMeeting(counterpart);
+  cancelMeeting(counterpart, InvalidPlayer);
 
   auto p = player_by_number(counterpart);
   // create a new tab
@@ -77,52 +79,63 @@ void PlayerDialog::initMeeting(int counterpart) {
   auto meeting = new QWidget;
   meeting->setLayout(layout);
   QString label = nation_plural_for_player(p);
-  auto icon = QIcon(get_nation_flag_sprite(tileset, nation_of_player(p))->pm);
-  m_meetings[counterpart] = m_tabs->addTab(meeting, icon, label);
-  m_tabs->setCurrentIndex(m_meetings[counterpart]);
+  auto icon = QIcon(get_nation_flag_sprite(get_tileset(), nation_of_player(p))->pm);
+  m_meetings[counterpart].index = m_tabs->addTab(meeting, icon, label);
+  m_meetings[counterpart].initiator = initiator;
+  m_tabs->setCurrentIndex(m_meetings[counterpart].index);
 
   show();
   raise();
 
 }
 
-void PlayerDialog::cancelMeeting(int counterpart) {
+void PlayerDialog::cancelMeeting(int counterpart, int canceler) {
   // qCDebug(FC) << "cancelMeeting" << counterpart;
 
   if (!m_meetings.contains(counterpart)) return;
 
   qCDebug(FC) << "cancelMeeting: found" << counterpart;
-  auto w = m_tabs->widget(m_meetings[counterpart]);
-  m_tabs->removeTab(m_meetings[counterpart]);
+  int initiator = m_meetings[counterpart].initiator;
+
+  auto w = m_tabs->widget(m_meetings[counterpart].index);
+  m_tabs->removeTab(m_meetings[counterpart].index);
   delete w;
   m_meetings.remove(counterpart);
   for (int i = 1; i < m_tabs->count(); i++) {
     auto meeting = m_tabs->widget(i)->findChild<TreatyDialog*>();
-    m_meetings[meeting->away()] = i;
+    m_meetings[meeting->away()].index = i;
+  }
+
+  if (!m_meetings.isEmpty() || canceler == InvalidPlayer) return;
+
+  // hide player dialog if it was popped up by other player's meeting request
+  int me = player_number(client_player());
+  if (canceler == me && initiator != me) {
+    hide();
   }
 }
 
 
 void PlayerDialog::createClause(int counterpart, const Clause& clause) {
   if (!m_meetings.contains(counterpart)) return;
-  auto meeting = m_tabs->widget(m_meetings[counterpart])->findChild<TreatyDialog*>();
+  auto meeting = m_tabs->widget(m_meetings[counterpart].index)->findChild<TreatyDialog*>();
   meeting->createClause(clause);
 }
 
 void PlayerDialog::removeClause(int counterpart, const Clause& clause) {
   if (!m_meetings.contains(counterpart)) return;
-  auto meeting = m_tabs->widget(m_meetings[counterpart])->findChild<TreatyDialog*>();
+  auto meeting = m_tabs->widget(m_meetings[counterpart].index)->findChild<TreatyDialog*>();
   meeting->removeClause(clause);
 }
 
 void PlayerDialog::acceptTreaty(int counterpart, bool resolution) {
   if (!m_meetings.contains(counterpart)) return;
-  auto meeting = m_tabs->widget(m_meetings[counterpart])->findChild<TreatyDialog*>();
+  auto meeting = m_tabs->widget(m_meetings[counterpart].index)->findChild<TreatyDialog*>();
   meeting->awayResolution(resolution);
 }
 
 void PlayerDialog::closeAllTreatyDialogs() {
   for (auto id: m_meetings.keys()) {
-    cancelMeeting(id);
+    cancelMeeting(id, InvalidPlayer);
   }
 }

@@ -90,6 +90,7 @@ protected:
   QPixmap m_pix;
   QPixmap m_hpix;
   unit* m_unit;
+  QSize m_unitSize;
 
 
 };

@@ -17,7 +17,7 @@
 
 using namespace KV;
 
-TreatyDialog::TreatyDialog(player* away, QWidget *parent)
+TreatyDialog::TreatyDialog(player *away, QWidget *parent)
   : QDialog(parent)
   , m_ui(new Ui::TreatyDialog)
   , m_away(away)
@@ -26,14 +26,14 @@ TreatyDialog::TreatyDialog(player* away, QWidget *parent)
 
   auto me = client_player();
 
-  auto sprite = get_nation_flag_sprite(tileset, nation_of_player(me));
+  auto sprite = get_nation_flag_sprite(get_tileset(), nation_of_player(me));
   if (sprite) {
     m_ui->homeFlagLabel->setPixmap(sprite->pm);
   } else {
     m_ui->homeFlagLabel->setText("FLAG MISSING");
   }
 
-  sprite = get_nation_flag_sprite(tileset, nation_of_player(m_away));
+  sprite = get_nation_flag_sprite(get_tileset(), nation_of_player(m_away));
   if (sprite) {
     m_ui->awayFlagLabel->setPixmap(sprite->pm);
   } else {
@@ -41,18 +41,18 @@ TreatyDialog::TreatyDialog(player* away, QWidget *parent)
   }
 
   color* textcolors[2] = {
-    get_color(tileset, COLOR_MAPVIEW_CITYTEXT),
-    get_color(tileset, COLOR_MAPVIEW_CITYTEXT_DARK)
+    get_color(get_tileset(), COLOR_MAPVIEW_CITYTEXT),
+    get_color(get_tileset(), COLOR_MAPVIEW_CITYTEXT_DARK)
   };
 
-  auto c = get_player_color(tileset, me);
+  auto c = get_player_color(get_tileset(), me);
   auto nation = QString("<style>h3{background-color: %1; color: %2}</style><b><h3>%3</h3></b>")
       .arg(c->qcolor.name())
       .arg(color_best_contrast(c, textcolors, ARRAY_SIZE(textcolors))->qcolor.name())
       .arg(nation_plural_for_player(me));
   m_ui->homeNationLabel->setText(nation);
 
-  c = get_player_color(tileset, m_away);
+  c = get_player_color(get_tileset(), m_away);
   nation = QString("<style>h3{background-color: %1; color: %2}</style><b><h3>%3</h3></b>")
       .arg(c->qcolor.name())
       .arg(color_best_contrast(c, textcolors, ARRAY_SIZE(textcolors))->qcolor.name())
@@ -307,7 +307,7 @@ void TreatyDialog::updateTreaty() {
                                 "Please add some clauses. ---"));
   }
 
-  auto pix = get_treaty_thumb_sprite(tileset, m_awayAccepts);
+  auto pix = get_treaty_thumb_sprite(get_tileset(), m_awayAccepts);
   if (pix) {
     m_ui->acceptLabel->setPixmap(pix->pm);
   } else {

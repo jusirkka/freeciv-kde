@@ -31,6 +31,8 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
 {
   m_ui->setupUi(this);
   setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   // map widget
   connect(this, &CityDialog::cityChanged,
@@ -214,7 +216,7 @@ void CityDialog::updateProperty() {
 
     auto building = new QTableWidgetItem;
     building->setData(Qt::UserRole, cid_encode(target));
-    auto pix = get_building_sprite(tileset, target.value.building)->pm;
+    auto pix = get_building_sprite(get_tileset(), target.value.building)->pm;
     pix = pix.scaledToHeight(h);
     building->setData(Qt::DecorationRole, pix);
     QString descr = props[row].descr;

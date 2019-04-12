@@ -32,7 +32,7 @@ TileInfo::TileInfo(tile* ptile, QWidget *parent):
     if (y - height() > 0) {
       y -= height();
     } else {
-      y  += tileset_tile_height(tileset);
+      y  += tileset_tile_height(get_tileset());
     }
     if (x + width() > parentWidget()->width()) {
       x = parentWidget()->width() - width();

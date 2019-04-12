@@ -39,8 +39,8 @@ struct sprite* SpriteFactory::Crop(struct sprite *source,
   }
 
   int hex = 0;
-  if (scale != 1.0f && (tileset_hex_height(tileset) > 0
-      || tileset_hex_width(tileset) > 0)) {
+  if (scale != 1.0f && (tileset_hex_height(get_tileset()) > 0
+      || tileset_hex_width(get_tileset()) > 0)) {
     hex = 1;
   }
   int widthzoom = ceil(width * scale) + hex;

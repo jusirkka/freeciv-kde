@@ -138,16 +138,16 @@ void StartDialog::populateTree() {
     // Column 3 = Flag
     if (pplayer->nation) {
       playerItem->setData(3, Qt::DecorationRole,
-                          get_nation_flag_sprite(tileset, pplayer->nation)->pm);
+                          get_nation_flag_sprite(get_tileset(), pplayer->nation)->pm);
     }
     // Column 4 = Border color
-    if (player_has_color(tileset, pplayer)) {
+    if (player_has_color(get_tileset(), pplayer)) {
       QPixmap pm(m_ui->playerTree->header()->sectionSizeHint(4), 16);
       pm.fill(Qt::transparent);
       QPainter p;
       p.begin(&pm);
       p.fillRect(pm.width() / 2 - 8, 0, 16, 16, Qt::black);
-      p.fillRect(pm.width() / 2 - 7, 1, 14, 14, get_player_color(tileset, pplayer)->qcolor);
+      p.fillRect(pm.width() / 2 - 7, 1, 14, 14, get_player_color(get_tileset(), pplayer)->qcolor);
       p.end();
       playerItem->setData(4, Qt::DecorationRole, pm);
     }

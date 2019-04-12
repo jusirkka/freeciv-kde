@@ -19,8 +19,8 @@ protected:
 
   void paintEvent(QPaintEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
-  QSize sizeHint() const override;
   QSize minimumSizeHint() const override;
+  void resizeEvent(QResizeEvent *event) override;
 
 public slots:
 
@@ -30,10 +30,13 @@ signals:
 
 private:
 
-  QPoint m_rect;
-  QPoint m_trans;
+  void createDisplayPixmap(const QSize& s);
+
+private:
+
   city* m_city = nullptr;
-  QPixmap m_pixmap;
+  QPixmap m_displayPixmap;
+  QPixmap m_cityPixmap;
 
 };
 

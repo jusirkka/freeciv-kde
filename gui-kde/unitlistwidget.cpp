@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include "logging.h"
+#include "application.h"
 
 #include "client_main.h"
 #include "tilespec.h"
@@ -174,6 +175,7 @@ void PresentUnitsWidget::createUnits() {
 UnitItem::UnitItem(unit* punit, QWidget *parent)
   : QLabel(parent)
   , m_unit(punit)
+  , m_unitSize(80, 80)
 {}
 
 SupportedUnitItem::SupportedUnitItem(unit *punit, int happy_cost, QWidget *parent)
@@ -181,18 +183,19 @@ SupportedUnitItem::SupportedUnitItem(unit *punit, int happy_cost, QWidget *paren
 {
   if (m_unit == nullptr) return;
 
-  auto c = canvas_create(tileset_full_tile_width(get_tileset()),
-                         tileset_unit_with_upkeep_height(get_tileset()));
+  auto c = canvas_create(tileset_unit_width(get_tileset()),
+                         tileset_unit_with_small_upkeep_height(get_tileset()));
+
   c->map_pixmap.fill(Qt::transparent);
   put_unit(m_unit, c, 1, 0, 0);
   put_unit_city_overlays(m_unit, c, 0,
-                         tileset_unit_layout_offset_y(get_tileset()),
+                         tileset_unit_layout_small_offset_y(get_tileset()),
                          m_unit->upkeep, happy_cost);
 
-  setFixedWidth(c->map_pixmap.width());
-  setFixedHeight(c->map_pixmap.height());
+  m_pix = Application::SaneMargins(c->map_pixmap, m_unitSize);
+  setFixedWidth(m_pix.width());
+  setFixedHeight(m_pix.height());
   setToolTip(unit_description(m_unit));
-  m_pix = c->map_pixmap;
   canvas_free(c);
   setPixmap(m_pix);
   m_hpix = QPixmap(m_pix.size());
@@ -213,14 +216,15 @@ PresentUnitItem::PresentUnitItem(unit *punit, QWidget *parent)
 {
   if (m_unit == nullptr) return;
 
-  auto c = canvas_create(tileset_full_tile_width(get_tileset()),
-                         tileset_unit_height(get_tileset()));
+  auto c = canvas_create(tileset_unit_width(get_tileset()),
+                         tileset_unit_with_small_upkeep_height(get_tileset()));
+
   c->map_pixmap.fill(Qt::transparent);
   put_unit(m_unit, c, 1, 0, 0);
-  setFixedWidth(c->map_pixmap.width() + 4);
-  setFixedHeight(c->map_pixmap.height());
+  m_pix = Application::SaneMargins(c->map_pixmap, m_unitSize);
+  setFixedWidth(m_pix.width());
+  setFixedHeight(m_pix.height());
   setToolTip(unit_description(m_unit));
-  m_pix = c->map_pixmap;
   canvas_free(c);
   setPixmap(m_pix);
   m_hpix = QPixmap(m_pix.size());

@@ -98,7 +98,9 @@ void HelpDialog::readSettings() {
   m_vSplitterSizes = Conf::HelpDialog::bottomSplit();
 
   m_ui->chaptersButton->setChecked(Conf::HelpDialog::searchChapters());
+  on_chaptersButton_clicked();
   m_ui->headersButton->setChecked(Conf::HelpDialog::searchHeaders());
+  on_headersButton_clicked();
 }
 
 void HelpDialog::writeSettings() const {
@@ -753,19 +755,40 @@ void HelpFilter::setHeaders(bool on) {
 
 
 bool HelpFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
+  if (!m_headers && !m_chapters) return true;
+
   QObject* p = sourceModel();
   if (parent.isValid()) {
     p = static_cast<QObject*>(parent.internalPointer());
   }
-  auto node = qobject_cast<HelpNode*>(p->children()[row]);
-  if (!m_headers && !m_chapters) return true;
+
+  // accept if node or its children contains the search string
 
   bool accept = false;
+  auto re = filterRegExp();
+  auto model = qobject_cast<HelpModel*>(sourceModel());
+  auto node = qobject_cast<HelpNode*>(p->children()[row]);
+  auto myIndex = model->index(row, 0, parent);
   if (m_headers) {
-    accept = node->title.contains(filterRegExp());
+    accept = node->title.contains(re);
+    if (!accept) {
+      HelpModel::IndexStack res;
+      model->findAnything(res, myIndex, true, [re] (HelpNode* n) {
+        return n->title.contains(re);
+      });
+      accept = !res.isEmpty();
+    }
   }
   if (m_chapters && !accept) {
-    accept = node->text.contains(filterRegExp());
+    accept = node->text.contains(re);
+    if (!accept) {
+      HelpModel::IndexStack res;
+      auto model = qobject_cast<HelpModel*>(sourceModel());
+      model->findAnything(res, myIndex, true, [re] (HelpNode* n) {
+        return n->text.contains(re);
+      });
+      accept = !res.isEmpty();
+    }
   }
   return accept;
 }
@@ -1032,14 +1055,14 @@ static canvas *terrain_canvas(terrain *terrain,
   int canvas_y, count, i, width, height;
   struct extra_type *pextra;
 
-  width = tileset_full_tile_width(tileset);
-  height = tileset_full_tile_height(tileset);
-  canvas_y = height - tileset_tile_height(tileset);
+  width = tileset_full_tile_width(get_tileset());
+  height = tileset_full_tile_height(get_tileset());
+  canvas_y = height - tileset_tile_height(get_tileset());
 
   canvas = canvas_create(width, height);
   canvas->map_pixmap.fill(Qt::transparent);
   for (i = 0; i < 3; ++i) {
-    count = fill_basic_terrain_layer_sprite_array(tileset, sprs,
+    count = fill_basic_terrain_layer_sprite_array(get_tileset(), sprs,
                                                   i, terrain);
     put_drawn_sprites(canvas, 1.0f, 0, canvas_y, count, sprs, false);
   }
@@ -1051,12 +1074,12 @@ static canvas *terrain_canvas(terrain *terrain,
       break;
     } extra_type_by_cause_iterate_end;
 
-    count = fill_basic_extra_sprite_array(tileset, sprs, pextra);
+    count = fill_basic_extra_sprite_array(get_tileset(), sprs, pextra);
     put_drawn_sprites(canvas, 1.0f, 0, canvas_y, count, sprs, false);
   }
 
   if (resource != NULL) {
-    count = fill_basic_extra_sprite_array(tileset, sprs, resource);
+    count = fill_basic_extra_sprite_array(get_tileset(), sprs, resource);
     put_drawn_sprites(canvas, 1.0f, 0, canvas_y, count, sprs, false);
   }
 
