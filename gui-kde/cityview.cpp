@@ -21,6 +21,8 @@ CityView::CityView(QWidget* parent)
 {
   m_ui->setupUi(this);
   setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   m_filter = new CityFilterModel(this);
   m_cities = new CityModel(this);

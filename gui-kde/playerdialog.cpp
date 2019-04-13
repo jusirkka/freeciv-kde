@@ -28,6 +28,9 @@ PlayerDialog::PlayerDialog(QWidget *parent)
   setLayout(topLayout);
 
   setWindowTitle(qAppName() + ": Players");
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   m_tabs->setTabBarAutoHide(true);
   m_tabs->setTabsClosable(false);

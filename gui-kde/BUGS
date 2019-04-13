@@ -1,22 +1,25 @@
 TODO
-- fix minimap: zoom does not work
-- options (server, client) dialog
-- sporadic freezes when starting a new game
-
+- client options dialog
+- server options dialog
+- load saved game dialog
+- load scenario dialog
+- save game dialog
 - happiness & other city info dialog
 - battle log
 - font manager
 - cityview filter
-- load saved game dialog
-- load scenario dialog
-- save game dialog
 - demographics config dialog
+- select predefined players in start dialog (like in governor dialog)
+
 BUGS
-- unitselector: "MP:" -string is displayed only after hovering over with mouse
+
 - demographics pane formatting could be better
-- sporadic freezes when quitting the game
 - select nation dialog: first nation is overlined, but reserved nations not
 - default size of start dialog is too small
 - Sometimes Esc key does not properly close diplo dialog
 - ensure that observer cannot control the game
+- connect dialog does not display players of local server
+- connect dialog stops scanning servers
+- start dialog: cannot start as an observer
+- start dialog: starts as an observer
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gui name="freeciv-kde"
-     version="6"
+     version="7"
      xmlns="http://www.kde.org/standards/kxmlgui/1.0"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.kde.org/standards/kxmlgui/1.0
@@ -109,7 +109,8 @@
     </Menu>
 
     <Menu name="settings">
-      <Action name="options"/>
+      <Action name="localOptions"/>
+      <Action name="serverOptions"/>
     </Menu>
 
 </MenuBar>

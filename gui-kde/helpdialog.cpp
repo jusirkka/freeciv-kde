@@ -77,6 +77,8 @@ HelpDialog::HelpDialog(QWidget *parent)
 
   setWindowTitle("Freeciv Manual");
   setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
   readSettings();
 }
 

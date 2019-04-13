@@ -23,6 +23,8 @@ GovernorDialog::GovernorDialog(CityView* cities, QWidget *parent)
 {
   m_ui->setupUi(this);
   setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   m_priority[O_FOOD] = m_ui->fpri;
   m_priority[O_SHIELD] = m_ui->ppri;

@@ -36,22 +36,18 @@ void set_indicator_icons(struct sprite *bulb, struct sprite *sol, struct sprite 
 }
 
 void overview_size_changed() {
-  // qCDebug(FC) << "overview_size_changed: dummy";
-  KV::Application::UpdateOverview();
+  // qCDebug(FC) << "overview_size_changed";
 }
 
-void update_overview_scroll_window_pos(int x, int y) {
-  // qCDebug(FC) << "TODO: update_overview_scroll_window_pos";
+void update_overview_scroll_window_pos(int /*x*/, int /*y*/) {
 }
 
 void get_overview_area_dimensions(int *width, int *height) {
-  // qCDebug(FC) << "get_overview_area_dimensions: dummy";
-  *width = 0;
-  *height = 0;
+  *width = 1;
+  *height = 1;
 }
 
 canvas* get_overview_window() {
-  // qCDebug(FC) << "TODO: get_overview_window";
   return nullptr;
 }
 

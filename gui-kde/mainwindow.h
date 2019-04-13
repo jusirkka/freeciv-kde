@@ -133,7 +133,8 @@ private slots:
   void on_economy_triggered();
   void on_research_triggered();
   void on_spaceship_triggered();
-  void on_options_triggered();
+  void on_localOptions_triggered();
+  void on_serverOptions_triggered();
 
   void setCurrentState(bool active);
   void stateChange(client_pages page);

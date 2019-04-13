@@ -70,7 +70,11 @@ EconomyReport::EconomyReport(QWidget *parent)
 
   m_ui->buildingView->setItemDelegate(new EcoDelegate(this));
 
+
   setWindowTitle(QString("%1: Economy").arg(qAppName()));
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   create(); // ensure there's a window created
   const KConfigGroup cnf(KSharedConfig::openConfig(), "EconomyReport");

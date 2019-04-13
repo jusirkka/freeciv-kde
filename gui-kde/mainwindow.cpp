@@ -687,7 +687,14 @@ void MainWindow::on_research_triggered() {
 }
 
 void MainWindow::on_spaceship_triggered() {}
-void MainWindow::on_options_triggered() {}
+
+void MainWindow::on_localOptions_triggered() {
+  qCDebug(FC) << "local options";
+}
+
+void MainWindow::on_serverOptions_triggered() {
+  qCDebug(FC) << "server options";
+}
 
 void MainWindow::popupManual() {
   if (m_help->isVisible()) {
@@ -882,7 +889,9 @@ void MainWindow::addActions() {
       nullptr},
     {"spaceship", "Spaceship", "F12", "", "", false, false, false,
       nullptr},
-    {"options", "Options...", "", "configure", "", true, false, false,
+    {"localOptions", "Local Options...", "", "configure", "", true, false, false,
+      nullptr},
+    {"serverOptions", "Server Options...", "", "configure", "", false, false, false,
       nullptr},
   };
 

@@ -81,10 +81,10 @@ static void setup_gui_funcs() {
     delete store;
   };
   funcs->canvas_set_zoom = [] (canvas*, float) {
-    qCDebug(FC) << "TODO: canvas_set_zoom";
+    // qCDebug(FC) << "canvas_set_zoom";
   };
   funcs->has_zoom_support = [] () {
-    return true;
+    return false;
   };
   funcs->canvas_copy = [] (canvas *dest, canvas *src,
       int src_x, int src_y, int dest_x, int dest_y, int w, int h) {
@@ -176,7 +176,7 @@ static void setup_gui_funcs() {
     QPainter p;
     p.begin(&pcanvas->map_pixmap);
     p.setPen(pen);
-    p.setRenderHint(QPainter::Antialiasing);
+    // p.setRenderHint(QPainter::Antialiasing);
     p.drawLine(start_x, start_y, start_x + dx, start_y + dy);
     p.end();
   };

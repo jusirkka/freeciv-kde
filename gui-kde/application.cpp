@@ -465,10 +465,6 @@ void Application::UpdateUnitSelector() {
   instance()->updateUnitSelector();
 }
 
-void Application::UpdateOverview() {
-  instance()->updateOverview();
-}
-
 void Application::PopupScienceReport() {
   instance()->popupScienceReport();
 }
@@ -512,7 +508,6 @@ void Application::PopupHelpDialog(const QString &topic, help_page_type section) 
 void Application::PopdownHelpDialog() {
   instance()->popdownHelpDialog();
 }
-
 
 void Application::AddIdleCallback(void callback(void *), void *data) {
   // qCDebug(FC) << "AddIdleCallback";

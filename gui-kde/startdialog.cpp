@@ -87,6 +87,13 @@ StartDialog::StartDialog(QWidget *parent)
   connect(m_ui->observeButton, &QPushButton::clicked,
           this, &StartDialog::observe);
 
+  // config buttons
+  connect(m_ui->clientButton, &QPushButton::clicked,
+          this, &StartDialog::configLocal);
+
+  connect(m_ui->serverButton, &QPushButton::clicked,
+          this, &StartDialog::configServer);
+
   updateButtons();
   setWindowTitle(QString("%1: pregame settings").arg(qAppName()));
 

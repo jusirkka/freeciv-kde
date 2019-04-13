@@ -117,7 +117,6 @@ public:
   static void UpdateCity(city*);
   static void RefreshCityDialog(city*, bool popup);
   static void PopdownCityDialog(city*);
-  static void UpdateOverview();
   static void PopupScienceReport();
   static void UpdateScienceReport();
   static void UpdateActions();
@@ -129,6 +128,7 @@ public:
   static void UpdateEconomyReport();
   static void PopupHelpDialog(const QString& topic, help_page_type section);
   static void PopdownHelpDialog();
+
 
 
 
@@ -168,7 +168,6 @@ signals:
   void refreshCityDialog(city*, bool popup);
   void popdownCityDialog(city*);
   void updateUnitSelector();
-  void updateOverview();
   void popupScienceReport();
   void updateScienceReport();
   void updateActions();

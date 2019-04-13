@@ -186,6 +186,10 @@ Start::Start(MainWindow *parent)
 {
   connect(m_startDialog, &QDialog::accepted, this, &Start::playerReady);
   connect(m_startDialog, &QDialog::rejected, this, &Start::disconnectFromServer);
+  connect(m_startDialog, &StartDialog::configLocal,
+          m_parent->action("localOptions"), &QAction::triggered);
+  connect(m_startDialog, &StartDialog::configServer,
+          m_parent->action("serverOptions"), &QAction::triggered);
 }
 
 

@@ -153,7 +153,8 @@ void MapView::resizeEvent(QResizeEvent *event) {
 
   m_endTurn->move(s.width() - m_endTurn->width(), s.height() - m_endTurn->height());
 
-  m_minimap->resize(height() * 0.2, height() * 0.2);
+  int aspect = tileset_is_isometric(get_tileset()) ? 2 : 1;
+  m_minimap->resize(width() * aspect * 0.08, width() * 0.08);
   m_minimap->move(s.width() - m_minimap->width() - 5,
                   s.height() - m_endTurn->height() - m_minimap->height() - 10);
 }

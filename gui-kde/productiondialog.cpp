@@ -25,6 +25,8 @@ ProductionDialog::ProductionDialog(CityView* cities, QWidget *parent)
 {
   m_ui->setupUi(this);
   setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   // cut, copy, paste, open, save, delete
   m_ui->cutButton->setDefaultAction(m_ui->actionCut);

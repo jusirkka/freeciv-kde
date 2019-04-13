@@ -32,6 +32,9 @@ ScienceDialog::ScienceDialog(QWidget *parent)
           this, &ScienceDialog::updateReport);
 
   setWindowTitle(qAppName() + ": Research");
+  setWindowFlag(Qt::WindowStaysOnTopHint, false);
+  setWindowFlag(Qt::Dialog, false);
+  setWindowFlag(Qt::Window, true);
 
   create(); // ensure there's a window created
   const KConfigGroup cnf(KSharedConfig::openConfig(), "ScienceDialog");

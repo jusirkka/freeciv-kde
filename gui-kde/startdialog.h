@@ -38,6 +38,11 @@ private:
 
   void updateButtons();
 
+signals:
+
+  void configLocal(bool);
+  void configServer(bool);
+
 private:
 
   Ui::StartDialog* m_ui;
