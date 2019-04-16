@@ -27,6 +27,7 @@ class UnitActionChecker;
 class UnitReport;
 class EconomyReport;
 class HelpDialog;
+class LocalOptionsDialog;
 
 class MainWindow: public KXmlGuiWindow
 {
@@ -140,6 +141,7 @@ private slots:
   void stateChange(client_pages page);
   void restartStateMachine();
   void checkActions();
+  void updateOption(const void* d); // really an option pointer
   void popupManual();
 
 signals:
@@ -158,6 +160,7 @@ private:
 
   using CheckerMap = QMap<QString, UnitActionChecker*>;
   using CheckerMapIterator = QMapIterator<QString, UnitActionChecker*>;
+  using OptionNameMap = QMap<QString, QString>;
 
   QStateMachine m_states;
   State::Base* m_currentState;
@@ -172,9 +175,11 @@ private:
   QRect m_fallbackGeom;
   CheckerMap m_checkers;
   QStringList m_staticGameActions;
+  OptionNameMap m_optionActions;
   UnitReport* m_unitReport;
   EconomyReport* m_economyReport;
   HelpDialog* m_help;
+  LocalOptionsDialog* m_localOptions;
 };
 
 }

@@ -1,5 +1,4 @@
-#ifndef SPRITEWIDGET_H
-#define SPRITEWIDGET_H
+#pragma once
 
 #include <QPushButton>
 
@@ -36,5 +35,3 @@ private:
 };
 
 }
-
-#endif // SPRITEWIDGET_H

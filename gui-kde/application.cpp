@@ -109,7 +109,7 @@ void Application::Main(int argc, char **argv) {
   calculate_overview_dimensions();
 
   // mainwindow ctor refers to application instance:
-  // cannot be created in in the instance ctor, so created here instead
+  // cannot be created in the instance ctor, so created here instead
   instance()->m_mainWindow = new MainWindow;
   instance()->m_mainWindow->show();
   app.exec();
@@ -507,6 +507,10 @@ void Application::PopupHelpDialog(const QString &topic, help_page_type section) 
 
 void Application::PopdownHelpDialog() {
   instance()->popdownHelpDialog();
+}
+
+void Application::UpdateOption(const option *opt) {
+  instance()->updateOption(opt);
 }
 
 void Application::AddIdleCallback(void callback(void *), void *data) {

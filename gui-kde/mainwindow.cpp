@@ -41,6 +41,7 @@ extern "C" {
 #include <KHelpMenu>
 #include <KAboutData>
 #include "helpdialog.h"
+#include "localoptionsdialog.h"
 
 using namespace KV;
 
@@ -116,8 +117,13 @@ MainWindow::MainWindow()
     m_help->hide();
   });
 
+  m_localOptions = new LocalOptionsDialog(this);
+
   connect(Application::instance(), &Application::updateActions,
           this, &MainWindow::checkActions);
+
+  connect(Application::instance(), &Application::updateOption,
+          this, &MainWindow::updateOption);
 
   addActions();
   createStateMachine();
@@ -302,69 +308,91 @@ void MainWindow::on_minimap_toggled(bool on) {
 }
 
 void MainWindow::on_cityOutlines_toggled(bool on) {
-  if (gui_options.draw_city_outlines != on) {
-    key_city_outlines_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_outlines");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_cityOutput_toggled(bool on) {
-  if (gui_options.draw_city_output != on) {
-    key_city_output_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_output");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_mapGrid_toggled(bool on) {
-  if (gui_options.draw_map_grid != on) {
-    key_map_grid_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_map_grid");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_nationalBorders_toggled(bool on) {
-  if (gui_options.draw_borders != on) {
-    key_map_borders_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_borders");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_nativeTiles_toggled(bool on) {
-  if (gui_options.draw_native != on) {
-    key_map_native_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_native");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_cityFullBar_toggled(bool on) {
-  if (gui_options.draw_full_citybar != on) {
-    key_city_full_bar_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_full_citybar");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 
 void MainWindow::on_cityNames_toggled(bool on) {
-  if (gui_options.draw_city_names != on) {
-    key_city_names_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_names");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_cityGrowth_toggled(bool on) {
-  if (gui_options.draw_city_growth != on) {
-    key_city_growth_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_growth");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_cityProductionLevels_toggled(bool on) {
-  if (gui_options.draw_city_productions != on) {
-    key_city_productions_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_productions");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_cityBuyCost_toggled(bool on) {
-  if (gui_options.draw_city_buycost != on) {
-    key_city_buycost_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_buycost");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
 void MainWindow::on_cityTradeRoutes_toggled(bool on) {
-  if (gui_options.draw_city_trade_routes != on) {
-    key_city_trade_routes_toggle();
+  auto opt = optset_option_by_name(client_optset, "draw_city_trade_routes");
+  bool v = option_bool_get(opt);
+  if (v != on) {
+    option_bool_set(opt, on);
   }
 }
 
@@ -689,7 +717,7 @@ void MainWindow::on_research_triggered() {
 void MainWindow::on_spaceship_triggered() {}
 
 void MainWindow::on_localOptions_triggered() {
-  qCDebug(FC) << "local options";
+  m_localOptions->checkAndShow();
 }
 
 void MainWindow::on_serverOptions_triggered() {
@@ -914,6 +942,7 @@ void MainWindow::addActions() {
       if (opt != nullptr) {
         a->setToolTip(option_description(opt));
         a->setWhatsThis(option_help_text(opt));
+        m_optionActions[d.tooltipOrKey] = d.name;
         if (d.checkable) { // boolean option
           a->setChecked(option_bool_get(opt));
         }
@@ -973,6 +1002,15 @@ void MainWindow::checkActions() {
       it.value()->check(units, actionCollection()->action(it.key()));
     }
   }
+}
+
+void MainWindow::updateOption(const void *d) {
+  auto opt = static_cast<const option*>(d);
+  if (option_optset(opt) != client_optset) return;
+  if (option_type(opt) != OT_BOOLEAN) return; // only booleans supported atm
+  QString optName = option_name(opt);
+  if (!m_optionActions.contains(optName)) return;
+  actionCollection()->action(m_optionActions[optName])->setChecked(option_bool_get(opt));
 }
 
 void MainWindow::registerPaneAction(QAction *a, int idx, const QKeySequence& sc) {

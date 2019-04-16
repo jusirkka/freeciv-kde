@@ -48,6 +48,8 @@ class Application: public QObject {
   friend class UnitReport;
   friend class EconomyReport;
   friend class HelpDialog;
+  friend class NationDialog;
+  friend class OptionModel;
 
 public:
 
@@ -128,6 +130,7 @@ public:
   static void UpdateEconomyReport();
   static void PopupHelpDialog(const QString& topic, help_page_type section);
   static void PopdownHelpDialog();
+  static void UpdateOption(const option* opt);
 
 
 
@@ -179,6 +182,7 @@ signals:
   void updateEconomyReport();
   void popupHelpDialog(const QString& topic, help_page_type section);
   void popdownHelpDialog();
+  void updateOption(const void* opt);
 
 
 
