@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QStateMachine>
 #include "themesmanager.h"
+#include "serveroptionsdialog.h"
 
 #include "tilespec.h"
 #include "version.h"
@@ -198,6 +199,8 @@ Start::~Start() {
 }
 
 void Start::onEntry(QEvent* event) {
+  // ensure server option validity
+  m_parent->m_serverOptions->reset();
   m_startDialog->show();
   QState::onEntry(event);
 }

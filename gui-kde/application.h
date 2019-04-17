@@ -131,6 +131,8 @@ public:
   static void PopupHelpDialog(const QString& topic, help_page_type section);
   static void PopdownHelpDialog();
   static void UpdateOption(const option* opt);
+  static void AddOption(option* opt);
+  static void DelOption(const option* opt);
 
 
 
@@ -183,6 +185,8 @@ signals:
   void popupHelpDialog(const QString& topic, help_page_type section);
   void popdownHelpDialog();
   void updateOption(const void* opt);
+  void addOption(void* opt);
+  void delOption(const void* opt);
 
 
 

@@ -42,6 +42,7 @@ extern "C" {
 #include <KAboutData>
 #include "helpdialog.h"
 #include "localoptionsdialog.h"
+#include "serveroptionsdialog.h"
 
 using namespace KV;
 
@@ -118,6 +119,7 @@ MainWindow::MainWindow()
   });
 
   m_localOptions = new LocalOptionsDialog(this);
+  m_serverOptions = new ServerOptionsDialog(this);
 
   connect(Application::instance(), &Application::updateActions,
           this, &MainWindow::checkActions);
@@ -721,7 +723,7 @@ void MainWindow::on_localOptions_triggered() {
 }
 
 void MainWindow::on_serverOptions_triggered() {
-  qCDebug(FC) << "server options";
+  m_serverOptions->checkAndShow();
 }
 
 void MainWindow::popupManual() {

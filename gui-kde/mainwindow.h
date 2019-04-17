@@ -14,6 +14,7 @@ namespace State {
 class Base;
 class Network;
 class Game;
+class Start;
 }
 
 class ChatLineEdit;
@@ -28,6 +29,7 @@ class UnitReport;
 class EconomyReport;
 class HelpDialog;
 class LocalOptionsDialog;
+class ServerOptionsDialog;
 
 class MainWindow: public KXmlGuiWindow
 {
@@ -36,6 +38,7 @@ class MainWindow: public KXmlGuiWindow
 
   friend class State::Network;
   friend class State::Game;
+  friend class State::Start;
   friend class OutputPaneManager;
 
 public:
@@ -180,6 +183,7 @@ private:
   EconomyReport* m_economyReport;
   HelpDialog* m_help;
   LocalOptionsDialog* m_localOptions;
+  ServerOptionsDialog* m_serverOptions;
 };
 
 }

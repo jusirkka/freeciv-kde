@@ -1,5 +1,5 @@
-#include "localoptionsdialog.h"
-#include "ui_localoptionsdialog.h"
+#include "serveroptionsdialog.h"
+#include "ui_serveroptionsdialog.h"
 #include <KConfigGroup>
 #include <KWindowConfig>
 #include <KSharedConfig>
@@ -15,14 +15,18 @@
 
 using namespace KV;
 
-LocalOptionsDialog::LocalOptionsDialog(QWidget *parent)
+ServerOptionsDialog::ServerOptionsDialog(QWidget *parent)
     : QDialog(parent)
-    , m_ui(new Ui::LocalOptionsDialog)
-    , m_model(new LocalOptionModel)
+    , m_ui(new Ui::ServerOptionsDialog)
+    , m_model(new ServerOptionModel)
     , m_filter(new CategoriesFilter)
 {
   m_ui->setupUi(this);
-  setWindowTitle(QString("%1: Local Options").arg(qAppName()));
+  setWindowTitle(QString("%1: Server Options").arg(qAppName()));
+
+  m_ui->openButton->setDefaultAction(m_ui->actionOpen);
+  m_ui->saveButton->setDefaultAction(m_ui->actionSave);
+  m_ui->deleteButton->setDefaultAction(m_ui->actionDelete);
 
   auto a = QWhatsThis::createAction(this);
   a->setIcon(QIcon::fromTheme("help-contextual"));
@@ -32,30 +36,34 @@ LocalOptionsDialog::LocalOptionsDialog(QWidget *parent)
   m_ui->pageView->setModel(m_filter);
 
   connect(m_model, &OptionModel::edited,
-          this, &LocalOptionsDialog::optionModel_edited);
+          this, &ServerOptionsDialog::optionModel_edited);
   connect(m_model, &OptionModel::defaulted,
-          this, &LocalOptionsDialog::optionModel_defaulted);
+          this, &ServerOptionsDialog::optionModel_defaulted);
 
   create(); // ensure there's a window created
-  const KConfigGroup cnf(KSharedConfig::openConfig(), "LocalOptionsDialog");
+  const KConfigGroup cnf(KSharedConfig::openConfig(), "ServerOptionsDialog");
   KWindowConfig::restoreWindowSize(windowHandle(), cnf);
   resize(windowHandle()->size());
 
   on_pageView_currentPageChanged();
 }
 
-LocalOptionsDialog::~LocalOptionsDialog() {
-  KConfigGroup cnf(KSharedConfig::openConfig(), "LocalOptionsDialog");
+ServerOptionsDialog::~ServerOptionsDialog() {
+  KConfigGroup cnf(KSharedConfig::openConfig(), "ServerOptionsDialog");
   KWindowConfig::saveWindowSize(windowHandle(), cnf);
   delete m_ui;
 }
 
-void LocalOptionsDialog::checkAndShow() {
+void ServerOptionsDialog::checkAndShow() {
   on_pageView_currentPageChanged();
   show();
 }
 
-void LocalOptionsDialog::on_searchLine_textEdited(const QString &s) {
+void ServerOptionsDialog::reset() {
+  m_model->reset();
+}
+
+void ServerOptionsDialog::on_searchLine_textEdited(const QString &s) {
   if (s.length() < 3) {
     m_filter->setFilterRegularExpression(QRegularExpression());
   } else {
@@ -63,7 +71,7 @@ void LocalOptionsDialog::on_searchLine_textEdited(const QString &s) {
   }
 }
 
-void LocalOptionsDialog::optionModel_edited(OptionWidget *opt, bool edited) {
+void ServerOptionsDialog::optionModel_edited(OptionWidget *opt, bool edited) {
   if (edited && !m_edits.contains(opt)) {
     // qCDebug(FC) << "adding" << opt->description() << "to edits";
     m_edits.append(opt);
@@ -74,21 +82,22 @@ void LocalOptionsDialog::optionModel_edited(OptionWidget *opt, bool edited) {
   updateState();
 }
 
-void LocalOptionsDialog::optionModel_defaulted(OptionWidget *opt, bool defaulted) {
+void ServerOptionsDialog::optionModel_defaulted(OptionWidget *opt, bool defaulted) {
   if (defaulted && m_nonDefaults.contains(opt)) {
-    qCDebug(FC) << "removing" << opt->description() << "from defaults";
+    qCDebug(FC) << "removing" << opt->description() << "from non-defaults";
     m_nonDefaults.removeAll(opt);
   } else if (!defaulted && !m_edits.contains(opt)) {
-    qCDebug(FC) << "adding" << opt->description() << "to defaults";
+    qCDebug(FC) << "adding" << opt->description() << "to non-defaults";
     m_nonDefaults.append(opt);
   }
   updateState();
 }
 
-void LocalOptionsDialog::on_pageView_currentPageChanged(const QModelIndex& curr,
+void ServerOptionsDialog::on_pageView_currentPageChanged(const QModelIndex& curr,
                                                         const QModelIndex& prev) {
   auto idx = m_filter->mapToSource(m_ui->pageView->currentPage());
   if (!idx.isValid()) return;
+
   m_model->checkOptions(idx);
 
   if (!m_edits.isEmpty()) {
@@ -104,14 +113,14 @@ void LocalOptionsDialog::on_pageView_currentPageChanged(const QModelIndex& curr,
   auto opts = page->findChildren<OptionWidget*>();
   for (auto opt: opts) {
     if (opt->defaultable()) {
-      // qCDebug(FC) << "adding" << opt->description() << "to defaults";
+      qCDebug(FC) << "adding" << opt->description() << "to non-defaults";
       m_nonDefaults.append(opt);
     }
   }
   updateState();
 }
 
-void LocalOptionsDialog::updateState() {
+void ServerOptionsDialog::updateState() {
   bool editing = !m_edits.isEmpty();
   bool canDefault = !m_nonDefaults.isEmpty();
 
@@ -125,9 +134,10 @@ void LocalOptionsDialog::updateState() {
   m_ui->closeButton->setEnabled(!editing);
 }
 
-void LocalOptionsDialog::on_defaultsButton_clicked() {
+void ServerOptionsDialog::on_defaultsButton_clicked() {
   while (!m_nonDefaults.isEmpty()) {
     auto opt = m_nonDefaults.takeFirst();
+    qCDebug(FC) << "defaulting" << opt->description();
     opt->defaultIt();
   }
   desired_settable_options_update();
@@ -135,7 +145,7 @@ void LocalOptionsDialog::on_defaultsButton_clicked() {
   updateState();
 }
 
-void LocalOptionsDialog::on_resetButton_clicked() {
+void ServerOptionsDialog::on_resetButton_clicked() {
   while (!m_edits.isEmpty()) {
     auto opt = m_edits.takeFirst();
     opt->reset();
@@ -145,7 +155,7 @@ void LocalOptionsDialog::on_resetButton_clicked() {
   updateState();
 }
 
-void LocalOptionsDialog::on_applyButton_clicked() {
+void ServerOptionsDialog::on_applyButton_clicked() {
   while (!m_edits.isEmpty()) {
     auto opt = m_edits.takeFirst();
     opt->apply();

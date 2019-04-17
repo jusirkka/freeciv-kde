@@ -232,7 +232,7 @@ QString Application::ApplyTags(const char *s, const text_tag_list *tags) {
 }
 
 void Application::ChatMessage(const char *s, const text_tag_list *tags, int) {
-  qCDebug(FC) << "Application::ChatMessage";
+  // qCDebug(FC) << "Application::ChatMessage";
 
   QString wakeup(gui_options.gui_qt_wakeup_text);
   /* Format wakeup string if needed */
@@ -511,6 +511,14 @@ void Application::PopdownHelpDialog() {
 
 void Application::UpdateOption(const option *opt) {
   instance()->updateOption(opt);
+}
+
+void Application::AddOption(option *opt) {
+  instance()->addOption(opt);
+}
+
+void Application::DelOption(const option *opt) {
+  instance()->delOption(opt);
 }
 
 void Application::AddIdleCallback(void callback(void *), void *data) {

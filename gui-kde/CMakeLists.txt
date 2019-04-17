@@ -89,6 +89,7 @@ set(fc_kde_srcs
     helpdialog.cpp
     optionmodel.cpp
     localoptionsdialog.cpp
+    serveroptionsdialog.cpp
 )
 
 ki18n_wrap_ui(fc_kde_srcs
@@ -109,6 +110,7 @@ ki18n_wrap_ui(fc_kde_srcs
     economyreport.ui
     helpdialog.ui
     localoptionsdialog.ui
+    serveroptionsdialog.ui
 )
 
 kconfig_add_kcfg_files(fc_kde_srcs
