@@ -10,8 +10,14 @@
 #include "logging.h"
 #include <KPageWidgetModel>
 #include "optionmodel.h"
+#include <QDirIterator>
+#include <QMenu>
+#include "inputbox.h"
+#include "messagebox.h"
 
 #include "options.h"
+#include "chat.h"
+#include "chatline_common.h"
 
 using namespace KV;
 
@@ -46,6 +52,7 @@ ServerOptionsDialog::ServerOptionsDialog(QWidget *parent)
   resize(windowHandle()->size());
 
   on_pageView_currentPageChanged();
+  on_copyButton_clicked();
 }
 
 ServerOptionsDialog::~ServerOptionsDialog() {
@@ -123,6 +130,7 @@ void ServerOptionsDialog::on_pageView_currentPageChanged(const QModelIndex& curr
 void ServerOptionsDialog::updateState() {
   bool editing = !m_edits.isEmpty();
   bool canDefault = !m_nonDefaults.isEmpty();
+  bool preset = m_ui->copyButton->isEnabled();
 
   auto view = m_ui->pageView->findChild<QAbstractItemView*>();
   if (view != nullptr) {
@@ -132,6 +140,12 @@ void ServerOptionsDialog::updateState() {
   m_ui->resetButton->setEnabled(editing);
   m_ui->applyButton->setEnabled(editing);
   m_ui->closeButton->setEnabled(!editing);
+
+  m_ui->pageView->setEnabled(!preset);
+
+  m_ui->openButton->setEnabled(!editing);
+  m_ui->saveButton->setEnabled(!editing && !preset);
+  m_ui->deleteButton->setEnabled(true);
 }
 
 void ServerOptionsDialog::on_defaultsButton_clicked() {
@@ -165,4 +179,94 @@ void ServerOptionsDialog::on_applyButton_clicked() {
   updateState();
 }
 
+void ServerOptionsDialog::on_copyButton_clicked() {
+  m_ui->copyButton->setEnabled(false);
+  m_ui->nameLabel->setText("Untitled");
+  updateState();
+}
 
+static void serverCommand(const QString& s) {
+  auto cmd = QString("%1%2").arg(SERVER_COMMAND_PREFIX).arg(s);
+  send_chat(cmd.toUtf8());
+}
+
+void ServerOptionsDialog::on_actionOpen_triggered() {
+  QMenu menu;
+  QDirIterator it(
+        freeciv_storage_dir(),
+        QStringList() << "*.serv",
+        QDir::Files | QDir::Readable,
+        QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+  while (it.hasNext()) {
+    auto path = it.next();
+    auto a = new QAction(it.fileInfo().completeBaseName());
+    a->setData(path);
+    menu.addAction(a);
+  }
+
+  auto a = menu.exec(QCursor::pos());
+  if (a == nullptr) return;
+
+  auto path = a->data().toString();
+  // qCDebug(FC) << "/read" << path;
+  serverCommand(QString("read %1").arg(path));
+
+  m_ui->copyButton->setEnabled(true);
+  m_ui->nameLabel->setText(a->text());
+  updateState();
+}
+
+void ServerOptionsDialog::on_actionSave_triggered() {
+  KV::InputBox ask(this,
+                   QString(
+                     _("What should we name the new server configuration file?\n"
+                       "Subdirectories are created if needed and prefix appended.\n"
+                       "E.g. path/to/example becomes example.serv in %1/path/to."))
+                   .arg(freeciv_storage_dir()),
+                   _("Save current server configuration"),
+                   "server_config");
+
+  if (ask.exec() != QDialog::Accepted) return;
+  auto path = ask.input().trimmed();
+  if (path.isEmpty()) return;
+  path += ".serv";
+
+  QDir storage(freeciv_storage_dir());
+
+  // qCDebug(FC) << "/write" << storage.absoluteFilePath(path);
+  storage.mkpath(QFileInfo(path).path());
+  serverCommand(QString("write %1").arg(storage.absoluteFilePath(path)));
+
+  m_ui->copyButton->setEnabled(true);
+  m_ui->nameLabel->setText(QFileInfo(path).completeBaseName());
+  updateState();
+}
+
+void ServerOptionsDialog::on_actionDelete_triggered() {
+  QMenu menu;
+  QDirIterator it(
+        freeciv_storage_dir(),
+        QStringList() << "*.serv",
+        QDir::Files | QDir::Writable,
+        QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+  while (it.hasNext()) {
+    auto path = it.next();
+    auto a = new QAction(it.fileInfo().completeBaseName());
+    a->setData(path);
+    menu.addAction(a);
+  }
+
+  auto a = menu.exec(QCursor::pos());
+  if (a == nullptr) return;
+
+  auto path = a->data().toString();
+  // qCDebug(FC) << path;
+
+  StandardMessageBox ask(this,
+                         QString("Do you really want delete %1?")
+                         .arg(path),
+                         "Delete server config");
+  if (ask.exec() == QMessageBox::Ok) {
+    QFile(path).remove();
+  }
+}

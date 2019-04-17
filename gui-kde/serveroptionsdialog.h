@@ -32,6 +32,12 @@ private slots:
   void on_resetButton_clicked();
   void on_applyButton_clicked();
 
+  void on_copyButton_clicked();
+
+  void on_actionOpen_triggered();
+  void on_actionSave_triggered();
+  void on_actionDelete_triggered();
+
   void on_pageView_currentPageChanged(const QModelIndex& curr = QModelIndex(),
                                       const QModelIndex& prev = QModelIndex());
   void on_searchLine_textEdited(const QString& filter);
