@@ -61,6 +61,7 @@ protected:
 private slots:
 
   void on_saveGameAs_triggered();
+  void on_newGame_triggered();
   void on_loadScenario_triggered();
   void on_loadGame_triggered();
   void on_quit_triggered();
@@ -150,6 +151,7 @@ private slots:
 signals:
 
   void resetStateMachine();
+  void startNewGame(const QString& fromFile);
 
 private:
 
@@ -158,6 +160,7 @@ private:
   void addActions();
   void createStateMachine();
   void registerPaneAction(QAction* a, int idx, const QKeySequence& sc);
+  void loadGame(const QStringList& dirs);
 
 private:
 

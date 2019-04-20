@@ -159,7 +159,7 @@ void OptionModel::delOption(const void *d) {
   auto page = m_categories[category];
   auto lay = qobject_cast<QVBoxLayout*>(page->widget()->layout());
   lay->removeWidget(w);
-  delete w;
+  // w->deleteLater(); crashes
 }
 
 

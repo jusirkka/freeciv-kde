@@ -532,7 +532,8 @@ void Application::StateChange(client_pages page) {
 }
 
 client_pages Application::CurrentState() {
-  qCDebug(FC) << "Application::CurrentState";
+  qCDebug(FC) << "Application::CurrentState is "
+              << client_pages_name(instance()->m_mainWindow->state());
   return instance()->m_mainWindow->state();
 }
 

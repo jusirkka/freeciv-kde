@@ -43,6 +43,9 @@ extern "C" {
 #include "helpdialog.h"
 #include "localoptionsdialog.h"
 #include "serveroptionsdialog.h"
+#include "filedialog.h"
+#include <QDir>
+#include <KFileWidget>
 
 using namespace KV;
 
@@ -158,7 +161,7 @@ void MainWindow::createStateMachine() {
   m_states.addState(final);
 
   intro->addTransition(action("connectToGame"), &QAction::triggered, nw);
-  intro->addTransition(action("newGame"), &QAction::triggered, nw);
+  intro->addTransition(this, &MainWindow::startNewGame, nw);
   intro->addTransition(intro, &State::Intro::playing, game);
   intro->addTransition(this, &MainWindow::resetStateMachine, final);
 
@@ -171,7 +174,7 @@ void MainWindow::createStateMachine() {
   start->addTransition(this, &MainWindow::resetStateMachine, final);
 
   game->addTransition(action("connectToGame"), &QAction::triggered, nw);
-  game->addTransition(action("newGame"), &QAction::triggered, nw);
+  game->addTransition(this, &MainWindow::startNewGame, nw);
   game->addTransition(this, &MainWindow::resetStateMachine, final);
 
   connect(&m_states, &QStateMachine::finished,
@@ -262,9 +265,60 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
 }
 
-void MainWindow::on_saveGameAs_triggered() {}
-void MainWindow::on_loadScenario_triggered() {}
-void MainWindow::on_loadGame_triggered() {}
+void MainWindow::on_newGame_triggered() {
+  emit startNewGame("");
+}
+
+void MainWindow::on_saveGameAs_triggered() {
+  auto sd = get_save_dirs();
+  QStringList folders;
+  strvec_iterate(sd, s) {
+    folders << s;
+  } strvec_iterate_end;
+
+  FileDialog save(folders, KFileWidget::Saving, this);
+  if (save.exec() != QDialog::Accepted) return;
+  // qCDebug(FC) << save.selectedFile();
+  if (save.selectedFile().isEmpty()) return;
+  Chat::sendServerCommand(QString("save %1").arg(save.selectedFile()));
+}
+
+
+void MainWindow::on_loadScenario_triggered() {
+  auto sc = get_scenario_dirs();
+  QStringList dirs;
+  strvec_iterate(sc, s) {
+    dirs << s;
+  } strvec_iterate_end;
+  loadGame(dirs);
+}
+
+void MainWindow::on_loadGame_triggered() {
+  auto sd = get_save_dirs();
+  QStringList dirs;
+  strvec_iterate(sd, s) {
+    dirs << s;
+  } strvec_iterate_end;
+  loadGame(dirs);
+}
+
+void MainWindow::loadGame(const QStringList &dirs) {
+  QStringList folders;
+  for (auto d: dirs) {
+    if (QDir(d).entryList(QStringList() << "*.sav" << "*.sav.*",
+                          QDir::Files | QDir::Readable).isEmpty()) {
+      qCDebug(FC) << d << "is empty";
+      continue;
+    }
+    folders << d;
+  }
+
+  FileDialog load(folders, KFileWidget::Opening, this);
+  if (load.exec() != QDialog::Accepted) return;
+  // qCDebug(FC) << load.selectedFile();
+  if (load.selectedFile().isEmpty()) return;
+  emit startNewGame(load.selectedFile());
+}
 
 void MainWindow::on_quit_triggered() {
   close();
@@ -765,11 +819,11 @@ void MainWindow::addActions() {
       nullptr},
     {"newGame", "New Game...", "Ctrl+N", "document-new", "New game", true, false, false,
       nullptr},
-    {"loadScenario", "Load Scenario...", "", "", "Load scenario game", true, false, false,
+    {"loadScenario", "Load Scenario...", "Ctrl+Shift+O", "", "Load scenario game", true, false, false,
       nullptr},
-    {"loadGame", "Load Game...", "", "", "Load saved game", true, false, false,
+    {"loadGame", "Load Game...", "Ctrl+O", "", "Load saved game", true, false, false,
       nullptr},
-    {"connectToGame", "Connect to Game...", "", "", "Connect to game server", true, false, false,
+    {"connectToGame", "Connect to Game...", "Ctrl+Shift+G", "", "Connect to game server", true, false, false,
       nullptr},
     {"quit", "Quit", "Ctrl+Q", "application-exit", "Quit", true, false, false,
       nullptr},

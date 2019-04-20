@@ -1,7 +1,4 @@
 TODO
-- load saved game dialog
-- load scenario dialog
-- save game dialog
 - happiness & other city info dialog
 - battle log
 - font manager
@@ -20,4 +17,5 @@ BUGS
 - connect dialog stops scanning servers
 - start dialog: cannot start as an observer
 - start dialog: starts as an observer
+- ensure that it's possible to start new game even if there's a game ongoing
 

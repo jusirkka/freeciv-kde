@@ -129,8 +129,34 @@ static bool isPlainPublicMessage(QString s)
   return true;
 }
 
-static QString serverCommand(const QString& s) {
+
+void Chat::sendCommand(const QString &cmd) {
+  qCDebug(FC) << "Chat::sendCommand" << cmd.toUtf8();
+  send_chat(cmd.toUtf8());
+}
+
+QString Chat::makeServerCommand(const QString& s) {
   return QString("%1%2").arg(SERVER_COMMAND_PREFIX).arg(s);
+}
+
+void Chat::sendServerCommand(const QString &s) {
+  sendCommand(makeServerCommand(s));
+}
+
+QString Chat::makeDirectCommand(const QString& s) {
+  return QString("%1%2").arg(CHAT_DIRECT_PREFIX).arg(s);
+}
+
+void Chat::sendDirectCommand(const QString &s) {
+  sendCommand(makeDirectCommand(s));
+}
+
+QString Chat::makeAlliesCommand(const QString& s) {
+  return QString("%1%2").arg(CHAT_ALLIES_PREFIX).arg(s);
+}
+
+void Chat::sendAlliesCommand(const QString &s) {
+  sendCommand(makeAlliesCommand(s));
 }
 
 void ChatLineEdit::sendChatMessage(const QString& message) {
@@ -141,17 +167,17 @@ void ChatLineEdit::sendChatMessage(const QString& message) {
   resetHistoryPosition();
 
   // If client send commands to take ai, set /away to disable AI
-  if (message.startsWith(serverCommand("take "))) {
+  if (message.startsWith(Chat::makeServerCommand("take "))) {
     auto s = message;
-    s = s.remove(serverCommand("take "));
+    s = s.remove(Chat::makeServerCommand("take "));
     players_iterate(pplayer) {
       if (!is_ai(pplayer)) continue;
 
       auto p = QString("\"%1\"").arg(pplayer->name);
       if (p.compare(s) == 0) {
-          send_chat(message.toLocal8Bit());
-          send_chat(serverCommand("away").toLocal8Bit());
-          return;
+        Chat::sendCommand(message);
+        Chat::sendServerCommand("away");
+        return;
       }
     } players_iterate_end;
   }
@@ -160,9 +186,9 @@ void ChatLineEdit::sendChatMessage(const QString& message) {
   if (client_state() >= C_S_RUNNING
       && gui_options.gui_qt_allied_chat_only
       && isPlainPublicMessage(message)) {
-    send_chat(QString("%1 %2").arg(CHAT_ALLIES_PREFIX).arg(message).toLocal8Bit());
+    Chat::sendAlliesCommand(message);
   } else {
-    send_chat(message.toLocal8Bit());
+    Chat::sendCommand(message);
   }
 }
 

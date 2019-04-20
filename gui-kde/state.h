@@ -61,7 +61,7 @@ protected:
   void onExit(QEvent *event) override;
 
 signals:
-  void accepted();
+  void accepted(const QString loadFile);
   void rejected();
 
 private slots:

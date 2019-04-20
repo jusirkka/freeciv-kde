@@ -9,6 +9,16 @@ struct tile;
 
 namespace KV {
 
+namespace Chat {
+QString makeServerCommand(const QString& s);
+void sendServerCommand(const QString& cmd);
+QString makeDirectCommand(const QString& s);
+void sendDirectCommand(const QString& s);
+QString makeAlliesCommand(const QString& s);
+void sendAlliesCommand(const QString& s);
+void sendCommand(const QString& cmd);
+}
+
 class ChatLineEdit : public QLineEdit
 {
   Q_OBJECT

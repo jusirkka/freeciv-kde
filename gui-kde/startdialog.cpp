@@ -11,6 +11,7 @@
 #include <KWindowConfig>
 #include <KSharedConfig>
 #include <QWindow>
+#include "chatlineedit.h"
 
 
 #include "game.h"
@@ -21,7 +22,6 @@
 #include "connectdlg_common.h"
 #include "client_main.h"
 #include "climisc.h"
-#include "chatline_common.h"
 
 using namespace KV;
 
@@ -232,10 +232,6 @@ void StartDialog::populateTree() {
   updateButtons();
 }
 
-static QString serverCommand(const QString& s) {
-  return QString("%1%2").arg(SERVER_COMMAND_PREFIX).arg(s);
-}
-
 void StartDialog::popupTreeMenu(const QPoint &p) {
   QTreeWidgetItem *item = m_ui->playerTree->itemAt(p);
   if (!item) return;
@@ -262,23 +258,23 @@ void StartDialog::popupTreeMenu(const QPoint &p) {
   if (me != selected->username) {
     auto a = new QAction(_("Observe"));
     connect(a, &QAction::triggered, this, [=]() {
-      send_chat(serverCommand(QString("observe %1").arg(name)).toUtf8());
+      Chat::sendServerCommand(QString("observe %1").arg(name));
     });
     menu->addAction(a);
 
     if (can_client_control()) {
       a = new QAction(_("Remove player"));
       connect(a, &QAction::triggered, this, [=]() {
-        send_chat(serverCommand(QString("remove %1").arg(name)).toUtf8());
+        Chat::sendServerCommand(QString("remove %1").arg(name));
       });
       menu->addAction(a);
     }
 
     a = new QAction(_("Take this player"));
     connect(a, &QAction::triggered, this, [=]() {
-      send_chat(serverCommand(QString("take %1").arg(name)).toUtf8());
+      Chat::sendServerCommand(QString("take %1").arg(name));
       if (is_ai(selected)) {
-        send_chat(serverCommand("away").toUtf8());
+        Chat::sendServerCommand("away");
       }
     });
     menu->addAction(a);
@@ -304,9 +300,9 @@ void StartDialog::popupTreeMenu(const QPoint &p) {
       if (is_settable_ai_level(level)) {
         auto a = new QAction(ai_level_translated_name(level));
         connect(a, &QAction::triggered, this, [=] () {
-          send_chat(serverCommand(QString("%1 %2")
+          Chat::sendServerCommand(QString("%1 %2")
                                   .arg(ai_level_cmd(level))
-                                  .arg(name)).toUtf8());
+                                  .arg(name));
         });
         submenu->addAction(a);
       }
@@ -329,10 +325,9 @@ void StartDialog::popupTreeMenu(const QPoint &p) {
       }
       auto a = new QAction(team_slot_name_translation(tslot));
       connect(a, &QAction::triggered, this, [=] () {
-        send_chat(serverCommand(QString("team %1 \"%2\"")
+        Chat::sendServerCommand(QString("team %1 \"%2\"")
                                 .arg(name)
-                                .arg(team_slot_rule_name(tslot)))
-                  .toUtf8());
+                                .arg(team_slot_rule_name(tslot)));
       });
       submenu->addAction(a);
     } team_slots_iterate_end;
@@ -341,7 +336,7 @@ void StartDialog::popupTreeMenu(const QPoint &p) {
   if (can_client_control()) {
     auto a = new QAction(_("Aitoggle player"));
     connect(a, &QAction::triggered, this, [=] () {
-      send_chat(serverCommand(QString("aitoggle %1").arg(name)).toUtf8());
+      Chat::sendServerCommand(QString("aitoggle %1").arg(name));
     });
     menu->addAction(a);
   }
@@ -467,7 +462,7 @@ void StartDialog::aiLevelChanged(int) {
     ai_level k = static_cast<ai_level>(v.toInt());
     /* Suppress changes provoked by server rather than local user */
     if (server_ai_level() != k) {
-      send_chat(serverCommand(ai_level_cmd(k)).toUtf8());
+      Chat::sendServerCommand(ai_level_cmd(k));
     }
   }
 
@@ -477,13 +472,13 @@ void StartDialog::aiLevelChanged(int) {
 void StartDialog::observe() {
   if (client_is_observer() || client_is_global_observer()) {
     if (game.info.is_new_game) {
-      send_chat(serverCommand("take -").toUtf8());
+      Chat::sendServerCommand("take -");
     } else {
-      send_chat(serverCommand("detach").toUtf8());
+      Chat::sendServerCommand("detach");
     }
     m_ui->observeButton->setText(_("Don't Observe"));
   } else {
-    send_chat(serverCommand("observe").toUtf8());
+    Chat::sendServerCommand("observe");
     m_ui->observeButton->setText(_("Observe"));
   }
 }

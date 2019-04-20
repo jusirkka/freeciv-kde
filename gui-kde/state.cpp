@@ -12,6 +12,8 @@
 #include <QStateMachine>
 #include "themesmanager.h"
 #include "serveroptionsdialog.h"
+#include "chatlineedit.h"
+#include <QTimer>
 
 #include "tilespec.h"
 #include "version.h"
@@ -109,7 +111,7 @@ void Network::connectToServer() {
 
   if (connect_to_server(user_name, server_host, server_port,
                         errbuf, sizeof(errbuf)) != -1) {
-    emit accepted();
+    emit accepted("");
   } else {
     KV::MessageBox fail(m_parent->centralWidget(), errbuf, "Connection failed");
     fail.setStandardButtons(QMessageBox::Ok);
@@ -124,15 +126,16 @@ Network::~Network() {
 
 void Network::onEntry(QEvent* event) {
   if (event->type() == QEvent::StateMachineSignal) {
-    auto signalEvent = static_cast<QStateMachine::SignalEvent*>(event);
-    if (signalEvent->sender() == m_parent->action("connectToGame")) {
+    auto ev = static_cast<QStateMachine::SignalEvent*>(event);
+    if (ev->sender() == m_parent->action("connectToGame")) {
       m_networkDialog->init();
       m_networkDialog->show();
-    } else if (signalEvent->sender() == m_parent->action("newGame")) {
+    } else if (ev->signalIndex() ==
+               ev->sender()->metaObject()->indexOfSignal("startNewGame(QString)")) {
       if (!is_server_running()) {
         client_start_server();
       }
-      emit accepted();
+      emit accepted(ev->arguments().first().toString());
     }
   }
   QState::onEntry(event);
@@ -142,6 +145,65 @@ void Network::onEntry(QEvent* event) {
 void Network::onExit(QEvent* event) {
   m_networkDialog->final();
   QState::onExit(event);
+}
+
+
+/*
+ * Start
+ */
+
+Start::Start(MainWindow *parent)
+  : Base(parent, PAGE_START)
+  , m_startDialog(new KV::StartDialog(parent))
+{
+  connect(m_startDialog, &QDialog::accepted, this, &Start::playerReady);
+  connect(m_startDialog, &QDialog::rejected, this, &Start::disconnectFromServer);
+  connect(m_startDialog, &StartDialog::configLocal,
+          m_parent->action("localOptions"), &QAction::triggered);
+  connect(m_startDialog, &StartDialog::configServer,
+          m_parent->action("serverOptions"), &QAction::triggered);
+}
+
+
+Start::~Start() {
+  delete m_startDialog;
+}
+
+void Start::onEntry(QEvent* event) {
+  // ensure server option validity
+  m_parent->m_serverOptions->reset();
+  m_startDialog->show();
+  if (event->type() == QEvent::StateMachineSignal) {
+    auto ev = static_cast<QStateMachine::SignalEvent*>(event);
+    if (ev->signalIndex() ==
+        ev->sender()->metaObject()->indexOfSignal("accepted(QString)")) {
+      QString loadFile = ev->arguments().first().toString();
+      if (!loadFile.isEmpty()) {
+        // give the server some time to boot - otherwise we get disconnected
+        QTimer::singleShot(500, this, [loadFile] () {
+          Chat::sendServerCommand(QString("load %1").arg(loadFile));
+        });
+      }
+    }
+  }
+  QState::onEntry(event);
+}
+
+void Start::disconnectFromServer() {
+  disconnect_from_server();
+  emit rejected();
+}
+
+void Start::playerReady() {
+  if (can_client_control()) {
+    dsend_packet_player_ready(&client.conn,
+                              player_number(client_player()),
+                              !client_player()->is_ready);
+  } else {
+    dsend_packet_player_ready(&client.conn, 0, TRUE);
+  }
+
+  emit accepted();
 }
 
 /*
@@ -174,52 +236,6 @@ void Game::onExit(QEvent* event) {
   m_parent->enableGameMenus(false);
   m_parent->setCentralWidget(new QWidget);
   QState::onExit(event);
-}
-
-
-/*
- * Start
- */
-
-Start::Start(MainWindow *parent)
-  : Base(parent, PAGE_START)
-  , m_startDialog(new KV::StartDialog(parent))
-{
-  connect(m_startDialog, &QDialog::accepted, this, &Start::playerReady);
-  connect(m_startDialog, &QDialog::rejected, this, &Start::disconnectFromServer);
-  connect(m_startDialog, &StartDialog::configLocal,
-          m_parent->action("localOptions"), &QAction::triggered);
-  connect(m_startDialog, &StartDialog::configServer,
-          m_parent->action("serverOptions"), &QAction::triggered);
-}
-
-
-Start::~Start() {
-  delete m_startDialog;
-}
-
-void Start::onEntry(QEvent* event) {
-  // ensure server option validity
-  m_parent->m_serverOptions->reset();
-  m_startDialog->show();
-  QState::onEntry(event);
-}
-
-void Start::disconnectFromServer() {
-  disconnect_from_server();
-  emit rejected();
-}
-
-void Start::playerReady() {
-  if (can_client_control()) {
-    dsend_packet_player_ready(&client.conn,
-                              player_number(client_player()),
-                              !client_player()->is_ready);
-  } else {
-    dsend_packet_player_ready(&client.conn, 0, TRUE);
-  }
-
-  emit accepted();
 }
 
 

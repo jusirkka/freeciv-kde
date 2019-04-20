@@ -13,6 +13,7 @@ find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
   I18n
   TextWidgets
   XmlGui
+  KIO
 )
 
 find_library(LPTHREAD pthread)
@@ -90,6 +91,7 @@ set(fc_kde_srcs
     optionmodel.cpp
     localoptionsdialog.cpp
     serveroptionsdialog.cpp
+    filedialog.cpp
 )
 
 ki18n_wrap_ui(fc_kde_srcs
@@ -149,6 +151,8 @@ add_subdirectory(client)
 target_link_libraries(freeciv-kde
   KF5::TextWidgets
   KF5::XmlGui
+  KF5::KIOCore
+  KF5::KIOFileWidgets
   $ENV{HOME}/lib/libfreeciv.a
   pthread
   z

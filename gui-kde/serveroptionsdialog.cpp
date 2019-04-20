@@ -14,10 +14,10 @@
 #include <QMenu>
 #include "inputbox.h"
 #include "messagebox.h"
+#include "chatlineedit.h"
 
 #include "options.h"
 #include "chat.h"
-#include "chatline_common.h"
 
 using namespace KV;
 
@@ -185,10 +185,6 @@ void ServerOptionsDialog::on_copyButton_clicked() {
   updateState();
 }
 
-static void serverCommand(const QString& s) {
-  auto cmd = QString("%1%2").arg(SERVER_COMMAND_PREFIX).arg(s);
-  send_chat(cmd.toUtf8());
-}
 
 void ServerOptionsDialog::on_actionOpen_triggered() {
   QMenu menu;
@@ -209,7 +205,7 @@ void ServerOptionsDialog::on_actionOpen_triggered() {
 
   auto path = a->data().toString();
   // qCDebug(FC) << "/read" << path;
-  serverCommand(QString("read %1").arg(path));
+  Chat::sendServerCommand(QString("read %1").arg(path));
 
   m_ui->copyButton->setEnabled(true);
   m_ui->nameLabel->setText(a->text());
@@ -235,7 +231,7 @@ void ServerOptionsDialog::on_actionSave_triggered() {
 
   // qCDebug(FC) << "/write" << storage.absoluteFilePath(path);
   storage.mkpath(QFileInfo(path).path());
-  serverCommand(QString("write %1").arg(storage.absoluteFilePath(path)));
+  Chat::sendServerCommand(QString("write %1").arg(storage.absoluteFilePath(path)));
 
   m_ui->copyButton->setEnabled(true);
   m_ui->nameLabel->setText(QFileInfo(path).completeBaseName());
