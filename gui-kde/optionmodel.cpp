@@ -118,7 +118,7 @@ void OptionModel::updateOption(const void *d) {
                   << "of type" << option_type_name(option_type(opt));
     return;
   }
-  qCDebug(FC) << "updateOption" << w->description();
+  // qCDebug(FC) << "updateOption" << w->description();
   w->updateIt();
 }
 

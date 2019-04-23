@@ -91,10 +91,10 @@ void ServerOptionsDialog::optionModel_edited(OptionWidget *opt, bool edited) {
 
 void ServerOptionsDialog::optionModel_defaulted(OptionWidget *opt, bool defaulted) {
   if (defaulted && m_nonDefaults.contains(opt)) {
-    qCDebug(FC) << "removing" << opt->description() << "from non-defaults";
+    // qCDebug(FC) << "removing" << opt->description() << "from non-defaults";
     m_nonDefaults.removeAll(opt);
   } else if (!defaulted && !m_edits.contains(opt)) {
-    qCDebug(FC) << "adding" << opt->description() << "to non-defaults";
+    // qCDebug(FC) << "adding" << opt->description() << "to non-defaults";
     m_nonDefaults.append(opt);
   }
   updateState();
@@ -120,7 +120,7 @@ void ServerOptionsDialog::on_pageView_currentPageChanged(const QModelIndex& curr
   auto opts = page->findChildren<OptionWidget*>();
   for (auto opt: opts) {
     if (opt->defaultable()) {
-      qCDebug(FC) << "adding" << opt->description() << "to non-defaults";
+      // qCDebug(FC) << "adding" << opt->description() << "to non-defaults";
       m_nonDefaults.append(opt);
     }
   }
@@ -151,7 +151,7 @@ void ServerOptionsDialog::updateState() {
 void ServerOptionsDialog::on_defaultsButton_clicked() {
   while (!m_nonDefaults.isEmpty()) {
     auto opt = m_nonDefaults.takeFirst();
-    qCDebug(FC) << "defaulting" << opt->description();
+    // qCDebug(FC) << "defaulting" << opt->description();
     opt->defaultIt();
   }
   desired_settable_options_update();

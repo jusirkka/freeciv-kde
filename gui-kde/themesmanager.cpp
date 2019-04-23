@@ -27,7 +27,7 @@ void ThemesManager::reloadStyle(const QString& path) {
                << ", not changing the current theme" << m_Current;
     return;
   }
-  qCDebug(FC) << "ThemesManager: reloading" << path;
+  // qCDebug(FC) << "ThemesManager: reloading" << path;
   QTextStream s(&res);
   qApp->setStyleSheet(s.readAll());
 }
@@ -59,9 +59,9 @@ void ThemesManager::loadTheme(const QString& theme_name, const QString& theme_pa
   }
   m_path = theme_path;
   if (m_styleWatcher->addPath(m_path)) {
-    qCDebug(FC) << "ThemesManager: loading" << m_path;
+    // qCDebug(FC) << "ThemesManager: loading" << m_path;
   } else {
-    qCDebug(FC) << "ThemesManager: failed to load" << m_path;
+    qCWarning(FC) << "ThemesManager: failed to load" << m_path;
   }
   m_Current = theme_name;
 

@@ -185,10 +185,17 @@ void GovernorDialog::on_actionOpen_triggered() {
   if (a == nullptr) return;
   int sel = a->data().toInt();
 
-  if (!testParameters(cmafec_preset_get_parameter(sel))) return;
+  governorChanged(m_city, sel);
+}
 
-  cm_copy_parameter(&m_parameters, cmafec_preset_get_parameter(sel));
-  cm_copy_parameter(&m_edited, cmafec_preset_get_parameter(sel));
+void GovernorDialog::governorChanged(city* c, int preset) {
+  if (c != m_city) {
+    changeCity(c);
+  }
+  if (!testParameters(cmafec_preset_get_parameter(preset))) return;
+
+  cm_copy_parameter(&m_parameters, cmafec_preset_get_parameter(preset));
+  cm_copy_parameter(&m_edited, cmafec_preset_get_parameter(preset));
   cma_put_city_under_agent(m_city, &m_parameters);
   m_editing = false;
   refresh_city_dialog(m_city);

@@ -3,15 +3,17 @@ extern "C" {
 }
 #include "logging.h"
 
+// intel info is in the player widget
+
 void close_intel_dialog(struct player *) {
-  qCDebug(FC) << "TODO: close_intel_dialog";
+  // qCDebug(FC) << "close_intel_dialog";
 }
 
 void popup_intel_dialog(struct player *) {
-  qCDebug(FC) << "TODO: popup_intel_dialog";
+  // qCDebug(FC) << "popup_intel_dialog";
 }
 
 void update_intel_dialog(struct player *) {
-  qCDebug(FC) << "TODO: update_intel_dialog";
+  // qCDebug(FC) << "update_intel_dialog";
 }
 

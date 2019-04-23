@@ -1,5 +1,5 @@
 TODO
-- happiness & other city info dialog
+- pillage, bribe, incite dialogs
 - battle log
 - font manager
 - cityview filter
@@ -7,7 +7,6 @@ TODO
 - select predefined players in start dialog (like in governor dialog)
 
 BUGS
-
 - demographics pane formatting could be better
 - select nation dialog: first nation is overlined, but reserved nations not
 - default size of start dialog is too small
@@ -18,4 +17,6 @@ BUGS
 - start dialog: cannot start as an observer
 - start dialog: starts as an observer
 - ensure that it's possible to start new game even if there's a game ongoing
+- helpdialog: initial show() does not select the first help item
+- worklists: it's possible to have two lists with the same name
 

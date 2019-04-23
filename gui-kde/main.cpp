@@ -35,10 +35,10 @@ static void setup_gui_funcs() {
   funcs->get_gui_type = [] () {return GUI_QT;};
 
   funcs->insert_client_build_info = [] (char *, size_t) {
-    qCDebug(FC) << "insert_client_build_info: dummy";
+    // qCDebug(FC) << "insert_client_build_info: dummy";
   };
   funcs->adjust_default_options = [] () {
-    qCDebug(FC) << "adjust_default_options: dummy";
+    // qCDebug(FC) << "adjust_default_options: dummy";
   };
 
   funcs->version_message = KV::Application::VersionMessage;
@@ -53,7 +53,7 @@ static void setup_gui_funcs() {
     qCDebug(FC) << "TODO: tileset_type_set";
   };
   funcs->free_intro_radar_sprites = [] () {
-    qCDebug(FC) << "free_intro_radar_sprites: dummy";
+    // qCDebug(FC) << "free_intro_radar_sprites: dummy";
   };
   funcs->load_gfxfile = KV::SpriteFactory::Load;
   funcs->create_sprite = KV::SpriteFactory::Create;
@@ -241,7 +241,7 @@ static void setup_gui_funcs() {
 
   funcs->set_rulesets = KV::Application::SetRulesets;
   funcs->options_extra_init = [] () {
-    qCDebug(FC) << "TODO: options_extra_init";
+    // qCDebug(FC) << "options_extra_init";
   };
   funcs->server_connect = [] () {
     qCDebug(FC) << "TODO: server_connect";
@@ -251,7 +251,7 @@ static void setup_gui_funcs() {
   funcs->real_conn_list_dialog_update = KV::Application::UpdateUsers;
 
   funcs->close_connection_dialog = [] () {
-    qCDebug(FC) << "close_connection_dialog";
+    // qCDebug(FC) << "close_connection_dialog";
     if (KV::Application::CurrentState() == PAGE_NETWORK) {
       KV::Application::StateChange(PAGE_MAIN);
     }
@@ -310,7 +310,7 @@ static void setup_gui_funcs() {
     KV::Application::UpdateTurnTimeout();
   };
   funcs->real_city_dialog_popup = [] (struct city* pcity) {
-    qCDebug(FC) << "real_city_dialog_popup";
+    // qCDebug(FC) << "real_city_dialog_popup";
     KV::Application::RefreshCityDialog(pcity, true);
   };
   funcs->real_city_dialog_refresh = [] (struct city* pcity) {
@@ -318,11 +318,11 @@ static void setup_gui_funcs() {
     KV::Application::RefreshCityDialog(pcity, false);
   };
   funcs->popdown_city_dialog = [] (struct city* pcity) {
-    qCDebug(FC) << "popdown_city_dialog";
+    // qCDebug(FC) << "popdown_city_dialog";
     KV::Application::PopdownCityDialog(pcity);
   };
   funcs->popdown_all_city_dialogs = [] () {
-    qCDebug(FC) << "popdown_all_city_dialogs";
+    // qCDebug(FC) << "popdown_all_city_dialogs";
     KV::Application::PopdownCityDialog(nullptr);
   };
   funcs->handmade_scenario_warning = [] () {
@@ -334,7 +334,7 @@ static void setup_gui_funcs() {
     real_city_dialog_refresh(tile_city(punit->tile));
   };
   funcs->city_dialog_is_open = [] (struct city* /*pcity*/) {
-    qCDebug(FC) << "city_dialog_is_open: dummy";
+    // qCDebug(FC) << "city_dialog_is_open: dummy";
     return false;
   };
 

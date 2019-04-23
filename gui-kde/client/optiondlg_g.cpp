@@ -7,12 +7,12 @@ extern "C" {
 #include "logging.h"
 #include "application.h"
 
-void option_dialog_popup(const char *name, const struct option_set */*poptset*/) {
-  qCDebug(FC) << "option_dialog_popup: dummy" << name;
+void option_dialog_popup(const char */*name*/, const struct option_set */*poptset*/) {
+  // qCDebug(FC) << "option_dialog_popup: dummy" << name;
 }
 
 void option_dialog_popdown(const struct option_set */*poptset*/) {
-  qCDebug(FC) << "option_dialog_popdown: dummy";
+  // qCDebug(FC) << "option_dialog_popdown: dummy";
 }
 
 void option_gui_update(option *opt) {

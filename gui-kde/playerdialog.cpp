@@ -72,7 +72,7 @@ PlayerDialog::~PlayerDialog() {
 }
 
 void PlayerDialog::initMeeting(int counterpart, int initiator) {
-  qCDebug(FC) << "initMeeting" << counterpart;
+  // qCDebug(FC) << "initMeeting" << counterpart;
   cancelMeeting(counterpart, InvalidPlayer);
 
   auto p = player_by_number(counterpart);
@@ -97,7 +97,7 @@ void PlayerDialog::cancelMeeting(int counterpart, int canceler) {
 
   if (!m_meetings.contains(counterpart)) return;
 
-  qCDebug(FC) << "cancelMeeting: found" << counterpart;
+  // qCDebug(FC) << "cancelMeeting: found" << counterpart;
   int initiator = m_meetings[counterpart].initiator;
 
   auto w = m_tabs->widget(m_meetings[counterpart].index);

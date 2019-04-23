@@ -5,7 +5,7 @@ extern "C" {
 #include "application.h"
 
 void popup_players_dialog(bool /*raise*/) {
-  qCDebug(FC) << "popup_players_dialog";
+  // qCDebug(FC) << "popup_players_dialog";
   KV::Application::PopupPlayers();
 }
 

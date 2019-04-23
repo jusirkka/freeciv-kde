@@ -5,7 +5,7 @@ extern "C" {
 #include "application.h"
 
 void city_report_dialog_popup(bool /*raise*/) {
-  qCDebug(FC) << "city_report_dialog_popup";
+  // qCDebug(FC) << "city_report_dialog_popup";
   KV::Application::PopupCityReport();
 }
 
@@ -15,7 +15,7 @@ void real_city_report_dialog_update(void */*unused*/) {
 }
 
 void real_city_report_update_city(struct city *pcity) {
-  qCDebug(FC) << "real_city_report_update_city";
+  // qCDebug(FC) << "real_city_report_update_city";
   KV::Application::UpdateCity(pcity);
 }
 

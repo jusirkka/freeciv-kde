@@ -131,7 +131,7 @@ static bool isPlainPublicMessage(QString s)
 
 
 void Chat::sendCommand(const QString &cmd) {
-  qCDebug(FC) << "Chat::sendCommand" << cmd.toUtf8();
+  // qCDebug(FC) << "Chat::sendCommand" << cmd.toUtf8();
   send_chat(cmd.toUtf8());
 }
 

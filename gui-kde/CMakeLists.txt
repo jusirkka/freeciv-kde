@@ -92,6 +92,8 @@ set(fc_kde_srcs
     localoptionsdialog.cpp
     serveroptionsdialog.cpp
     filedialog.cpp
+    citizensdialog.cpp
+    colorbarlabel.cpp
 )
 
 ki18n_wrap_ui(fc_kde_srcs
@@ -113,6 +115,7 @@ ki18n_wrap_ui(fc_kde_srcs
     helpdialog.ui
     localoptionsdialog.ui
     serveroptionsdialog.ui
+    citizensdialog.ui
 )
 
 kconfig_add_kcfg_files(fc_kde_srcs

@@ -16,6 +16,7 @@ namespace KV {
 class CityView;
 class ProductionDialog;
 class GovernorDialog;
+class CitizensDialog;
 
 class CityDialog : public QDialog
 {
@@ -57,6 +58,7 @@ private:
   CityView* m_cities;
   ProductionDialog* m_production;
   GovernorDialog* m_governor;
+  CitizensDialog* m_citizens;
 };
 
 }

@@ -76,10 +76,10 @@ void LocalOptionsDialog::optionModel_edited(OptionWidget *opt, bool edited) {
 
 void LocalOptionsDialog::optionModel_defaulted(OptionWidget *opt, bool defaulted) {
   if (defaulted && m_nonDefaults.contains(opt)) {
-    qCDebug(FC) << "removing" << opt->description() << "from defaults";
+    // qCDebug(FC) << "removing" << opt->description() << "from defaults";
     m_nonDefaults.removeAll(opt);
   } else if (!defaulted && !m_edits.contains(opt)) {
-    qCDebug(FC) << "adding" << opt->description() << "to defaults";
+    // qCDebug(FC) << "adding" << opt->description() << "to defaults";
     m_nonDefaults.append(opt);
   }
   updateState();

@@ -55,6 +55,7 @@ HelpDialog::HelpDialog(QWidget *parent)
 {
   m_ui->setupUi(this);
 
+
   m_ui->helpPanel->setLayout(new QVBoxLayout);
   m_panelWidget = m_browser;
 
@@ -80,6 +81,9 @@ HelpDialog::HelpDialog(QWidget *parent)
   setWindowFlag(Qt::Dialog, false);
   setWindowFlag(Qt::Window, true);
   readSettings();
+
+  // a hack to workaround a QSplitter bug
+  m_initialHelpTeeWidth = m_ui->helpTree->width();
 }
 
 HelpDialog::~HelpDialog()
@@ -106,10 +110,10 @@ void HelpDialog::readSettings() {
 }
 
 void HelpDialog::writeSettings() const {
-  if (m_ui->mainSplitter->sizes() != QList<int>{71, 22}) {
+  if (m_ui->helpTree->width() != m_initialHelpTeeWidth) {
     Conf::HelpDialog::setMainSplit(m_ui->mainSplitter->sizes());
   } else {
-    qCDebug(FC) << "A hack to work around a QSplitter bug: not writing main splitter sizes";
+    qCInfo(FC) << "A hack to work around a QSplitter bug: not writing main splitter sizes";
   }
   Conf::HelpDialog::setLeftSplit(m_hSplitterSizes);
   Conf::HelpDialog::setBottomSplit(m_vSplitterSizes);

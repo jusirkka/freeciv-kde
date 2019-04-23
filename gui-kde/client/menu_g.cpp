@@ -6,11 +6,11 @@ extern "C" {
 #include "client_main.h"
 
 void real_menus_init() {
-  qCDebug(FC) << "real_menus_init: dummy";
+  // qCDebug(FC) << "real_menus_init";
 }
 
 void real_menus_update() {
-  qCDebug(FC) << "real_menus_update";
+  // qCDebug(FC) << "real_menus_update";
   if (client_state() != C_S_RUNNING) return;
   KV::Application::UpdateActions();
 }

@@ -93,7 +93,7 @@ void Application::Main(int argc, char **argv) {
   parser.process(app);
   aboutData.processCommandLine(&parser);
 
-  qCDebug(FC) << "Application::Main";
+  // qCDebug(FC) << "Application::Main";
 
   // set application icon
   tileset_init(get_tileset());
@@ -113,7 +113,7 @@ void Application::Main(int argc, char **argv) {
   instance()->m_mainWindow = new MainWindow;
   instance()->m_mainWindow->show();
   app.exec();
-  qCDebug(FC) << "Mainwindow closed";
+  // qCDebug(FC) << "Mainwindow closed";
 }
 
 void Application::Exit() {
@@ -334,22 +334,22 @@ void Application::SetRulesets(int num_rulesets, char **rulesets) {
   for (int i = 0; i < num_rulesets; i++) {
     rules << rulesets[i];
   }
-  qCDebug(FC) << "Application::SetRulesets" << rules;
+  // qCDebug(FC) << "Application::SetRulesets" << rules;
   instance()->rulesetMessage(rules);
 }
 
 void Application::AddServerSource(int sock) {
-  qCDebug(FC) << "Application::AddServerSource";
+  // qCDebug(FC) << "Application::AddServerSource";
   instance()->addServerSource(sock);
 }
 
 void Application::RemoveServerSource() {
-  qCDebug(FC) << "Application::RemoveServerSource";
+  // qCDebug(FC) << "Application::RemoveServerSource";
   instance()->removeServerSource();
 }
 
 void Application::UpdateUsers(void *) {
-  qCDebug(FC) << "Application::UpdateUsers";
+  // qCDebug(FC) << "Application::UpdateUsers";
   instance()->updateUsers();
 }
 
@@ -527,13 +527,13 @@ void Application::AddIdleCallback(void callback(void *), void *data) {
 }
 
 void Application::StateChange(client_pages page) {
-  qCDebug(FC) << "Application::StateChange" << client_pages_name(page);
+  // qCDebug(FC) << "Application::StateChange" << client_pages_name(page);
   instance()->stateChange(page);
 }
 
 client_pages Application::CurrentState() {
-  qCDebug(FC) << "Application::CurrentState is "
-              << client_pages_name(instance()->m_mainWindow->state());
+  //  qCDebug(FC) << "Application::CurrentState is "
+  //              << client_pages_name(instance()->m_mainWindow->state());
   return instance()->m_mainWindow->state();
 }
 

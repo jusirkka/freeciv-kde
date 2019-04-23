@@ -207,7 +207,7 @@ void MainWindow::setCurrentState(bool active) {
       m_currentState = nullptr;
     }
   } else {
-    qCDebug(FC) << "active state = " << client_pages_name(s->id());
+    // qCDebug(FC) << "active state = " << client_pages_name(s->id());
     m_currentState = s;
   }
 }
@@ -224,7 +224,7 @@ void MainWindow::stateChange(client_pages page) {
     }
   }
   if (to) {
-    qCDebug(FC) << "MainWindow::stateChange" << client_pages_name(page);
+    // qCDebug(FC) << "MainWindow::stateChange" << client_pages_name(page);
     m_states.setInitialState(to);
     emit resetStateMachine();
   }
@@ -307,7 +307,7 @@ void MainWindow::loadGame(const QStringList &dirs) {
   for (auto d: dirs) {
     if (QDir(d).entryList(QStringList() << "*.sav" << "*.sav.*",
                           QDir::Files | QDir::Readable).isEmpty()) {
-      qCDebug(FC) << d << "is empty";
+      // qCDebug(FC) << d << "is empty";
       continue;
     }
     folders << d;

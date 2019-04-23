@@ -31,7 +31,7 @@ void popup_races_dialog(struct player *pplayer) {
 }
 
 void popdown_races_dialog() {
-  qCDebug(FC) << "popdown_races_dialog";
+  // qCDebug(FC) << "popdown_races_dialog";
   KV::Application::PopdownNationDialog();
 }
 
@@ -46,12 +46,12 @@ void unit_select_dialog_update_real(void */*unused*/) {
 }
 
 void races_toggles_set_sensitive() {
-  qCDebug(FC) << "races_toggles_set_sensitive";
+  // qCDebug(FC) << "races_toggles_set_sensitive";
   KV::Application::RefreshNationDialog(false);
 }
 
 void races_update_pickable(bool nationset_change) {
-  qCDebug(FC) << "races_update_pickable";
+  // qCDebug(FC) << "races_update_pickable";
   KV::Application::RefreshNationDialog(nationset_change);
 }
 
@@ -65,7 +65,7 @@ void popup_action_selection(unit *actor,
                             tile *target_tile,
                             extra_type *target_extra,
                             const act_prob *act_probs) {
-  qCDebug(FC) << "popup_action_selection";
+  // qCDebug(FC) << "popup_action_selection";
   KV::ActionSelector::Popup(actor,
                             target_city,
                             target_unit,
@@ -80,22 +80,22 @@ int action_selection_actor_unit() {
 }
 
 int action_selection_target_city() {
-  qCDebug(FC) << "action_selection_target_city";
+  // qCDebug(FC) << "action_selection_target_city";
   return KV::ActionSelector::TargetCityId();
 }
 
 int action_selection_target_unit() {
-  qCDebug(FC) << "action_selection_target_unit";
+  // qCDebug(FC) << "action_selection_target_unit";
   return KV::ActionSelector::TargetUnitId();
 }
 
 int action_selection_target_tile() {
-  qCDebug(FC) << "action_selection_target_tile";
+  // qCDebug(FC) << "action_selection_target_tile";
   return KV::ActionSelector::TargetTileId();
 }
 
 int action_selection_target_extra() {
-  qCDebug(FC) << "action_selection_target_extra";
+  // qCDebug(FC) << "action_selection_target_extra";
   return KV::ActionSelector::TargetExtraId();
 }
 
@@ -120,7 +120,7 @@ void action_selection_refresh(unit *actor,
 }
 
 void action_selection_no_longer_in_progress_gui_specific(int actor_unit_id) {
-  qCDebug(FC) << "TODO: action_selection_no_longer_in_progress_gui_specific";
+  KV::ActionSelector::Finalize(actor_unit_id);
 }
 
 void popup_incite_dialog(struct unit *actor, struct city *pcity, int cost, const struct action *paction) {
@@ -186,19 +186,19 @@ void popup_musicset_suggestion_dialog() {
 }
 
 bool popup_theme_suggestion_dialog(const char *theme_name) {
-  qCDebug(FC) << "TODO: popup_theme_suggestion_dialog";
+  qCDebug(FC) << "TODO: popup_theme_suggestion_dialog" << theme_name;
   return false;
 }
 
-void show_tech_gained_dialog(Tech_type_id tech) {
-  qCDebug(FC) << "TODO: show_tech_gained_dialog";
+void show_tech_gained_dialog(Tech_type_id /*tech*/) {
+  // qCDebug(FC) << "TODO: show_tech_gained_dialog";
 }
 
 void show_tileset_error(const char *msg) {
-  qCDebug(FC) << "TODO: show_tileset_error";
+  qCDebug(FC) << "TODO: show_tileset_error" << msg;
 }
 
 void popdown_all_game_dialogs() {
-  qCDebug(FC) << "popdown_all_game_dialogs: dummy";
+  // qCDebug(FC) << "popdown_all_game_dialogs: dummy";
 }
 

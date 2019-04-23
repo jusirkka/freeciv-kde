@@ -6,17 +6,17 @@ extern "C" {
 #include "diptreaty.h"
 
 void handle_diplomacy_init_meeting(int counterpart, int initiator) {
-  qCDebug(FC) << "handle_diplomacy_init_meeting";
+  // qCDebug(FC) << "handle_diplomacy_init_meeting";
   KV::Application::InitMeeting(counterpart, initiator);
 }
 
 void handle_diplomacy_cancel_meeting(int counterpart, int canceler) {
-  qCDebug(FC) << "handle_diplomacy_cancel_meeting";
+  // qCDebug(FC) << "handle_diplomacy_cancel_meeting";
   KV::Application::CancelMeeting(counterpart, canceler);
 }
 
 void handle_diplomacy_create_clause(int counterpart, int giver, enum clause_type type, int value) {
-  qCDebug(FC) << "handle_diplomacy_create_clause";
+  // qCDebug(FC) << "handle_diplomacy_create_clause";
   Clause d;
   d.from = player_by_number(giver);
   d.type = type;
@@ -25,7 +25,7 @@ void handle_diplomacy_create_clause(int counterpart, int giver, enum clause_type
 }
 
 void handle_diplomacy_remove_clause(int counterpart, int giver, enum clause_type type, int value) {
-  qCDebug(FC) << "handle_diplomacy_remove_clause";
+  // qCDebug(FC) << "handle_diplomacy_remove_clause";
   Clause d;
   d.from = player_by_number(giver);
   d.type = type;
@@ -34,12 +34,12 @@ void handle_diplomacy_remove_clause(int counterpart, int giver, enum clause_type
 }
 
 void handle_diplomacy_accept_treaty(int counterpart, bool /*I_accepted*/, bool other_accepted) {
-  qCDebug(FC) << "handle_diplomacy_accept_treaty";
+  // qCDebug(FC) << "handle_diplomacy_accept_treaty";
   KV::Application::AcceptTreaty(counterpart, other_accepted);
 }
 
 void close_all_diplomacy_dialogs() {
-  qCDebug(FC) << "close_all_diplomacy_dialogs";
+  // qCDebug(FC) << "close_all_diplomacy_dialogs";
   KV::Application::CloseAllTreatyDialogs();
 }
 

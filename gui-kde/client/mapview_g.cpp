@@ -84,7 +84,7 @@ void update_map_canvas_scrollbars_size() {
 }
 
 void put_cross_overlay_tile(struct tile *ptile) {
-  qCDebug(FC) << "TODO: put_cross_overlay_tile";
+  // qCDebug(FC) << "put_cross_overlay_tile";
 }
 
 void draw_selection_rectangle(int canvas_x, int canvas_y, int w, int h) {

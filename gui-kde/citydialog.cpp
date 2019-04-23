@@ -8,6 +8,7 @@
 #include "cityinfowidget.h"
 #include "productiondialog.h"
 #include "governordialog.h"
+#include "citizensdialog.h"
 #include "logging.h"
 #include <QKeyEvent>
 
@@ -28,6 +29,7 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
   , m_cities(cities)
   , m_production(new ProductionDialog(cities, this))
   , m_governor(new GovernorDialog(cities, this))
+  , m_citizens(new CitizensDialog(cities, this))
 {
   m_ui->setupUi(this);
   setWindowFlag(Qt::WindowStaysOnTopHint, false);
@@ -37,6 +39,10 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
   // map widget
   connect(this, &CityDialog::cityChanged,
           m_ui->mapWidget, &CityMap::changeCity);
+
+  connect(m_ui->mapWidget, &CityMap::governorChanged,
+          m_governor, &GovernorDialog::governorChanged);
+
   // production header
   connect(this, &CityDialog::cityChanged,
           m_ui->productionHeader, &ProductionHeader::changeCity);
@@ -67,7 +73,7 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
     changeCity(m_cities->prev(m_city));
   });
 
-  // production/governor buttons
+  // production/governor/citizens buttons
   connect(m_ui->productionButton, &QPushButton::clicked, this, [=] () {
     m_production->changeCity(m_city);
     m_production->show();
@@ -77,6 +83,15 @@ CityDialog::CityDialog(CityView* cities, QWidget *parent)
     m_governor->changeCity(m_city);
     m_governor->show();
   });
+
+  connect(m_ui->citizensButton, &QPushButton::clicked, this, [=] () {
+    m_citizens->changeCity(m_city);
+    m_citizens->show();
+  });
+
+  connect(m_citizens, &CitizensDialog::governorChanged,
+          m_governor, &GovernorDialog::governorChanged);
+
 
   // filter out enter key in unit lists
   m_ui->supportedFrame->installEventFilter(this);
@@ -123,6 +138,9 @@ void CityDialog::refresh(city* c) {
     if (m_governor->isVisible()) {
       m_governor->refresh(c);
     }
+    if (m_citizens->isVisible()) {
+      m_citizens->refresh(c);
+    }
   }
 }
 
@@ -139,12 +157,15 @@ void CityDialog::changeCity(city *c) {
   // present units signalled
   // next/prev buttons
   updateButtons();
-  // gov/prod dialogs work independently - only refresh
+  // gov/prod/citizens dialogs work independently - only refresh
   if (m_production->isVisible()) {
     m_production->refresh(m_city);
   }
   if (m_governor->isVisible()) {
     m_governor->refresh(m_city);
+  }
+  if (m_citizens->isVisible()) {
+    m_citizens->refresh(c);
   }
 
   setWindowTitle(Title(m_city));
@@ -155,7 +176,7 @@ void CityDialog::updateButtons() {
 
   m_ui->productionButton->setEnabled(canDo);
   m_ui->governorButton->setEnabled(canDo);
-  m_ui->moreButton->setEnabled(canDo);
+  m_ui->citizensButton->setEnabled(canDo);
   m_ui->nextButton->setEnabled(canDo);
   m_ui->previousButton->setEnabled(canDo);
 

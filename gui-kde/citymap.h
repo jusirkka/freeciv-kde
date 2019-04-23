@@ -28,6 +28,8 @@ public slots:
 
 signals:
 
+  void governorChanged(city* c, int);
+
 private:
 
   void createDisplayPixmap(const QSize& s);

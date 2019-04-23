@@ -14,13 +14,13 @@ void popup_help_dialog_string(const char *item) {
 }
 
 void popup_help_dialog_typed(const char *item, enum help_page_type section) {
-  qCDebug(FC) << "popup_help_dialog_typed";
+  // qCDebug(FC) << "popup_help_dialog_typed";
   KV::Application::PopupHelpDialog(QString(item).trimmed(), section);
 }
 
 void popdown_help_dialog() {
-  qCDebug(FC) << "popdown_help_dialog";
-  // a hack: popdown_help_dialog might be called before we have an event loop
+  // qCDebug(FC) << "popdown_help_dialog";
+  // popdown_help_dialog might be called before we have an event loop
   if (client_state() == C_S_INITIAL) return;
   KV::Application::PopdownHelpDialog();
 }

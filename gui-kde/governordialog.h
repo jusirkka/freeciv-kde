@@ -31,6 +31,7 @@ public:
 public slots:
 
   void changeCity(city* c);
+  void governorChanged(city* c, int preset);
 
 private slots:
 

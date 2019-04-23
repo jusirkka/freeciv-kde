@@ -356,7 +356,7 @@ void UnitItem::mouseDoubleClickEvent(QMouseEvent *event)
 }
 
 void UnitItem::handleEnterKey() {
-  qCDebug(FC) << "handleEnterKey";
+  // qCDebug(FC) << "handleEnterKey";
   unit_focus_set(m_unit);
   popdown_all_city_dialogs();
 }

@@ -19,7 +19,7 @@ void science_report_dialog_redraw() {
 }
 
 void economy_report_dialog_popup(bool /*raise*/) {
-  qCDebug(FC) << "economy_report_dialog_popup";
+  // qCDebug(FC) << "economy_report_dialog_popup";
   KV::Application::PopupEconomyReport();
 }
 
@@ -42,7 +42,7 @@ void real_science_report_dialog_update(void */*unused*/) {
 }
 
 void real_economy_report_dialog_update(void */*unused*/) {
-  qCDebug(FC) << "real_economy_report_dialog_update";
+  // qCDebug(FC) << "real_economy_report_dialog_update";
   KV::Application::UpdateEconomyReport();
 }
 
