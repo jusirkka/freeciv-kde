@@ -123,20 +123,20 @@ void action_selection_no_longer_in_progress_gui_specific(int actor_unit_id) {
   KV::ActionSelector::Finalize(actor_unit_id);
 }
 
-void popup_incite_dialog(struct unit *actor, struct city *pcity, int cost, const struct action *paction) {
-  qCDebug(FC) << "TODO: popup_incite_dialog";
+void popup_incite_dialog(unit *actor, city *c, int cost, const action *act) {
+  KV::ActionSelector::InciteDialog(actor, c, cost, act);
 }
 
-void popup_bribe_dialog(struct unit *actor, struct unit *punit, int cost, const struct action *paction) {
-  qCDebug(FC) << "TODO: popup_bribe_dialog";
+void popup_bribe_dialog(unit *actor, unit *u, int cost, const action *act) {
+  KV::ActionSelector::BribeDialog(actor, u, cost, act);
 }
 
-void popup_sabotage_dialog(struct unit *actor, struct city *pcity, const struct action *paction) {
-  qCDebug(FC) << "TODO: popup_sabotage_dialog";
+void popup_sabotage_dialog(unit *actor, city *c, const action *act) {
+  KV::ActionSelector::SabotageDialog(actor, c, act);
 }
 
-void popup_pillage_dialog(struct unit *punit, bv_extras extras) {
-  qCDebug(FC) << "TODO: popup_pillage_dialog";
+void popup_pillage_dialog(unit *u, bv_extras e) {
+  KV::ActionSelector::PillageDialog(u, e);
 }
 
 void popup_upgrade_dialog(struct unit_list *punits) {

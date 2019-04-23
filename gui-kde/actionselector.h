@@ -4,11 +4,14 @@
 #include <QDialog>
 #include <QMap>
 
+#include "fc_types.h"
+
 struct unit;
 struct city;
 struct tile;
 struct act_prob;
 struct extra_type;
+struct action;
 
 class QPushButton;
 class QVBoxLayout;
@@ -66,6 +69,11 @@ public:
 
   static void Finalize(int actor);
 
+  static void InciteDialog(unit *actor, city *tcity, int cost, const action *act);
+  static void BribeDialog(unit *actor, unit *u, int cost, const action *act);
+  static void SabotageDialog(unit *actor, city *c, const action *act);
+  static void PillageDialog(unit *u, bv_extras e);
+
 private:
 
   static QMap<int, int> m_targetedActionMap;
@@ -91,10 +99,14 @@ private:
 
   void finalAct(int actor);
 
+
 private slots:
 
   void reset();
   void buildStealTechDialog(int id, int actor, int target);
+  void buildSabotageDialog(unit *actor, city *c, const action *act);
+  void buildPillageDialog(unit *u, bv_extras e);
+
 
 private:
 

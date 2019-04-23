@@ -3,6 +3,10 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include "logging.h"
+#include "messagebox.h"
+#include "application.h"
+#include "mainwindow.h"
 
 #include "actions.h"
 #include "city.h"
@@ -112,6 +116,82 @@ int ActionSelector::TargetExtraId() {
 void ActionSelector::Finalize(int actor) {
   instance()->m_inProgressActors.removeAll(actor);
 }
+
+void ActionSelector::InciteDialog(unit *actor, city *c, int cost, const action *act) {
+
+  auto treasury = QString(PL_("Treasury contains %1 gold.",
+                              "Treasury contains %1 gold.",
+                              client_player()->economic.gold))
+      .arg(client_player()->economic.gold);
+
+  if (cost == INCITE_IMPOSSIBLE_COST) {
+    MessageBox notice(Application::Mainwin(),
+                      QString(_("You can't incite a revolt in %1."))
+                      .arg(city_name_get(c)),
+                      "!");
+    notice.setStandardButtons(QMessageBox::Ok);
+    notice.exec();
+  } else if (cost <= client_player()->economic.gold) {
+    StandardMessageBox ask(Application::Mainwin(),
+                           QString(PL_("Incite a revolt for %1 gold?\n%2",
+                                       "Incite a revolt for %1 gold?\n%2", cost))
+                           .arg(cost).arg(treasury),
+                           _("Incite a Revolt!"));
+    if (ask.exec() == QMessageBox::Ok) {
+      request_do_action(act->id, actor->id, c->id, 0, "");
+    }
+  } else {
+    MessageBox notice(Application::Mainwin(),
+                      QString(PL_("Inciting a revolt costs %1 gold.\n%2",
+                                  "Inciting a revolt costs %1 gold.\n%2", cost))
+                      .arg(cost).arg(treasury),
+                      "!");
+    notice.setStandardButtons(QMessageBox::Ok);
+    notice.exec();
+  }
+
+  instance()->finalAct(actor->id);
+}
+
+
+void ActionSelector::BribeDialog(unit *actor, unit *u, int cost, const action *act) {
+
+  auto treasury = QString(PL_("Treasury contains %1 gold.",
+                              "Treasury contains %1 gold.",
+                              client_player()->economic.gold))
+      .arg(client_player()->economic.gold);
+
+  if (cost <= client_player()->economic.gold) {
+    StandardMessageBox ask(Application::Mainwin(),
+                           QString(PL_("Bribe unit for %1 gold?\n%2",
+                                       "Bribe unit for %1 gold?\n%2",
+                                       cost))
+                           .arg(cost).arg(treasury),
+                           _("Bribe Enemy Unit"));
+    if (ask.exec() == QMessageBox::Ok) {
+      request_do_action(act->id, actor->id, u->id, 0, "");
+    }
+  } else {
+    MessageBox notice(Application::Mainwin(),
+                      QString(PL_("Bribing the unit costs %1 gold.\n%2",
+                                  "Bribing the unit costs %1 gold.\n%2", cost))
+                      .arg(cost).arg(treasury),
+                      _("Traitors Demand Too Much!"));
+    notice.setStandardButtons(QMessageBox::Ok);
+    notice.exec();
+  }
+
+  instance()->finalAct(actor->id);
+}
+
+void ActionSelector::SabotageDialog(unit *actor, city *c, const action *act) {
+  instance()->buildSabotageDialog(actor, c, act);
+}
+
+void ActionSelector::PillageDialog(unit *u, bv_extras e) {
+  instance()->buildPillageDialog(u, e);
+}
+
 
 QMap<int, int> ActionSelector::m_targetedActionMap{
   {ACTION_SPY_SABOTAGE_CITY, ACTION_SPY_TARGETED_SABOTAGE_CITY},
@@ -327,6 +407,78 @@ void ActionSelector::buildStealTechDialog(int id, int actor, int target) {
   d->show();
 }
 
+void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act) {
+  auto d = new QDialog;
+  d->setAttribute(Qt::WA_DeleteOnClose);
+  d->setWindowTitle(_("Sabotage"));
+  auto lay = new QVBoxLayout;
+  d->setLayout(lay);
+  lay->addWidget(new QLabel(_("Select Improvement to Sabotage")));
+
+  auto but = new QPushButton(QString(_("City Production")));
+  connect(but, &QPushButton::clicked, this, [d, act, actor, c] () {
+    request_do_action(act->id, actor->id, c->id, 0, "");
+    d->close();
+  });
+  lay->addWidget(but);
+
+  city_built_iterate(c, pimp) {
+    if (pimp->sabotage > 0) {
+      auto but = new QPushButton(city_improvement_name_translation(c, pimp));
+      connect(but, &QPushButton::clicked, this, [d, act, actor, c, pimp] () {
+        request_do_action(act->id, actor->id, c->id, improvement_number(pimp), "");
+        d->close();
+      });
+      lay->addWidget(but);
+    }
+  } city_built_iterate_end;
+
+  int n = m_targetedActionMap.key(actor->id, -1);
+  if (n != -1) {
+    if (action_prob_possible(actor->client.act_prob_cache[n])) {
+      auto but = new QPushButton(QString(_("At %1's Discretion")).arg(unit_name_translation(actor)));
+      connect(but, &QPushButton::clicked, this, [d, n, actor, c] () {
+        request_do_action(n, actor->id, c->id, 0, "");
+        d->close();
+      });
+      lay->addWidget(but);
+    }
+  }
+
+  auto box = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
+  connect(box, &QDialogButtonBox::rejected, d, &QDialog::reject);
+
+  connect(d, &QDialog::finished, this, [this, actor] () {
+    finalAct(actor->id);
+  });
+
+  d->show();
+}
+
+void ActionSelector::buildPillageDialog(unit *u, bv_extras es) {
+  auto d = new QDialog;
+  d->setAttribute(Qt::WA_DeleteOnClose);
+  d->setWindowTitle(_("What To Pillage"));
+  auto lay = new QVBoxLayout;
+  d->setLayout(lay);
+  lay->addWidget(new QLabel(_("Select what to pillage")));
+
+  extra_type* t;
+  while ((t = get_preferred_pillage(es))) {
+    BV_CLR(es, extra_index(t));
+    auto but = new QPushButton(extra_name_translation(t));
+    connect(but, &QPushButton::clicked, this, [d, u, t] () {
+      request_new_unit_activity_targeted(u, ACTIVITY_PILLAGE, t);
+      d->close();
+    });
+    lay->addWidget(but);
+  }
+
+  auto box = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
+  connect(box, &QDialogButtonBox::rejected, d, &QDialog::reject);
+
+  d->show();
+}
 
 void ActionSelector::finalAct(int actor) {
   m_inProgressActors.removeAll(actor);
@@ -340,12 +492,11 @@ void ActionSelector::finalAct(int actor) {
 
 void ActionSelector::reset() {
 
+  m_dialog = nullptr;
   auto old = m_actor;
-
   // in progress - do not change state
   if (m_inProgressActors.contains(old)) return;
 
-  m_dialog = nullptr;
   m_actor = IDENTITY_NUMBER_ZERO;
   m_targetCity = IDENTITY_NUMBER_ZERO;
   m_targetUnit = IDENTITY_NUMBER_ZERO;
