@@ -390,7 +390,7 @@ void ActionSelector::buildStealTechDialog(int id, int actor, int target) {
     if (action_prob_possible(u->client.act_prob_cache[n])) {
       auto but = new QPushButton(QString(_("At %1's Discretion")).arg(unit_name_translation(u)));
       connect(but, &QPushButton::clicked, this, [d, n, actor, target] () {
-        request_do_action(n, actor, target, 0, "");
+        request_do_action(n, actor, target, A_UNSET, "");
         d->close();
       });
       lay->addWidget(but);
@@ -426,7 +426,8 @@ void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act
     if (pimp->sabotage > 0) {
       auto but = new QPushButton(city_improvement_name_translation(c, pimp));
       connect(but, &QPushButton::clicked, this, [d, act, actor, c, pimp] () {
-        request_do_action(act->id, actor->id, c->id, improvement_number(pimp), "");
+        // why + 1? Dunno.
+        request_do_action(act->id, actor->id, c->id, improvement_number(pimp) + 1, "");
         d->close();
       });
       lay->addWidget(but);
@@ -438,7 +439,7 @@ void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act
     if (action_prob_possible(actor->client.act_prob_cache[n])) {
       auto but = new QPushButton(QString(_("At %1's Discretion")).arg(unit_name_translation(actor)));
       connect(but, &QPushButton::clicked, this, [d, n, actor, c] () {
-        request_do_action(n, actor->id, c->id, 0, "");
+        request_do_action(n, actor->id, c->id, B_LAST + 1, "");
         d->close();
       });
       lay->addWidget(but);
@@ -528,6 +529,12 @@ ActionExec* ActionExec::Create(int id, QObject *parent) {
   case ACTION_SPY_TARGETED_SABOTAGE_CITY_ESC:
   case ACTION_SPY_BRIBE_UNIT:
     return new RequestActionDetails(id, parent);
+  case ACTION_SPY_SABOTAGE_CITY:
+  case ACTION_SPY_SABOTAGE_CITY_ESC:
+    return new RequestDoActionWithBLastAndOne(id, parent);
+  case ACTION_SPY_STEAL_TECH:
+  case ACTION_SPY_STEAL_TECH_ESC:
+    return new RequestDoActionWithAUnset(id, parent);
   case ACTION_SPY_TARGETED_STEAL_TECH:
   case ACTION_SPY_TARGETED_STEAL_TECH_ESC:
     return new BuildStealTechDialog(id, parent);
@@ -560,6 +567,21 @@ RequestDoActionWithExtra::RequestDoActionWithExtra(int id, QObject *parent)
 
 void RequestDoActionWithExtra::func(int actor, int target, int extra) const {
   request_do_action(m_actionId, actor, target, extra, "");
+}
+
+RequestDoActionWithBLastAndOne::RequestDoActionWithBLastAndOne(int id, QObject *parent)
+  : ActionExec(id, parent) {}
+
+// why B_LAST + 1? Dunno.
+void RequestDoActionWithBLastAndOne::func(int actor, int target, int /*extra*/) const {
+  request_do_action(m_actionId, actor, target, B_LAST + 1, "");
+}
+
+RequestDoActionWithAUnset::RequestDoActionWithAUnset(int id, QObject *parent)
+  : ActionExec(id, parent) {}
+
+void RequestDoActionWithAUnset::func(int actor, int target, int /*extra*/) const {
+  request_do_action(m_actionId, actor, target, A_UNSET, "");
 }
 
 RequestActionDetails::RequestActionDetails(int id, QObject *parent)

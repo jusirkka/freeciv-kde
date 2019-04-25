@@ -149,6 +149,20 @@ public:
   void func(int actor, int target, int extra) const override;
 };
 
+class RequestDoActionWithBLastAndOne: public ActionExec {
+  Q_OBJECT
+public:
+  RequestDoActionWithBLastAndOne(int id, QObject* parent = nullptr);
+  void func(int actor, int target, int extra) const override;
+};
+
+class RequestDoActionWithAUnset: public ActionExec {
+  Q_OBJECT
+public:
+  RequestDoActionWithAUnset(int id, QObject* parent = nullptr);
+  void func(int actor, int target, int extra) const override;
+};
+
 class RequestActionDetails: public ActionExec {
   Q_OBJECT
 public:
