@@ -16,6 +16,7 @@
 #include "control.h"
 #include "client_main.h"
 #include "research.h"
+#include "climisc.h"
 
 using namespace KV;
 
@@ -256,23 +257,36 @@ void ActionSelector::createDialog(unit *actor,
   if (m_dialog) {
     m_dialog->done(QDialog::Rejected);
   }
-  m_dialog = new ActionDialog(title, header);
+  m_dialog = new ActionDialog(title, header, Application::Mainwin());
   connect(m_dialog, &ActionDialog::finished, this, &ActionSelector::reset);
   connect(m_dialog, &ActionDialog::inProgress, this, [this] (int actor) {
     if (!m_inProgressActors.contains(actor)) {
       m_inProgressActors.append(actor);
     }
   });
+  connect(m_dialog, &ActionDialog::stealTech, this, &ActionSelector::buildStealTechDialog);
+
+  client_unit_init_act_prob_cache(actor);
   action_iterate(aid) {
+
+    // Give follow up questions access to action probabilities.
+    actor->client.act_prob_cache[aid] = act_probs[aid];
+
     if (action_id_get_actor_kind(aid) != AAK_UNIT) continue;
     if (!action_prob_possible(act_probs[aid])) continue;
 
     if (m_targetedActionMap.contains(aid)) {
+
       if (action_prob_possible(act_probs[m_targetedActionMap[aid]])) {
-        // untargeted version handled in the targeted popup ("at spy's discretion")
+        qCDebug(FC) << "untargeted version"
+                    << gen_action_name(static_cast<gen_action>(aid))
+                    << "handled in the popup of targeted version"
+                    << gen_action_name(static_cast<gen_action>(m_targetedActionMap[aid]));
         continue;
       }
     }
+
+    qCDebug(FC) << gen_action_name(static_cast<gen_action>(aid));
 
     if (action_id_get_target_kind(aid) == ATK_CITY) {
       m_dialog->addButton(aid, m_actor, m_targetCity, m_targetExtra, act_probs[aid]);
@@ -361,7 +375,7 @@ void ActionSelector::buildStealTechDialog(int id, int actor, int target) {
     finalAct(actor);
     return;
   }
-  auto d = new QDialog;
+  auto d = new QDialog(Application::Mainwin());
   d->setAttribute(Qt::WA_DeleteOnClose);
   d->setWindowTitle(_("Steal"));
   auto lay = new QVBoxLayout;
@@ -384,8 +398,10 @@ void ActionSelector::buildStealTechDialog(int id, int actor, int target) {
     }
   } advance_index_iterate_end;
 
+  qCDebug(FC) << gen_action_name(static_cast<gen_action>(id));
   int n = m_targetedActionMap.key(id, -1);
   if (n != -1) {
+    qCDebug(FC) << gen_action_name(static_cast<gen_action>(n));
     auto u = game_unit_by_number(actor);
     if (action_prob_possible(u->client.act_prob_cache[n])) {
       auto but = new QPushButton(QString(_("At %1's Discretion")).arg(unit_name_translation(u)));
@@ -399,6 +415,7 @@ void ActionSelector::buildStealTechDialog(int id, int actor, int target) {
 
   auto box = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
   connect(box, &QDialogButtonBox::rejected, d, &QDialog::reject);
+  lay->addWidget(box);
 
   connect(d, &QDialog::finished, this, [this, actor] () {
     finalAct(actor);
@@ -408,7 +425,7 @@ void ActionSelector::buildStealTechDialog(int id, int actor, int target) {
 }
 
 void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act) {
-  auto d = new QDialog;
+  auto d = new QDialog(Application::Mainwin());
   d->setAttribute(Qt::WA_DeleteOnClose);
   d->setWindowTitle(_("Sabotage"));
   auto lay = new QVBoxLayout;
@@ -434,8 +451,10 @@ void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act
     }
   } city_built_iterate_end;
 
-  int n = m_targetedActionMap.key(actor->id, -1);
+  qCDebug(FC) << gen_action_name(static_cast<gen_action>(act->id));
+  int n = m_targetedActionMap.key(act->id, -1);
   if (n != -1) {
+    qCDebug(FC) << gen_action_name(static_cast<gen_action>(n));
     if (action_prob_possible(actor->client.act_prob_cache[n])) {
       auto but = new QPushButton(QString(_("At %1's Discretion")).arg(unit_name_translation(actor)));
       connect(but, &QPushButton::clicked, this, [d, n, actor, c] () {
@@ -448,6 +467,7 @@ void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act
 
   auto box = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
   connect(box, &QDialogButtonBox::rejected, d, &QDialog::reject);
+  lay->addWidget(box);
 
   connect(d, &QDialog::finished, this, [this, actor] () {
     finalAct(actor->id);
@@ -457,7 +477,7 @@ void ActionSelector::buildSabotageDialog(unit *actor, city *c, const action *act
 }
 
 void ActionSelector::buildPillageDialog(unit *u, bv_extras es) {
-  auto d = new QDialog;
+  auto d = new QDialog(Application::Mainwin());
   d->setAttribute(Qt::WA_DeleteOnClose);
   d->setWindowTitle(_("What To Pillage"));
   auto lay = new QVBoxLayout;
@@ -477,6 +497,7 @@ void ActionSelector::buildPillageDialog(unit *u, bv_extras es) {
 
   auto box = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
   connect(box, &QDialogButtonBox::rejected, d, &QDialog::reject);
+  lay->addWidget(box);
 
   d->show();
 }

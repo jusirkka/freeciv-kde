@@ -120,7 +120,7 @@ void SavedGamePreview::showPreview(const QUrl &url) {
 void SavedGamePreview::showSaved(const QString &f) {
 
   auto line = QString("<b>%1</b>: %2<br/>");
-  QString info = line.arg("Created").arg(QFileInfo(f).birthTime().toString("ddd MMMM d hh:mm"));
+  QString info = line.arg("Last Modified").arg(QFileInfo(f).lastModified().toString("ddd MMMM d hh:mm"));
 
   auto section = secfile_load_section(f.toUtf8(), "game", true);
   if (section != nullptr) {

@@ -5,8 +5,12 @@ TODO
 - demographics config dialog
 - select predefined players in start dialog (like in governor dialog)
 - endgame report
+- city buttons should change view in all city dialogs
+- add dialog flag to all dialogs
+- spaceship dialog
 
 BUGS
+- accepting an alliance treaty fails
 - demographics pane formatting could be better
 - select nation dialog: first nation is overlined, but reserved nations not
 - default size of start dialog is too small
@@ -19,4 +23,4 @@ BUGS
 - ensure that it's possible to start new game even if there's a game ongoing
 - helpdialog: initial show() does not select the first help item
 - worklists: it's possible to have two lists with the same name
-
+- dialogs are empty before first turn (help, research, cityreport, ...)
