@@ -20,7 +20,6 @@ FileDialog::FileDialog(const QStringList &dirs,
                        QWidget* parent)
   : QDialog(parent)
 {
-  setWindowTitle("Load Freeciv Game/Scenario");
   auto lay = new QVBoxLayout;
   setLayout(lay);
   m_main = new KFileWidget(QUrl(), this);
@@ -29,10 +28,12 @@ FileDialog::FileDialog(const QStringList &dirs,
   if (mode == KFileWidget::Opening) {
     m_main->setMode(KFile::ExistingOnly | KFile::LocalOnly | KFile::File);
     m_main->setPreviewWidget(new SavedGamePreview);
+    setWindowTitle("Load Freeciv Game/Scenario");
   } else if (mode == KFileWidget::Saving) {
     m_main->setMode(KFile::LocalOnly | KFile::File);
     m_main->setConfirmOverwrite(true);
     m_main->locationEdit()->clear();
+    setWindowTitle("Save Freeciv Game");
   }
 
   if (!dirs.isEmpty()) {

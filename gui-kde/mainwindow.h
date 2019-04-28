@@ -114,7 +114,6 @@ private slots:
   void on_cancel_triggered();
   void on_endTurn_triggered();
   void on_showUnits_triggered();
-  void on_combatInfo_triggered();
   void on_fortifyUnit_triggered();
   void on_buildFortFortressBuoy_triggered();
   void on_buildAirstripAirbase_triggered();

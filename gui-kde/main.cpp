@@ -262,11 +262,11 @@ static void setup_gui_funcs() {
   funcs->real_set_client_page = KV::Application::StateChange;
   funcs->get_current_client_page = KV::Application::CurrentState;
 
-  funcs->set_unit_icon = [] (int idx, unit* punit) {
-    qCDebug(FC) << "TODO: set_unit_icon" << idx << punit->id;
+  funcs->set_unit_icon = [] (int /*idx*/, unit* /*punit*/) {
+    qCDebug(FC) << "TODO: set_unit_icon";
   };
-  funcs->set_unit_icons_more_arrow = [] (bool onoff) {
-    qCDebug(FC) << "TODO: set_unit_icons_more_arrow" << onoff;
+  funcs->set_unit_icons_more_arrow = [] (bool /*onoff*/) {
+    qCDebug(FC) << "TODO: set_unit_icons_more_arrow";
   };
   funcs->real_focus_units_changed = [] () {/*noop*/};
   funcs->gui_update_font = [] (const char *font_name, const char *font_value) {
@@ -297,13 +297,10 @@ static void setup_gui_funcs() {
       int attacker_unit_id, int defender_unit_id,
       int attacker_hp, int defender_hp,
       bool make_att_veteran, bool make_def_veteran) {
-    qCDebug(FC) << "TODO: popup_combat_info"
-                << attacker_unit_id
-                << defender_unit_id
-                << attacker_hp
-                << defender_hp
-                << make_att_veteran
-                << make_def_veteran;
+    // qCDebug(FC) << "popup_combat_info";
+    KV::Hostile att{attacker_unit_id, attacker_hp, make_att_veteran};
+    KV::Hostile def{defender_unit_id, defender_hp, make_def_veteran};
+    KV::Application::CombatInfo(att, def);
   };
   funcs->update_timeout_label = [] () {
     // qCDebug(FC) << "update_timeout_label";

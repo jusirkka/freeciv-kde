@@ -65,13 +65,13 @@ void Application::Main(int argc, char **argv) {
         // A displayable program name string. (displayName)
         qAppName(),
         // The program version string. (version)
-        QStringLiteral("0.0.9"),
+        QStringLiteral("0.5.0"),
         // Short description of what the app does. (shortDescription)
         i18n("KDE Freeciv client"),
         // The license this code is released under
         KAboutLicense::GPL,
         // Copyright Statement (copyrightStatement = QString())
-        i18n("Jukak Sirkka (c) 2019"),
+        i18n("Jukka Sirkka (c) 2019"),
         // Optional text shown in the About box.
         // Can contain any information desired. (otherText)
         i18n("Now... Go Give 'em Hell!"),
@@ -519,6 +519,10 @@ void Application::AddOption(option *opt) {
 
 void Application::DelOption(const option *opt) {
   instance()->delOption(opt);
+}
+
+void Application::CombatInfo(const Hostile &attacker, const Hostile &defender) {
+  instance()->combatInfo(attacker, defender);
 }
 
 void Application::AddIdleCallback(void callback(void *), void *data) {

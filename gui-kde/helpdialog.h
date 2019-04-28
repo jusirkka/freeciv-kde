@@ -103,7 +103,7 @@ private:
   IndexStack m_history;
   IndexStack m_future;
   QModelIndex m_currentPage;
-  int m_initialHelpTeeWidth;
+  int m_initialHelpTreeWidth;
 };
 
 class HelpFilter: public QSortFilterProxyModel {

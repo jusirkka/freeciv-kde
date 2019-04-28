@@ -237,7 +237,12 @@ OutputPaneManager::~OutputPaneManager() {
 
 void OutputPaneManager::readSettings() {
   QList<int> panes = Conf::OutputPaneManager::visiblePanes();
-  QList<int> left{0, 1, 2, 3, 4, 5}; // TODO: magic number 6 = number of panes
+
+  QList<int> left;
+  for (int i = 0; i < m_outputPanes.count(); i++) {
+    left.append(i);
+  }
+
   for (int idx: panes) {
     left.removeOne(idx);
   }

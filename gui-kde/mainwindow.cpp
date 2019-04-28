@@ -25,6 +25,7 @@ extern "C" {
 #include "messagepane.h"
 #include "chatpane.h"
 #include "reportpane.h"
+#include "combatpane.h"
 #include "playerdialog.h"
 #include "cityview.h"
 #include "citydialog.h"
@@ -65,6 +66,7 @@ MainWindow::MainWindow()
                                     new WondersPane,
                                     new DemographicsPane,
                                     new AchievementsPane,
+                                    new CombatPane,
                                     chatPane}, this);
 
   m_players = new PlayerDialog(this);
@@ -546,9 +548,6 @@ void MainWindow::on_showUnits_triggered() {
   }
 }
 
-void MainWindow::on_combatInfo_triggered() {
-  qCDebug(FC) << "TODO: on_combatInfo_triggered()";
-}
 
 void MainWindow::on_gotoTile_triggered() {
   key_unit_goto();
@@ -896,8 +895,6 @@ void MainWindow::addActions() {
     {"endTurn", "End turn", "Shift+Return", "games-endturn", "", false, false, false,
       nullptr},
     {"showUnits", "Show Units", "Ctrl+Space", "", "", false, false, false,
-      nullptr},
-    {"combatInfo", "Combat info", "Shift+F2", "", "", false, false, false,
       nullptr},
     {"gotoTile", "Go to Tile", "G", "", "", false, false, false,
       new BoolChecker([] (unit_list*) {return true;})},

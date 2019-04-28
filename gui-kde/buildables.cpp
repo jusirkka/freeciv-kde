@@ -272,7 +272,7 @@ bool BuildablesFilter::filterAcceptsRow(int row, const QModelIndex &/*parent*/) 
 
 void BuildablesFilter::changeCity(city* c) {
   auto src = qobject_cast<BuildablesModel*>(sourceModel());
-  if (src) { // source model takes car of resetting
+  if (src) { // source model takes care of resetting
     m_city = c;
     src->changeCity(c);
   } else {

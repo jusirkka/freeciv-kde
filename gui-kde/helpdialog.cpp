@@ -83,7 +83,7 @@ HelpDialog::HelpDialog(QWidget *parent)
   readSettings();
 
   // a hack to workaround a QSplitter bug
-  m_initialHelpTeeWidth = m_ui->helpTree->width();
+  m_initialHelpTreeWidth = m_ui->helpTree->width();
 }
 
 HelpDialog::~HelpDialog()
@@ -110,7 +110,7 @@ void HelpDialog::readSettings() {
 }
 
 void HelpDialog::writeSettings() const {
-  if (m_ui->helpTree->width() != m_initialHelpTeeWidth) {
+  if (m_ui->helpTree->width() != m_initialHelpTreeWidth) {
     Conf::HelpDialog::setMainSplit(m_ui->mainSplitter->sizes());
   } else {
     qCInfo(FC) << "A hack to work around a QSplitter bug: not writing main splitter sizes";
@@ -623,7 +623,7 @@ QWidget* HelpDialog::makeLink(const universal *u, const QString &header, const Q
   universal_extraction(u, &type, &value);
   char buf[1024];
   universal_name_translation(u, buf, sizeof(buf));
-  auto link = QString("<a href=%1,%2>%3</a>").arg(type).arg(value).arg(buf);;
+  auto link = QString("<a href=%1,%2>%3</a>").arg(type).arg(value).arg(buf);
   QString text;
   if (footer.isEmpty()) {
     text = QString("<b>%1</b> %2").arg(header).arg(link);
@@ -970,8 +970,6 @@ universal HelpModel::universal_by_topic(help_page_type type, const char *s) {
   COND21(GOVERNMENT, GOVERNMENT, government)
   }
 
-#undef COND11
-#undef COND12
 #undef COND21
 #undef COND22
 
@@ -1002,7 +1000,7 @@ QString HelpModel::chapter(HelpNode* node, const char* text) {
   } else if (node->u.kind == VUT_SPECIALIST) {
     helptext_specialist(buffer, sizeof(buffer), client_player(),
                         text, node->u.value.specialist);
-      ch = buffer;
+    ch = buffer;
   } else if (node->u.kind == VUT_ADVANCE) {
     helptext_advance(buffer, sizeof(buffer), client_player(),
                      text, advance_number(node->u.value.advance));

@@ -94,6 +94,8 @@ set(fc_kde_srcs
     filedialog.cpp
     citizensdialog.cpp
     colorbarlabel.cpp
+    combatpane.cpp
+    combatpaneconfigdialog.cpp
 )
 
 ki18n_wrap_ui(fc_kde_srcs
@@ -116,6 +118,7 @@ ki18n_wrap_ui(fc_kde_srcs
     localoptionsdialog.ui
     serveroptionsdialog.ui
     citizensdialog.ui
+    combatpaneconfigdialog.ui
 )
 
 kconfig_add_kcfg_files(fc_kde_srcs
@@ -124,6 +127,7 @@ kconfig_add_kcfg_files(fc_kde_srcs
   conf_playerwidget.kcfgc
   conf_cityview.kcfgc
   conf_helpdialog.kcfgc
+  conf_combatpane.kcfgc
 )
 
 qt5_add_resources(fc_kde_srcs freeciv-kde.qrc)

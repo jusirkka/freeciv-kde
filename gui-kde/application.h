@@ -23,6 +23,11 @@ namespace KV {
 
 class MainWindow;
 
+struct Hostile {
+  int id;
+  int health;
+  bool veteran;
+};
 
 class Application: public QObject {
 
@@ -50,6 +55,7 @@ class Application: public QObject {
   friend class HelpDialog;
   friend class NationDialog;
   friend class OptionModel;
+  friend class CombatPane;
 
 public:
 
@@ -133,6 +139,7 @@ public:
   static void UpdateOption(const option* opt);
   static void AddOption(option* opt);
   static void DelOption(const option* opt);
+  static void CombatInfo(const Hostile& attacker, const Hostile& defender);
 
 
 
@@ -187,6 +194,7 @@ signals:
   void updateOption(const void* opt);
   void addOption(void* opt);
   void delOption(const void* opt);
+  void combatInfo(const Hostile& attacker, const Hostile& defender);
 
 
 

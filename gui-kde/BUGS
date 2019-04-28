@@ -1,5 +1,4 @@
 TODO
-- battle log
 - font manager
 - cityview filter
 - demographics config dialog
@@ -8,6 +7,8 @@ TODO
 - city buttons should change view in all city dialogs
 - add dialog flag to all dialogs
 - spaceship dialog
+- multiplayer controls
+- "rally" ???
 
 BUGS
 - accepting an alliance treaty fails

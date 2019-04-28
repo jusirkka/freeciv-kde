@@ -10,12 +10,14 @@ ProxyTableModel::ProxyTableModel(int columns, QObject* parent)
 
 void ProxyTableModel::setSourceModel(QAbstractItemModel *model) {
   beginResetModel();
-  disconnect(sourceModel(), &QAbstractItemModel::rowsInserted,
-             this, &ProxyTableModel::sourceRowsInserted);
-  disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
-             this, &ProxyTableModel::sourceRowsRemoved);
-  disconnect(sourceModel(), &QAbstractItemModel::modelReset,
-             this, &ProxyTableModel::modelReset);
+  if (sourceModel() != nullptr) {
+    disconnect(sourceModel(), &QAbstractItemModel::rowsInserted,
+               this, &ProxyTableModel::sourceRowsInserted);
+    disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
+               this, &ProxyTableModel::sourceRowsRemoved);
+    disconnect(sourceModel(), &QAbstractItemModel::modelReset,
+               this, &ProxyTableModel::modelReset);
+  }
   QAbstractProxyModel::setSourceModel(model);
   connect(sourceModel(), &QAbstractItemModel::rowsInserted,
              this, &ProxyTableModel::sourceRowsInserted);
